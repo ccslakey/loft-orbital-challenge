@@ -225,7 +225,6 @@ type GroundStation {
 
 input GroundStationFilter {
   coordinates: [Float]
-  coordinates_neq: [Float]
   id: ID
   id_neq: ID
   ids: [ID]
@@ -349,6 +348,16 @@ type Mutation {
   createPayload(category: String!, configuration: JSON!, customer_id: ID!, description: String!, name: String!, satellite_id: ID!, status: String!): Payload
   createReport(content: String!, date: Date!, employee_id: ID!, groundStation_id: ID, satellite_id: ID, title: String!, type: String!): Report
   createSatellite(altitude: Float!, busType: String!, constellation_id: ID, coordinates: [Float]!, description: String!, image: String!, launch_id: ID!, manufacturer: String!, name: String!, specs: JSON!, status: String!, tle: JSON!): Satellite
+  deleteComment(id: ID!): Comment
+  deleteConstellation(id: ID!): Constellation
+  deleteContact(id: ID!): Contact
+  deleteCustomer(id: ID!): Customer
+  deleteEmployee(id: ID!): Employee
+  deleteGroundStation(id: ID!): GroundStation
+  deleteLaunch(id: ID!): Launch
+  deletePayload(id: ID!): Payload
+  deleteReport(id: ID!): Report
+  deleteSatellite(id: ID!): Satellite
   removeComment(id: ID!): Comment
   removeConstellation(id: ID!): Constellation
   removeContact(id: ID!): Contact
@@ -564,7 +573,6 @@ input SatelliteFilter {
   constellation_id: ID
   constellation_id_neq: ID
   coordinates: [Float]
-  coordinates_neq: [Float]
   description: String
   description_gt: String
   description_gte: String

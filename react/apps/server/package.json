@@ -6,7 +6,7 @@
   "dependencies": {
     "cors": "2.8.5",
     "express": "4.19.2",
-    "json-graphql-server": "3.1.1",
+    "json-graphql-server": "3.3.1",
     "satellite.js": "5.0.0",
     "uuid": "10.0.0"
   },

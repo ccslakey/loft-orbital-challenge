@@ -141,7 +141,7 @@ interface Satellite {
   };
   coordinates: [Degrees, Degrees];
   altitude: Kilometer;
-  specs: Object;
+  specs: object;
   launch_id: string;
   constellation_id?: string;
 }
@@ -561,7 +561,7 @@ interface Payload {
   description: string;
   category: PayloadCategory;
   status: PayloadStatus;
-  configuration: Object;
+  configuration: object;
   satellite_id: string;
   customer_id: string;
 }
@@ -737,7 +737,7 @@ interface Contact {
   date: Date;
   type: ContactType;
   executionScript: string;
-  configuration: Object;
+  configuration: object;
   groundStation_id: string;
   satellite_id: string;
   payload_id?: string;

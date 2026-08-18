@@ -107,6 +107,7 @@
 .name {
   font-size: var(--text-md);
   font-weight: 600;
+  white-space: nowrap;
   color: var(--ink);
   text-decoration: underline;
   text-decoration-color: var(--rule-strong);
