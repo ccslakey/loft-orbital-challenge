@@ -1,34 +1,16 @@
 // Design tokens ///////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Direction: "color is state".
-//
-// The entire interface is ink and graphite on cool chart stock. Saturated colour is reserved exclusively for encoding
-// the state of a real thing — a satellite's status, a launch outcome, a link that has dropped. Nothing is coloured for
-// decoration. An operator scanning this screen can therefore trust that anything coloured means something.
 
 :root {
-  // Surfaces ------------------------------------------------------------------------------------------------------
-  // A cool blue-grey ground with lighter panels floating on top, closer to an instrument bezel than to paper.
-
   --ground: #dfe3e9;
   --panel: #f5f7f9;
   --panel-sunk: #e8ecf0;
-
-  // Ink -----------------------------------------------------------------------------------------------------------
 
   --ink: #0e141b;
   --ink-2: #47535f;
   --ink-3: #7c8996;
 
-  // Rules ---------------------------------------------------------------------------------------------------------
-  // Hairlines do the structural work that colour is not allowed to do.
-
   --rule: #c6cdd6;
   --rule-strong: #a7b1bc;
-
-  // State ---------------------------------------------------------------------------------------------------------
-  // The only saturated values in the system. `--state-inert` is deliberately desaturated: "no signal" is an absence,
-  // and it should read as one.
 
   --state-nominal: #12664a;
   --state-planned: #1e4fa3;
@@ -37,11 +19,6 @@
   --state-inert: #6b7683;
 
   --focus: #1e4fa3;
-
-  // Type ----------------------------------------------------------------------------------------------------------
-  // Monospace carries the data, because every important value here is a measurement, an identifier or a coordinate and
-  // they must align vertically to be comparable. A condensed face carries titles so headings can stay large without
-  // eating horizontal room that the tables need.
 
   --font-display: "Avenir Next Condensed", "HelveticaNeue-CondensedBold", "Arial Narrow", system-ui, sans-serif;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -54,8 +31,6 @@
   --text-xl: 1.5rem;
   --text-2xl: 2.125rem;
 
-  // Space ---------------------------------------------------------------------------------------------------------
-
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -63,9 +38,6 @@
   --space-5: 1.5rem;
   --space-6: 2rem;
   --space-7: 3rem;
-
-  // Geometry ------------------------------------------------------------------------------------------------------
-  // Near-square corners: this is instrumentation, not a consumer app. Not zero, which reads as unstyled.
 
   --radius-sm: 2px;
   --radius-md: 3px;
@@ -76,3 +48,4 @@
   --shell-sidebar: 232px;
   --shell-header: 52px;
 }
+

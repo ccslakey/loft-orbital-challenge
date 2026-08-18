@@ -3,9 +3,6 @@
 import styles from "./ReportsPage.module.scss";
 
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
-// SCAFFOLD: routed and styled, but intentionally left unimplemented. `allReports` exposes reports with their author,
-// affected satellite or ground station, and threaded comments — including a `createComment` mutation, which is the
-// natural place to demonstrate writes and optimistic cache updates.
 
 function ReportsPage() {
   return (
@@ -26,3 +23,4 @@ function ReportsPage() {
 }
 
 export default ReportsPage;
+

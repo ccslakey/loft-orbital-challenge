@@ -57,8 +57,6 @@ button {
   outline-offset: 2px;
 }
 
-// Respect the user's motion preference. Every transition in this app is an affordance, not content, so removing them
-// costs nothing.
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -69,3 +67,4 @@ button {
     scroll-behavior: auto !important;
   }
 }
+

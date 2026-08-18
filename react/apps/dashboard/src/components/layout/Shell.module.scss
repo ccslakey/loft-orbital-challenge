@@ -6,8 +6,6 @@
   min-height: 100vh;
 }
 
-// Header ----------------------------------------------------------------------------------------------------------
-
 .header {
   display: flex;
   gap: var(--space-4);
@@ -31,7 +29,6 @@
   width: 10px;
   height: 10px;
   background: var(--ink);
-  // A quarter-circle: the arc of an orbit against the limb of a planet, at the smallest size that still reads.
   border-radius: 50% 0 50% 50%;
 }
 
@@ -109,8 +106,6 @@
   background: var(--state);
 }
 
-// Body ------------------------------------------------------------------------------------------------------------
-
 .body {
   display: grid;
   flex: 1;
@@ -156,7 +151,6 @@
   font-size: var(--text-sm);
   color: var(--ink-2);
   border-radius: var(--radius-sm);
-  // The 2px inset rule is the active marker; reserving the space on every link stops the row shifting on selection.
   box-shadow: inset 2px 0 0 transparent;
   transition: background-color 120ms ease, color 120ms ease;
 
@@ -181,3 +175,4 @@
     padding: var(--space-4);
   }
 }
+

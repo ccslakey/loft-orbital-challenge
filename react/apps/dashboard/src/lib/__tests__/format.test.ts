@@ -59,7 +59,6 @@ describe("longitudeToTrackPosition", () => {
   });
 
   it("wraps rather than clamps once a satellite crosses the antimeridian", () => {
-    // 190E is the same meridian as 170W, so it belongs near the left edge, not pinned to the right one.
     expect(longitudeToTrackPosition(190)).toBeCloseTo(longitudeToTrackPosition(-170) as number, 10);
   });
 
@@ -79,3 +78,4 @@ describe("formatDate", () => {
     expect(formatDate("not a date")).toBe("\u2014");
   });
 });
+

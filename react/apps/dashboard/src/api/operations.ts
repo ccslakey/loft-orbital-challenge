@@ -3,7 +3,6 @@
 import {graphql} from "@/gql";
 
 /* Shell //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
-// Polled by the header. Doubles as the app's link check, so it is deliberately the cheapest query in the app.
 
 export const FLEET_SUMMARY_QUERY = graphql(`
   query FleetSummary {
@@ -14,7 +13,7 @@ export const FLEET_SUMMARY_QUERY = graphql(`
 `);
 
 /* Fleet //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
-// `perPage` is silently ignored by `json-graphql-server` unless `page` is also supplied, so both are always sent.
+// json-graphql-server ignores perPage unless page is also sent.
 
 export const SATELLITE_OVERVIEW_QUERY = graphql(`
   query SatelliteOverview($perPage: Int!, $page: Int!) {
@@ -92,3 +91,4 @@ export const GROUND_STATIONS_QUERY = graphql(`
     }
   }
 `);
+

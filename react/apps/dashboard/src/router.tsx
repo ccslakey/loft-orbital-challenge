@@ -10,8 +10,6 @@ import ReportsPage from "@/routes/ReportsPage.js";
 import SatellitePage from "@/routes/SatellitePage.js";
 
 /* Routes /////////////////////////////////////////////////////////////////////////////////////////////////////////// */
-// A single layout route owns the shell, so the header and navigation persist across navigations and only the outlet
-// re-renders. `/` redirects rather than duplicating the fleet route, keeping one canonical URL per view.
 
 export const router = createBrowserRouter([
   {
@@ -26,3 +24,4 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
+

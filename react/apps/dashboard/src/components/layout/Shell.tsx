@@ -9,8 +9,6 @@ import MissionClock from "./MissionClock.js";
 import styles from "./Shell.module.scss";
 
 /* Navigation /////////////////////////////////////////////////////////////////////////////////////////////////////// */
-// Grouped the way the business is actually organised — what flies, what talks to it, and what is written down about
-// both. The groupings carry meaning, so they are headings rather than decorative dividers.
 
 const NAV_GROUPS = [
   {
@@ -30,8 +28,6 @@ const NAV_GROUPS = [
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 function Shell() {
-  // Doubles as a link check: if this poll fails the header says so, which is more honest than a green light that only
-  // ever reflects the very first page load.
   const {data, error} = useQuery(FLEET_SUMMARY_QUERY, {pollInterval: 15000});
 
   const linkState = error ? "critical" : "nominal";
@@ -91,3 +87,4 @@ function Shell() {
 }
 
 export default Shell;
+

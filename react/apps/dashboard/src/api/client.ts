@@ -9,9 +9,7 @@ const httpLink = new HttpLink({
   uri: import.meta.env.VITE_GRAPHQL_URL ?? "http://localhost:3000/graphql",
 });
 
-// Central place to observe failures. A `CombinedGraphQLErrors` instance means the request reached the server but one
-// or more fields failed; anything else is a transport failure (server down, CORS, offline). This link only reports —
-// it deliberately does not swallow the error, so components still receive it and can render their own recovery UI.
+// Reports without swallowing: the error still reaches useQuery so components can render their own recovery.
 const errorLink = new ErrorLink(({error, operation}) => {
   if (CombinedGraphQLErrors.is(error)) {
     error.errors.forEach(({message, path}) => {
@@ -31,8 +29,7 @@ export const client = new ApolloClient({
     typePolicies: {
       Query: {
         fields: {
-          // `allSatellites` is filtered and sorted via arguments. Keying cache entries by those arguments keeps
-          // distinct result sets from overwriting one another while paging and filtering.
+          // Key by args so filtered/sorted result sets do not overwrite each other.
           allSatellites: {
             keyArgs: ["filter", "sortField", "sortOrder", "perPage"],
           },
@@ -41,3 +38,4 @@ export const client = new ApolloClient({
     },
   }),
 });
+

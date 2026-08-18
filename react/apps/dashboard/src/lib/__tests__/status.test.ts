@@ -62,3 +62,4 @@ describe("getPayloadState", () => {
     expect(getPayloadState("Inactive")).toBe("inert");
   });
 });
+

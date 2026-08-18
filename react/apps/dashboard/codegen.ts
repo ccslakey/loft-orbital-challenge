@@ -3,8 +3,7 @@
 import type {CodegenConfig} from "@graphql-codegen/cli";
 
 /* Configuration //////////////////////////////////////////////////////////////////////////////////////////////////// */
-// Types are generated from the committed `schema.graphql` snapshot rather than the live server, so `pnpm codegen`,
-// type-checking and CI all work without a running API. Refresh the snapshot with `pnpm codegen:schema`.
+// Generated from the committed schema.graphql so codegen and type-checking work with no server running.
 
 const config: CodegenConfig = {
   schema: "./schema.graphql",
@@ -18,15 +17,12 @@ const config: CodegenConfig = {
       preset: "client",
 
       presetConfig: {
-        // Fragment masking hides fragment fields from the parent component unless unmasked. It is a good pattern on
-        // large teams, but it adds ceremony that is not worth it at this size. Disabled deliberately.
+        // Off: adds indirection not worth it at this size.
         fragmentMasking: false,
       },
 
       config: {
-        // `json-graphql-server` exposes two custom scalars. `Date` is serialised as an ISO-8601 string over the wire.
-        // `JSON` is genuinely unstructured (satellite `tle` and `specs`), so it is typed as `unknown` values to force
-        // an explicit narrowing at the call site instead of silently trusting `any`.
+        // JSON is unstructured (tle, specs); typed as unknown values to force narrowing at the call site.
         scalars: {
           Date: "string",
           JSON: "Record<string, unknown>",
@@ -37,3 +33,4 @@ const config: CodegenConfig = {
 };
 
 export default config;
+

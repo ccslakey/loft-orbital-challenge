@@ -5,7 +5,6 @@ import {describe, expect, it} from "vitest";
 import {getCatalogNumber, parseTle} from "@/lib/tle.js";
 
 /* Fixtures ///////////////////////////////////////////////////////////////////////////////////////////////////////// */
-// Real values taken from the seeded API response for Starlink-1.
 
 const LINE_1 = "1    11U 59001A   22053.83197560  .00000847  00000-0  45179-3 0  9996";
 const LINE_2 = "2    11  32.8647 264.6509 1466352 126.0358 248.5175 11.85932318689790";
@@ -40,3 +39,4 @@ describe("getCatalogNumber", () => {
     expect(getCatalogNumber({line1: LINE_1, line2: LINE_2})).toBe(11);
   });
 });
+

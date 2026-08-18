@@ -16,8 +16,6 @@ import styles from "./FleetPage.module.scss";
 function FleetPage() {
   const {data, loading, error, refetch} = useQuery(SATELLITE_OVERVIEW_QUERY, {
     variables: {perPage: 50, page: 0},
-    // Positions are recomputed from TLEs server-side once a second and there are no subscriptions, so the ground track
-    // is only live because we ask again.
     pollInterval: 5000,
   });
 
@@ -114,3 +112,4 @@ function FleetPage() {
 }
 
 export default FleetPage;
+

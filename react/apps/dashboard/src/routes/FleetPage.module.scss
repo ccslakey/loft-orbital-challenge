@@ -25,9 +25,6 @@
   color: var(--ink-2);
 }
 
-// Table -------------------------------------------------------------------------------------------------------------
-// Wide content scrolls inside its own container so the page body never scrolls sideways.
-
 .tableWrap {
   @include panel;
 
@@ -55,8 +52,6 @@
 
   tbody tr {
     border-bottom: 1px solid var(--rule);
-    // The status gutter: each row is tagged at its leading edge with the colour of its own state, so the fleet can be
-    // read down the left margin without reading any words.
     box-shadow: inset 3px 0 0 var(--state);
 
     &[data-state="nominal"] {
@@ -128,10 +123,6 @@
   letter-spacing: 0.06em;
 }
 
-// Ground track --------------------------------------------------------------------------------------------------
-// A per-row equirectangular longitude strip. The marker is positioned from live coordinates, so the whole column
-// drifts each time the poll returns — the one moving thing on the page, and it is moving because the data is.
-
 .trackHeader {
   width: 34%;
   min-width: 220px;
@@ -174,3 +165,4 @@
   transform: translate(-50%, -50%);
   transition: left 400ms linear;
 }
+

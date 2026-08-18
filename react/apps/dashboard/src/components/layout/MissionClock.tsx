@@ -1,10 +1,6 @@
 /* Imports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
-import {useEffect, useState} from "react";
-
-/* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
-// Operations run on UTC, so the shell shows UTC rather than the viewer's local time. Displaying local time here would
-// be actively misleading when reading a contact window.
+import { useEffect, useState } from "react";
 
 function MissionClock() {
   const [now, setNow] = useState(() => new Date());
@@ -25,3 +21,4 @@ function MissionClock() {
 }
 
 export default MissionClock;
+

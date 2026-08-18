@@ -1,9 +1,6 @@
 /* Coordinates ////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
-/**
- * Formats a signed decimal degree as a hemisphere-qualified coordinate, the way it is written on a range sheet:
- * `-10.37` latitude becomes `10.37° S`.
- */
+// Signed degrees -> hemisphere-qualified, e.g. -10.37 lat becomes 10.37 S.
 export const formatLatitude = (value: number | null | undefined): string => formatDegrees(value, "N", "S");
 
 export const formatLongitude = (value: number | null | undefined): string => formatDegrees(value, "E", "W");
@@ -23,12 +20,7 @@ export const formatAltitude = (km: number | null | undefined): string =>
 
 /* Positions //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
-/**
- * Maps a longitude onto its 0-1 position across an equirectangular strip, so a satellite can be plotted with plain CSS.
- *
- * Longitudes are wrapped rather than clamped: a satellite at 190° has crossed the antimeridian and belongs at -170°,
- * near the left edge, not pinned to the right one.
- */
+// Longitude -> 0-1 across an equirectangular strip. Wraps rather than clamps: 190 == -170.
 export const longitudeToTrackPosition = (longitude: number | null | undefined): number | null => {
   if (longitude === null || longitude === undefined || Number.isNaN(longitude)) {
     return null;
@@ -52,3 +44,4 @@ export const formatDate = (value: string | null | undefined): string => {
     ? "—"
     : date.toLocaleDateString("en-US", {year: "numeric", month: "short", day: "2-digit", timeZone: "UTC"});
 };
+

@@ -50,8 +50,6 @@
   color: var(--ink-2);
 }
 
-// Panels ------------------------------------------------------------------------------------------------------------
-
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -125,8 +123,6 @@
   color: var(--ink-3);
 }
 
-// Payloads ----------------------------------------------------------------------------------------------------------
-
 .payloads {
   display: flex;
   flex-direction: column;
@@ -157,3 +153,4 @@
   flex: 1;
   text-align: right;
 }
+
