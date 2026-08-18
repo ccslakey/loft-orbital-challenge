@@ -16,6 +16,16 @@ export default defineConfig({
     },
   },
 
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // Vite 5.3 drives Sass through the legacy API, which reads includePaths; loadPaths is the modern name.
+        includePaths: [path.resolve(__dirname, "./src/styles")],
+        loadPaths: [path.resolve(__dirname, "./src/styles")],
+      },
+    },
+  },
+
   build: {
     outDir: path.resolve(__dirname, "./dist"),
     emptyOutDir: true,
@@ -47,3 +57,4 @@ export default defineConfig({
     environment: "jsdom",
   },
 });
+

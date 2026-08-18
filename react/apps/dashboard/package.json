@@ -4,10 +4,17 @@
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
+    "@apollo/client": "4.2.12",
+    "@graphql-typed-document-node/core": "3.2.0",
+    "graphql": "16.9.0",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "react-router-dom": "7.18.2"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "7.2.0",
+    "@graphql-codegen/client-preset": "6.1.3",
+    "@graphql-codegen/schema-ast": "6.1.0",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "@vitejs/plugin-react": "4.3.1",
@@ -17,6 +24,8 @@
   },
   "scripts": {
     "build": "concurrently --kill-others-on-fail --names 'type-check,build' --prefix-colors 'magenta,green' 'tsc --project ./src/tsconfig.src.json' 'vite build'",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:schema": "graphql-codegen --config codegen.schema.ts",
     "dev": "vite",
     "start": "vite preview"
   }
