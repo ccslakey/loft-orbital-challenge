@@ -76,6 +76,39 @@ Things worth knowing about `json-graphql-server` that shaped the client:
 - **Nullability is loose.** List fields are typed `[Satellite]`, a nullable list of nullable elements, so results need
   a null filter to be usable in TypeScript.
 - `tle` and `specs` are the opaque `JSON` scalar, mapped to `Record<string, unknown>` to force explicit narrowing.
+- **The built-in GraphiQL page is broken out of the box.** See below.
+
+### The GraphiQL page
+
+Opening <http://localhost:3000/graphql> in a browser showed `Loading...` forever. The API itself was fine the whole
+time — `POST /graphql` returned 200 throughout.
+
+`json-graphql-server@3.1.1` serves a GraphiQL page that loads its assets from **unpinned** unpkg URLs:
+
+```html
+<script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+```
+
+Unpinned resolves to whatever is latest, which is now GraphiQL v5. v5 no longer ships a UMD bundle at that path, so
+both requests 404 while React itself loads fine, leaving the page stuck on its static placeholder:
+
+```
+react.production.min.js   HTTP 200
+graphiql.min.js           HTTP 404  ->  unpkg.com/graphiql@5.2.4/graphiql.min.js
+graphiql.min.css          HTTP 404  ->  unpkg.com/graphiql@5.2.4/graphiql.min.css
+```
+
+Nothing in this repo caused it. The HTML was written when latest was v2; the breakage arrived on its own as the CDN
+moved on.
+
+**Fix:** `apps/server/src/index.ts` now serves its own GraphiQL page with pinned versions (`graphiql@3.8.3`,
+`react@18.3.1`), registered ahead of the library's handler. It only intercepts requests that accept HTML, so
+programmatic GETs and every POST still fall through to `json-graphql-server` untouched.
+
+> TODO: worth raising on the walkthrough call. This is either an unnoticed rot bug in the template or a deliberate
+> gotcha to see whether candidates investigate rather than assume their own API is broken. Either way, say which you
+> think it is and how you traced it.
 
 ## Changes made to the project template
 
@@ -85,10 +118,11 @@ The challenge asks for these to be called out.
 | --- | --- |
 | `main.tsx` mounts on a `#root` div instead of `document.body` | React warns about owning `body`; extensions inject siblings there and can break reconciliation |
 | Added `<div id="root">` to `index.html` | Required by the above |
-| `apps/server/src/db.ts`: `Object` → `object` (3 fields) | `Object` is the wrapper type; `object` is correct. Only change made to server code, and it is type-level only |
+| `apps/server/src/db.ts`: `Object` → `object` (3 fields) | `Object` is the wrapper type; `object` is correct. Type-level only, no behaviour change |
 | `vite.config.ts`: added Sass `includePaths` | Lets modules `@use "mixins"`. Vite 5.3 drives Sass through its legacy API, which reads `includePaths`, not `loadPaths` |
 | `docker-compose.yml`: commented out `version: "3.8"` | Obsolete key; Compose warns on every command |
 | Added ESLint | The template README claims ESLint and Prettier configs are provided, but no config exists anywhere in the template |
+| `apps/server/src/index.ts`: serve a pinned GraphiQL page | The bundled one 404s against current unpkg and never loads (see above) |
 
 ## Testing
 
