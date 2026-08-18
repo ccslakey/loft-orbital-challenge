@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  challenge:
+    image: loft-orbital/challenge/dev
+    container_name: loft-challenge-dev
+    ports:
+      - 3000:3000 # Server access port
+      - 8080:8080 # Dashboard access port
+      - 8081:8081 # Dashboard HMR port
+    volumes:
+      - ./:/workspace:delegated
+    working_dir: /workspace
+    command: '/bin/bash -c "trap : TERM INT; sleep infinity & wait"'
+
+networks:
+  default:
+    name: loft
+    external: true
