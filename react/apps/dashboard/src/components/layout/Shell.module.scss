@@ -1,0 +1,183 @@
+@use "mixins" as *;
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+// Header ----------------------------------------------------------------------------------------------------------
+
+.header {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  height: var(--shell-header);
+  padding: 0 var(--space-5);
+  background: var(--panel);
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.brand {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  min-width: 0;
+}
+
+.mark {
+  align-self: center;
+  width: 10px;
+  height: 10px;
+  background: var(--ink);
+  // A quarter-circle: the arc of an orbit against the limb of a planet, at the smallest size that still reads.
+  border-radius: 50% 0 50% 50%;
+}
+
+.wordmark {
+  @include display(var(--text-md));
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.product {
+  @include label;
+
+  @include below-sm {
+    display: none;
+  }
+}
+
+.readout {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+
+.metric {
+  @include below-sm {
+    display: none;
+  }
+}
+
+.metricValue {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.divider {
+  width: 1px;
+  height: 14px;
+  background: var(--rule);
+}
+
+.clock {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+
+  abbr {
+    color: var(--ink-3);
+    text-decoration: none;
+  }
+}
+
+.link {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  color: var(--state);
+
+  &[data-state="nominal"] {
+    --state: var(--state-nominal);
+  }
+
+  &[data-state="critical"] {
+    --state: var(--state-critical);
+  }
+}
+
+.linkDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--state);
+}
+
+// Body ------------------------------------------------------------------------------------------------------------
+
+.body {
+  display: grid;
+  flex: 1;
+  grid-template-columns: var(--shell-sidebar) minmax(0, 1fr);
+
+  @include below-md {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-4);
+  border-right: 1px solid var(--rule);
+
+  @include below-md {
+    flex-direction: row;
+    gap: var(--space-5);
+    overflow-x: auto;
+    padding: var(--space-3) var(--space-4);
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.groupLabel {
+  @include label;
+
+  font-weight: 500;
+}
+
+.navLink {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  border-radius: var(--radius-sm);
+  // The 2px inset rule is the active marker; reserving the space on every link stops the row shifting on selection.
+  box-shadow: inset 2px 0 0 transparent;
+  transition: background-color 120ms ease, color 120ms ease;
+
+  &:hover {
+    background: var(--panel-sunk);
+    color: var(--ink);
+  }
+}
+
+.navLinkActive {
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: inset 2px 0 0 var(--ink);
+}
+
+.main {
+  min-width: 0;
+  padding: var(--space-6);
+
+  @include below-sm {
+    padding: var(--space-4);
+  }
+}

@@ -16,6 +16,18 @@ export default defineConfig({
     },
   },
 
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // Lets any `*.module.scss` reach the shared mixins with `@use "mixins" as *;` instead of counting `../`s.
+        // Vite 5.3 still drives Sass through its legacy API, which reads `includePaths`; `loadPaths` is the modern
+        // equivalent and is kept so this keeps working when the modern compiler becomes the default.
+        includePaths: [path.resolve(__dirname, "./src/styles")],
+        loadPaths: [path.resolve(__dirname, "./src/styles")],
+      },
+    },
+  },
+
   build: {
     outDir: path.resolve(__dirname, "./dist"),
     emptyOutDir: true,

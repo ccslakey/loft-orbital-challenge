@@ -1,0 +1,176 @@
+@use "mixins" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 60ch;
+}
+
+.title {
+  @include display(var(--text-2xl));
+
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+// Table -------------------------------------------------------------------------------------------------------------
+// Wide content scrolls inside its own container so the page body never scrolls sideways.
+
+.tableWrap {
+  @include panel;
+
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+  }
+
+  thead th {
+    @include label;
+
+    white-space: nowrap;
+    vertical-align: bottom;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--rule);
+    // The status gutter: each row is tagged at its leading edge with the colour of its own state, so the fleet can be
+    // read down the left margin without reading any words.
+    box-shadow: inset 3px 0 0 var(--state);
+
+    &[data-state="nominal"] {
+      --state: var(--state-nominal);
+    }
+
+    &[data-state="planned"] {
+      --state: var(--state-planned);
+    }
+
+    &[data-state="caution"] {
+      --state: var(--state-caution);
+    }
+
+    &[data-state="critical"] {
+      --state: var(--state-critical);
+    }
+
+    &[data-state="inert"] {
+      --state: var(--state-inert);
+    }
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &:hover {
+      background: var(--panel-sunk);
+    }
+  }
+
+  tbody td {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+}
+
+.numeric {
+  @include tabular;
+
+  font-size: var(--text-sm);
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-weight: 400;
+}
+
+.name {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px;
+
+  &:hover {
+    text-decoration-color: var(--ink);
+  }
+}
+
+.constellation {
+  @include label;
+
+  letter-spacing: 0.06em;
+}
+
+// Ground track --------------------------------------------------------------------------------------------------
+// A per-row equirectangular longitude strip. The marker is positioned from live coordinates, so the whole column
+// drifts each time the poll returns — the one moving thing on the page, and it is moving because the data is.
+
+.trackHeader {
+  width: 34%;
+  min-width: 220px;
+}
+
+.scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+.track {
+  position: relative;
+  height: 18px;
+  background: var(--panel-sunk);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+}
+
+.meridian {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--rule-strong);
+}
+
+.marker {
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  background: var(--state);
+  border: 1px solid var(--panel);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: left 400ms linear;
+}

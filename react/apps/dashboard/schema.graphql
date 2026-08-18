@@ -1,0 +1,623 @@
+type Comment {
+  Employee: Employee
+  Report: Report
+  content: String!
+  date: Date!
+  employee_id: ID!
+  id: ID!
+  report_id: ID!
+}
+
+input CommentFilter {
+  content: String
+  content_gt: String
+  content_gte: String
+  content_lt: String
+  content_lte: String
+  content_neq: String
+  date: Date
+  date_gt: Date
+  date_gte: Date
+  date_lt: Date
+  date_lte: Date
+  date_neq: Date
+  employee_id: ID
+  employee_id_neq: ID
+  id: ID
+  id_neq: ID
+  ids: [ID]
+  q: String
+  report_id: ID
+  report_id_neq: ID
+}
+
+input CommentInput {
+  content: String!
+  date: Date!
+  employee_id: ID!
+  report_id: ID!
+}
+
+type Constellation {
+  Satellites: [Satellite]
+  description: String!
+  id: ID!
+  name: String!
+}
+
+input ConstellationFilter {
+  description: String
+  description_gt: String
+  description_gte: String
+  description_lt: String
+  description_lte: String
+  description_neq: String
+  id: ID
+  id_neq: ID
+  ids: [ID]
+  name: String
+  name_gt: String
+  name_gte: String
+  name_lt: String
+  name_lte: String
+  name_neq: String
+  q: String
+}
+
+input ConstellationInput {
+  description: String!
+  name: String!
+}
+
+type Contact {
+  Employee: Employee
+  GroundStation: GroundStation
+  Payload: Payload
+  Satellite: Satellite
+  configuration: JSON!
+  date: Date!
+  employee_id: ID!
+  executionScript: String!
+  groundStation_id: ID!
+  id: ID!
+  payload_id: ID
+  satellite_id: ID!
+  type: String!
+}
+
+input ContactFilter {
+  configuration: JSON
+  configuration_neq: JSON
+  date: Date
+  date_gt: Date
+  date_gte: Date
+  date_lt: Date
+  date_lte: Date
+  date_neq: Date
+  employee_id: ID
+  employee_id_neq: ID
+  executionScript: String
+  executionScript_gt: String
+  executionScript_gte: String
+  executionScript_lt: String
+  executionScript_lte: String
+  executionScript_neq: String
+  groundStation_id: ID
+  groundStation_id_neq: ID
+  id: ID
+  id_neq: ID
+  ids: [ID]
+  payload_id: ID
+  payload_id_neq: ID
+  q: String
+  satellite_id: ID
+  satellite_id_neq: ID
+  type: String
+  type_gt: String
+  type_gte: String
+  type_lt: String
+  type_lte: String
+  type_neq: String
+}
+
+input ContactInput {
+  configuration: JSON!
+  date: Date!
+  employee_id: ID!
+  executionScript: String!
+  groundStation_id: ID!
+  payload_id: ID
+  satellite_id: ID!
+  type: String!
+}
+
+type Customer {
+  Employee: Employee
+  Payloads: [Payload]
+  email: String!
+  employee_id: ID!
+  id: ID!
+  name: String!
+}
+
+input CustomerFilter {
+  email: String
+  email_gt: String
+  email_gte: String
+  email_lt: String
+  email_lte: String
+  email_neq: String
+  employee_id: ID
+  employee_id_neq: ID
+  id: ID
+  id_neq: ID
+  ids: [ID]
+  name: String
+  name_gt: String
+  name_gte: String
+  name_lt: String
+  name_lte: String
+  name_neq: String
+  q: String
+}
+
+input CustomerInput {
+  email: String!
+  employee_id: ID!
+  name: String!
+}
+
+"""Date type"""
+scalar Date
+
+type Employee {
+  Comments: [Comment]
+  Contacts: [Contact]
+  Customers: [Customer]
+  Reports: [Report]
+  email: String!
+  id: ID!
+  name: String!
+  role: String!
+}
+
+input EmployeeFilter {
+  email: String
+  email_gt: String
+  email_gte: String
+  email_lt: String
+  email_lte: String
+  email_neq: String
+  id: ID
+  id_neq: ID
+  ids: [ID]
+  name: String
+  name_gt: String
+  name_gte: String
+  name_lt: String
+  name_lte: String
+  name_neq: String
+  q: String
+  role: String
+  role_gt: String
+  role_gte: String
+  role_lt: String
+  role_lte: String
+  role_neq: String
+}
+
+input EmployeeInput {
+  email: String!
+  name: String!
+  role: String!
+}
+
+type GroundStation {
+  Contacts: [Contact]
+  Reports: [Report]
+  coordinates: [Float]!
+  id: ID!
+  image: String!
+  name: String!
+  network: String!
+  status: String!
+}
+
+input GroundStationFilter {
+  coordinates: [Float]
+  coordinates_neq: [Float]
+  id: ID
+  id_neq: ID
+  ids: [ID]
+  image: String
+  image_gt: String
+  image_gte: String
+  image_lt: String
+  image_lte: String
+  image_neq: String
+  name: String
+  name_gt: String
+  name_gte: String
+  name_lt: String
+  name_lte: String
+  name_neq: String
+  network: String
+  network_gt: String
+  network_gte: String
+  network_lt: String
+  network_lte: String
+  network_neq: String
+  q: String
+  status: String
+  status_gt: String
+  status_gte: String
+  status_lt: String
+  status_lte: String
+  status_neq: String
+}
+
+input GroundStationInput {
+  coordinates: [Float]!
+  image: String!
+  name: String!
+  network: String!
+  status: String!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type Launch {
+  Satellites: [Satellite]
+  date: Date!
+  id: ID!
+  outcome: String
+  provider: String!
+  rocket: String!
+  status: String!
+}
+
+input LaunchFilter {
+  date: Date
+  date_gt: Date
+  date_gte: Date
+  date_lt: Date
+  date_lte: Date
+  date_neq: Date
+  id: ID
+  id_neq: ID
+  ids: [ID]
+  outcome: String
+  outcome_gt: String
+  outcome_gte: String
+  outcome_lt: String
+  outcome_lte: String
+  outcome_neq: String
+  provider: String
+  provider_gt: String
+  provider_gte: String
+  provider_lt: String
+  provider_lte: String
+  provider_neq: String
+  q: String
+  rocket: String
+  rocket_gt: String
+  rocket_gte: String
+  rocket_lt: String
+  rocket_lte: String
+  rocket_neq: String
+  status: String
+  status_gt: String
+  status_gte: String
+  status_lt: String
+  status_lte: String
+  status_neq: String
+}
+
+input LaunchInput {
+  date: Date!
+  outcome: String
+  provider: String!
+  rocket: String!
+  status: String!
+}
+
+type ListMetadata {
+  count: Int
+}
+
+type Mutation {
+  createComment(content: String!, date: Date!, employee_id: ID!, report_id: ID!): Comment
+  createConstellation(description: String!, name: String!): Constellation
+  createContact(configuration: JSON!, date: Date!, employee_id: ID!, executionScript: String!, groundStation_id: ID!, payload_id: ID, satellite_id: ID!, type: String!): Contact
+  createCustomer(email: String!, employee_id: ID!, name: String!): Customer
+  createEmployee(email: String!, name: String!, role: String!): Employee
+  createGroundStation(coordinates: [Float]!, image: String!, name: String!, network: String!, status: String!): GroundStation
+  createLaunch(date: Date!, outcome: String, provider: String!, rocket: String!, status: String!): Launch
+  createManyComment(data: [CommentInput]): [Comment]
+  createManyConstellation(data: [ConstellationInput]): [Constellation]
+  createManyContact(data: [ContactInput]): [Contact]
+  createManyCustomer(data: [CustomerInput]): [Customer]
+  createManyEmployee(data: [EmployeeInput]): [Employee]
+  createManyGroundStation(data: [GroundStationInput]): [GroundStation]
+  createManyLaunch(data: [LaunchInput]): [Launch]
+  createManyPayload(data: [PayloadInput]): [Payload]
+  createManyReport(data: [ReportInput]): [Report]
+  createManySatellite(data: [SatelliteInput]): [Satellite]
+  createPayload(category: String!, configuration: JSON!, customer_id: ID!, description: String!, name: String!, satellite_id: ID!, status: String!): Payload
+  createReport(content: String!, date: Date!, employee_id: ID!, groundStation_id: ID, satellite_id: ID, title: String!, type: String!): Report
+  createSatellite(altitude: Float!, busType: String!, constellation_id: ID, coordinates: [Float]!, description: String!, image: String!, launch_id: ID!, manufacturer: String!, name: String!, specs: JSON!, status: String!, tle: JSON!): Satellite
+  removeComment(id: ID!): Comment
+  removeConstellation(id: ID!): Constellation
+  removeContact(id: ID!): Contact
+  removeCustomer(id: ID!): Customer
+  removeEmployee(id: ID!): Employee
+  removeGroundStation(id: ID!): GroundStation
+  removeLaunch(id: ID!): Launch
+  removePayload(id: ID!): Payload
+  removeReport(id: ID!): Report
+  removeSatellite(id: ID!): Satellite
+  updateComment(content: String, date: Date, employee_id: ID, id: ID!, report_id: ID): Comment
+  updateConstellation(description: String, id: ID!, name: String): Constellation
+  updateContact(configuration: JSON, date: Date, employee_id: ID, executionScript: String, groundStation_id: ID, id: ID!, payload_id: ID, satellite_id: ID, type: String): Contact
+  updateCustomer(email: String, employee_id: ID, id: ID!, name: String): Customer
+  updateEmployee(email: String, id: ID!, name: String, role: String): Employee
+  updateGroundStation(coordinates: [Float], id: ID!, image: String, name: String, network: String, status: String): GroundStation
+  updateLaunch(date: Date, id: ID!, outcome: String, provider: String, rocket: String, status: String): Launch
+  updatePayload(category: String, configuration: JSON, customer_id: ID, description: String, id: ID!, name: String, satellite_id: ID, status: String): Payload
+  updateReport(content: String, date: Date, employee_id: ID, groundStation_id: ID, id: ID!, satellite_id: ID, title: String, type: String): Report
+  updateSatellite(altitude: Float, busType: String, constellation_id: ID, coordinates: [Float], description: String, id: ID!, image: String, launch_id: ID, manufacturer: String, name: String, specs: JSON, status: String, tle: JSON): Satellite
+}
+
+type Payload {
+  Contacts: [Contact]
+  Customer: Customer
+  Satellite: Satellite
+  category: String!
+  configuration: JSON!
+  customer_id: ID!
+  description: String!
+  id: ID!
+  name: String!
+  satellite_id: ID!
+  status: String!
+}
+
+input PayloadFilter {
+  category: String
+  category_gt: String
+  category_gte: String
+  category_lt: String
+  category_lte: String
+  category_neq: String
+  configuration: JSON
+  configuration_neq: JSON
+  customer_id: ID
+  customer_id_neq: ID
+  description: String
+  description_gt: String
+  description_gte: String
+  description_lt: String
+  description_lte: String
+  description_neq: String
+  id: ID
+  id_neq: ID
+  ids: [ID]
+  name: String
+  name_gt: String
+  name_gte: String
+  name_lt: String
+  name_lte: String
+  name_neq: String
+  q: String
+  satellite_id: ID
+  satellite_id_neq: ID
+  status: String
+  status_gt: String
+  status_gte: String
+  status_lt: String
+  status_lte: String
+  status_neq: String
+}
+
+input PayloadInput {
+  category: String!
+  configuration: JSON!
+  customer_id: ID!
+  description: String!
+  name: String!
+  satellite_id: ID!
+  status: String!
+}
+
+type Query {
+  Comment(id: ID!): Comment
+  Constellation(id: ID!): Constellation
+  Contact(id: ID!): Contact
+  Customer(id: ID!): Customer
+  Employee(id: ID!): Employee
+  GroundStation(id: ID!): GroundStation
+  Launch(id: ID!): Launch
+  Payload(id: ID!): Payload
+  Report(id: ID!): Report
+  Satellite(id: ID!): Satellite
+  _allCommentsMeta(filter: CommentFilter, page: Int, perPage: Int): ListMetadata
+  _allConstellationsMeta(filter: ConstellationFilter, page: Int, perPage: Int): ListMetadata
+  _allContactsMeta(filter: ContactFilter, page: Int, perPage: Int): ListMetadata
+  _allCustomersMeta(filter: CustomerFilter, page: Int, perPage: Int): ListMetadata
+  _allEmployeesMeta(filter: EmployeeFilter, page: Int, perPage: Int): ListMetadata
+  _allGroundStationsMeta(filter: GroundStationFilter, page: Int, perPage: Int): ListMetadata
+  _allLaunchesMeta(filter: LaunchFilter, page: Int, perPage: Int): ListMetadata
+  _allPayloadsMeta(filter: PayloadFilter, page: Int, perPage: Int): ListMetadata
+  _allReportsMeta(filter: ReportFilter, page: Int, perPage: Int): ListMetadata
+  _allSatellitesMeta(filter: SatelliteFilter, page: Int, perPage: Int): ListMetadata
+  allComments(filter: CommentFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Comment]
+  allConstellations(filter: ConstellationFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Constellation]
+  allContacts(filter: ContactFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Contact]
+  allCustomers(filter: CustomerFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Customer]
+  allEmployees(filter: EmployeeFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Employee]
+  allGroundStations(filter: GroundStationFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [GroundStation]
+  allLaunches(filter: LaunchFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Launch]
+  allPayloads(filter: PayloadFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Payload]
+  allReports(filter: ReportFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Report]
+  allSatellites(filter: SatelliteFilter, page: Int, perPage: Int, sortField: String, sortOrder: String): [Satellite]
+}
+
+type Report {
+  Comments: [Comment]
+  Employee: Employee
+  GroundStation: GroundStation
+  Satellite: Satellite
+  content: String!
+  date: Date!
+  employee_id: ID!
+  groundStation_id: ID
+  id: ID!
+  satellite_id: ID
+  title: String!
+  type: String!
+}
+
+input ReportFilter {
+  content: String
+  content_gt: String
+  content_gte: String
+  content_lt: String
+  content_lte: String
+  content_neq: String
+  date: Date
+  date_gt: Date
+  date_gte: Date
+  date_lt: Date
+  date_lte: Date
+  date_neq: Date
+  employee_id: ID
+  employee_id_neq: ID
+  groundStation_id: ID
+  groundStation_id_neq: ID
+  id: ID
+  id_neq: ID
+  ids: [ID]
+  q: String
+  satellite_id: ID
+  satellite_id_neq: ID
+  title: String
+  title_gt: String
+  title_gte: String
+  title_lt: String
+  title_lte: String
+  title_neq: String
+  type: String
+  type_gt: String
+  type_gte: String
+  type_lt: String
+  type_lte: String
+  type_neq: String
+}
+
+input ReportInput {
+  content: String!
+  date: Date!
+  employee_id: ID!
+  groundStation_id: ID
+  satellite_id: ID
+  title: String!
+  type: String!
+}
+
+type Satellite {
+  Constellation: Constellation
+  Contacts: [Contact]
+  Launch: Launch
+  Payloads: [Payload]
+  Reports: [Report]
+  altitude: Float!
+  busType: String!
+  constellation_id: ID
+  coordinates: [Float]!
+  description: String!
+  id: ID!
+  image: String!
+  launch_id: ID!
+  manufacturer: String!
+  name: String!
+  specs: JSON!
+  status: String!
+  tle: JSON!
+}
+
+input SatelliteFilter {
+  altitude: Float
+  altitude_gt: Float
+  altitude_gte: Float
+  altitude_lt: Float
+  altitude_lte: Float
+  altitude_neq: Float
+  busType: String
+  busType_gt: String
+  busType_gte: String
+  busType_lt: String
+  busType_lte: String
+  busType_neq: String
+  constellation_id: ID
+  constellation_id_neq: ID
+  coordinates: [Float]
+  coordinates_neq: [Float]
+  description: String
+  description_gt: String
+  description_gte: String
+  description_lt: String
+  description_lte: String
+  description_neq: String
+  id: ID
+  id_neq: ID
+  ids: [ID]
+  image: String
+  image_gt: String
+  image_gte: String
+  image_lt: String
+  image_lte: String
+  image_neq: String
+  launch_id: ID
+  launch_id_neq: ID
+  manufacturer: String
+  manufacturer_gt: String
+  manufacturer_gte: String
+  manufacturer_lt: String
+  manufacturer_lte: String
+  manufacturer_neq: String
+  name: String
+  name_gt: String
+  name_gte: String
+  name_lt: String
+  name_lte: String
+  name_neq: String
+  q: String
+  specs: JSON
+  specs_neq: JSON
+  status: String
+  status_gt: String
+  status_gte: String
+  status_lt: String
+  status_lte: String
+  status_neq: String
+  tle: JSON
+  tle_neq: JSON
+}
+
+input SatelliteInput {
+  altitude: Float!
+  busType: String!
+  constellation_id: ID
+  coordinates: [Float]!
+  description: String!
+  image: String!
+  launch_id: ID!
+  manufacturer: String!
+  name: String!
+  specs: JSON!
+  status: String!
+  tle: JSON!
+}

@@ -1,0 +1,43 @@
+@use "mixins" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+  max-width: 52ch;
+}
+
+.code {
+  @include tabular;
+
+  font-size: var(--text-2xl);
+  color: var(--ink-3);
+}
+
+.title {
+  @include display(var(--text-xl));
+
+  text-transform: uppercase;
+}
+
+.body {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.back {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--panel);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    background: var(--panel-sunk);
+  }
+}

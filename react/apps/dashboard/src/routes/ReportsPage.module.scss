@@ -1,0 +1,53 @@
+@use "mixins" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 60ch;
+}
+
+.title {
+  @include display(var(--text-2xl));
+
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.placeholder {
+  @include panel;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  // Hatched rather than solid, so an unbuilt surface never reads as an empty result set.
+  background: repeating-linear-gradient(
+    45deg,
+    var(--panel),
+    var(--panel) 8px,
+    var(--panel-sunk) 8px,
+    var(--panel-sunk) 16px
+  );
+}
+
+.placeholderTitle {
+  @include label;
+}
+
+.placeholderBody {
+  max-width: 48ch;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
