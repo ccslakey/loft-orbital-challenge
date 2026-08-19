@@ -7,8 +7,6 @@
 
 The submission is the **React** variant, in [`react/`](./react).
 
-> TODO: delete the `vue/` directory before submitting, or say explicitly here why both are present.
-
 ## Running it
 
 ```sh
@@ -149,6 +147,17 @@ The challenge asks for these to be called out.
 > TODO: component tests are not present. Either add a couple (React Testing Library is not installed yet) or state
 > here that you scoped testing to pure logic deliberately.
 
+## Planned: contact-planning map (`/map`)
+
+A top-level route answering the operator question behind the brief's contact narrative: *which contracted stations can
+reach which satellites, now and next*. Client-side SGP4 propagation (`satellite.js`), rendered as an equirectangular
+SVG via d3-geo, with station visibility footprints, active line-of-sight links, and next-contact windows (AOS/LOS).
+
+The full plan — phases, scope exclusions, spike results and rejected alternatives — lives in
+[`plans/contact-planning-map.md`](./plans/contact-planning-map.md).
+
+> TODO: once the feature lands, replace this pointer with what was actually built.
+
 ## Not implemented
 
 Being explicit about the edges:
@@ -179,16 +188,3 @@ Claude Code was used substantially throughout. Concretely:
 
 > TODO: state which parts you directed, changed, or rejected, and which decisions were yours. The policy asks that
 > core logic, architecture and key design decisions be your own work — describe honestly where that line fell.
-
-## Remaining TODOs before submitting
-
-- [x] Add reports page + comments mutation
-- [ ] TLE propagation and globe/map
-- [x] Tests on business logic
-- [x] CI pipeline (unit tests, lint, stylelint, format, build)
-- [x] Add Prettier and Stylelint
-- [ ] Error/loading states, polish
-
-- [ ] Write the AI usage section in your own words
-- [ ] Fill in the state management and design rationale sections
-- [ ] `make clean` before packaging, to strip `node_modules` and build output

@@ -28,11 +28,14 @@ Server recomputes from TLEs every second and exposes no subscriptions.
 **Why:** _TODO_
 
 ### Live positions (planned): client-side TLE propagation
-Run SGP4 in the browser (`satellite.js`) to animate position between polls;
-poll slowly only to correct drift. Server stays source-of-truth.
-**Why:** _TODO — orbit is deterministic, so decouple smoothness from network.
-1s polling pays more network for still-stepped motion; push/subscriptions
-don't help a continuous firehose. Cost: own the math, reconcile client vs. server._
+SGP4 in the browser (`satellite.js`); poll slowly only to correct drift.
+Spiked 2026-08-19, de-risked — see [`plans/contact-planning-map.md`](./plans/contact-planning-map.md).
+**Why:** _TODO_
+
+### Map (planned): contact-planning view at `/map`, d3-geo over SVG
+Equirectangular SVG, d3-geo for projection/footprints/antimeridian clipping.
+Plan and rejected alternatives in [`plans/contact-planning-map.md`](./plans/contact-planning-map.md).
+**Why:** _TODO_
 
 ### Reports page: the deliberate place to demonstrate writes
 Read-only everywhere else; `/reports` adds `createComment` with an optimistic
