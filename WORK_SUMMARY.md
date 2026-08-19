@@ -155,16 +155,10 @@ A top-level route answering the operator question behind the brief's contact nar
 reach which satellites, now and next*. Client-side SGP4 propagation (`satellite.js`), rendered as an equirectangular
 SVG via d3-geo, with station visibility footprints, active line-of-sight links, and next-contact windows (AOS/LOS).
 
-Deliberately excluded from that scope:
+The full plan — phases, scope exclusions, spike results and rejected alternatives — lives in
+[`plans/contact-planning-map.md`](./plans/contact-planning-map.md).
 
-- **No time scrubber or playback** — the map shows "now" only; windows are listed, not animated.
-- **No antenna, frequency or link-budget modelling** — visibility is purely geometric line-of-sight.
-- **Default elevation mask assumed** (~5–10°) — the data has no per-station mask, so one value is applied fleet-wide.
-- **Read-only planner** — the API has no contact-request mutation, so none is faked.
-- **Degradation, not failure** — a satellite with a missing or unparseable TLE renders at its server-polled position
-  with no footprint or track; the map never breaks on bad data.
-
-> TODO: these are the scope lines to own or move before submitting — edit once the feature lands.
+> TODO: once the feature lands, replace this pointer with what was actually built.
 
 ## Not implemented
 

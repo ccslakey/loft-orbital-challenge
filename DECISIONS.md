@@ -28,27 +28,14 @@ Server recomputes from TLEs every second and exposes no subscriptions.
 **Why:** _TODO_
 
 ### Live positions (planned): client-side TLE propagation
-Run SGP4 in the browser (`satellite.js`) to animate position between polls;
-poll slowly only to correct drift. Server stays source-of-truth.
-**Why:** _TODO — orbit is deterministic, so decouple smoothness from network.
-1s polling pays more network for still-stepped motion; push/subscriptions
-don't help a continuous firehose. Cost: own the math, reconcile client vs. server._
-**Spike (2026-08-19):** de-risked. The server itself uses satellite.js 5.0.0
-(`twoline2satrec → propagate → eciToGeodetic`, `apps/server/src/db.ts`); all
-7 seed TLEs propagate at wall-clock now (`satrec.error=0` despite 2021–22
-epochs) and client output matches the API within 0.02° / 0.4 km — sub-tick
-skew only. Same library + same recipe = structural agreement.
+SGP4 in the browser (`satellite.js`); poll slowly only to correct drift.
+Spiked 2026-08-19, de-risked — see [`plans/contact-planning-map.md`](./plans/contact-planning-map.md).
+**Why:** _TODO_
 
 ### Map (planned): contact-planning view at `/map`, d3-geo over SVG
-Top-level route; equirectangular SVG with d3-geo doing projection, geodesic
-footprint circles and antimeridian clipping — styling stays in SCSS tokens.
-Phased L1 positions → L2 footprints/links → L3 contact windows (AOS/LOS).
-Scope exclusions recorded in WORK_SUMMARY's *Planned* section.
-**Why:** _TODO — footprints/links are the point (contact narrative), and the
-two hard geo problems are exactly what d3-geo solves; a WebGL globe can't be
-token-styled and occludes half the fleet. Rejected: hand-rolled projection
-(antimeridian + geodesic circles eat the time), react-simple-maps (component
-layer fights per-frame animation), globe.gl._
+Equirectangular SVG, d3-geo for projection/footprints/antimeridian clipping.
+Plan and rejected alternatives in [`plans/contact-planning-map.md`](./plans/contact-planning-map.md).
+**Why:** _TODO_
 
 ### Reports page: the deliberate place to demonstrate writes
 Read-only everywhere else; `/reports` adds `createComment` with an optimistic
