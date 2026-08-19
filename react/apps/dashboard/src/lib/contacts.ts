@@ -40,6 +40,17 @@ export const PASS_PAD_MS = 2 * 60_000;
 // than silently dropping the contact from conflict checks.
 export const FALLBACK_WINDOW_MS = 15 * 60_000;
 
+export type ContactPhase = "upcoming" | "active" | "past";
+
+// A null losMs means the window could not be recovered; the worst-case pass bounds the active phase instead.
+export const contactPhase = (aosMs: number, losMs: number | null, nowMs: number): ContactPhase => {
+  if (nowMs < aosMs) {
+    return "upcoming";
+  }
+
+  return nowMs < (losMs ?? aosMs + FALLBACK_WINDOW_MS) ? "active" : "past";
+};
+
 export interface ScheduledUse {
   startMs: number;
   endMs: number;

@@ -1,13 +1,13 @@
 /* Imports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 import {useQuery} from "@apollo/client/react";
-import {useMemo} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {Link} from "react-router-dom";
 
 import {CONTACTS_QUERY} from "@/api/operations.js";
 import QueryState from "@/components/ui/QueryState.js";
 import StatusChip from "@/components/ui/StatusChip.js";
-import {recoverContactWindow} from "@/lib/contacts.js";
+import {contactPhase, recoverContactWindow, type ContactPhase} from "@/lib/contacts.js";
 import {formatDate, formatSpan} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getSatelliteState, type State} from "@/lib/status.js";
@@ -23,6 +23,7 @@ type Contact = NonNullable<NonNullable<ContactsQuery["allContacts"]>[number]>;
 interface ContactRow {
   contact: Contact;
   dateMs: number;
+  phase: ContactPhase;
   state: State;
   // Recovered from the current TLE; null when the stored AOS no longer falls inside a pass.
   windowLabel: string | null;
@@ -36,16 +37,32 @@ const formatUtcDateTime = (ms: number): string => {
   return `${formatDate(date.toISOString())} · ${date.toISOString().slice(11, 16)} UTC`;
 };
 
+/* Hooks //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+// A contact migrates upcoming -> in progress -> past with no data change, so the grouping needs a clock.
+
+const useNow = (intervalMs: number): Date => {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), intervalMs);
+
+    return () => window.clearInterval(id);
+  }, [intervalMs]);
+
+  return now;
+};
+
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 function ContactsPage() {
   const {data, loading, error, refetch} = useQuery(CONTACTS_QUERY, {variables: {perPage: 100, page: 0}});
+  const now = useNow(15_000);
 
   const contacts = useMemo(() => (data?.allContacts ?? []).filter((contact) => contact !== null), [data]);
 
-  // Query order is date desc; upcoming flips to soonest-first, past stays most-recent-first.
-  const {upcoming, past} = useMemo(() => {
-    const nowMs = new Date().getTime();
+  // Query order is date desc; in-progress and upcoming flip to soonest-first, past stays most-recent-first.
+  const {active, upcoming, past} = useMemo(() => {
+    const nowMs = now.getTime();
     const rows = contacts.flatMap((contact): ContactRow[] => {
       const dateMs = new Date(contact.date).getTime();
 
@@ -60,22 +77,30 @@ function ContactsPage() {
         satrec && stationLat != null && stationLon != null
           ? recoverContactWindow(satrec, stationLat, stationLon, dateMs)
           : null;
+      const phase = contactPhase(dateMs, window?.losMs ?? null, nowMs);
 
       return [
         {
           contact,
           dateMs,
+          phase,
           state: getSatelliteState(contact.Satellite?.status),
-          windowLabel: window ? `${formatSpan(window.losMs - dateMs)} · ${Math.round(window.maxElevationDeg)}°` : null,
+          windowLabel:
+            phase === "active" && window
+              ? `ends in ${formatSpan(window.losMs - nowMs)}`
+              : window
+                ? `${formatSpan(window.losMs - dateMs)} · ${Math.round(window.maxElevationDeg)}°`
+                : null,
         },
       ];
     });
 
     return {
-      upcoming: rows.filter((row) => row.dateMs >= nowMs).sort((a, b) => a.dateMs - b.dateMs),
-      past: rows.filter((row) => row.dateMs < nowMs),
+      active: rows.filter((row) => row.phase === "active").sort((a, b) => a.dateMs - b.dateMs),
+      upcoming: rows.filter((row) => row.phase === "upcoming").sort((a, b) => a.dateMs - b.dateMs),
+      past: rows.filter((row) => row.phase === "past"),
     };
-  }, [contacts]);
+  }, [contacts, now]);
 
   return (
     <section className={styles.page}>
@@ -99,6 +124,7 @@ function ContactsPage() {
         emptyMessage="No contacts have been scheduled."
         onRetry={() => void refetch()}
       >
+        <ContactGroup title="In progress" rows={active} emptyNote="No contact is underway right now." />
         <ContactGroup title="Upcoming" rows={upcoming} emptyNote="Nothing scheduled ahead." />
         <ContactGroup title="Past" rows={past} emptyNote="No completed contacts on record." />
       </QueryState>
