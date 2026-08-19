@@ -14,5 +14,6 @@
 
 ## CLEANUP ITEMS
 - [ ] Write the AI usage section in your own words
+- [ ] WORK_SUMMARY: mention the template changes (stable seed ids in db.ts, uuid dep dropped)
 - [ ] Fill in the state management and design rationale sections
 - [ ] `make clean` before packaging, to strip `node_modules` and build output
