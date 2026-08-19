@@ -92,3 +92,76 @@ export const GROUND_STATIONS_QUERY = graphql(`
   }
 `);
 
+
+/* reports /////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+export const REPORTS_QUERY = graphql(`
+  query Reports($perPage: Int!, $page: Int!, $sortField: String!, $sortOrder: String!) {
+    allReports(page: $page, perPage: $perPage, sortField: $sortField, sortOrder: $sortOrder) {
+      id
+      title
+      type
+      date
+      content
+      employee_id
+      groundStation_id
+      satellite_id
+      Comments {
+        id
+        date
+        content
+        Employee {
+        id
+        name
+        role
+      }
+      }
+      Employee {
+        id
+        name
+        role
+      }
+      GroundStation {
+        id
+        name
+        network
+        status
+        image
+      }
+      Satellite {
+        id
+        name
+        description
+        status
+        busType
+        manufacturer
+      }
+    }
+  }
+`);
+
+export const EMPLOYEES_QUERY = graphql(`
+  query Employees {
+    allEmployees(sortField: "name", sortOrder: "asc") {
+      id
+      name
+      role
+    }
+  }
+`);
+
+export const CREATE_COMMENT = graphql(`
+  mutation CreateComment($content: String!, $date: Date!, $employee_id: ID!, $report_id: ID!) {
+    createComment(content: $content, date: $date, employee_id: $employee_id, report_id: $report_id) {
+      id
+      content
+      date
+      report_id
+      Employee {
+        id
+        name
+        role
+      }
+    }
+  }
+`);
