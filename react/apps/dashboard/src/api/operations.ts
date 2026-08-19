@@ -92,7 +92,6 @@ export const GROUND_STATIONS_QUERY = graphql(`
   }
 `);
 
-
 /* reports /////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 export const REPORTS_QUERY = graphql(`
@@ -111,10 +110,10 @@ export const REPORTS_QUERY = graphql(`
         date
         content
         Employee {
-        id
-        name
-        role
-      }
+          id
+          name
+          role
+        }
       }
       Employee {
         id

@@ -46,4 +46,3 @@ export const getGroundStationState = (status: string | null | undefined): State 
 export const getLaunchState = (status: string | null | undefined): State => resolve(LAUNCH_STATES, status);
 
 export const getPayloadState = (status: string | null | undefined): State => resolve(PAYLOAD_STATES, status);
-

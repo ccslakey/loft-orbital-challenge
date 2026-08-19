@@ -74,7 +74,6 @@ function SatellitePage() {
                     <dd>{tle ? (getCatalogNumber(tle) ?? "—") : "—"}</dd>
                   </div>
                 </dl>
-
               </article>
 
               <article className={styles.panel}>
@@ -164,4 +163,3 @@ function SatellitePage() {
 }
 
 export default SatellitePage;
-

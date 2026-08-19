@@ -39,4 +39,3 @@ describe("getCatalogNumber", () => {
     expect(getCatalogNumber({line1: LINE_1, line2: LINE_2})).toBe(11);
   });
 });
-

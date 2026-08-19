@@ -34,5 +34,5 @@ export default tseslint.config(
     files: ["apps/dashboard/src/**/*.{ts,tsx}"],
     plugins: {"react-hooks": reactHooks},
     rules: reactHooks.configs.recommended.rules,
-  }
+  },
 );

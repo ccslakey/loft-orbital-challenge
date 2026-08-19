@@ -44,4 +44,3 @@ export const formatDate = (value: string | null | undefined): string => {
     ? "—"
     : date.toLocaleDateString("en-US", {year: "numeric", month: "short", day: "2-digit", timeZone: "UTC"});
 };
-

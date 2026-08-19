@@ -37,4 +37,3 @@ export const getCatalogNumber = (tle: TwoLineElement): number | null => {
 
   return Number.isNaN(raw) ? null : raw;
 };
-
