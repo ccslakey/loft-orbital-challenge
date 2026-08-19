@@ -7,8 +7,6 @@
 
 The submission is the **React** variant, in [`react/`](./react).
 
-> TODO: delete the `vue/` directory before submitting, or say explicitly here why both are present.
-
 ## Running it
 
 ```sh
@@ -190,16 +188,3 @@ Claude Code was used substantially throughout. Concretely:
 
 > TODO: state which parts you directed, changed, or rejected, and which decisions were yours. The policy asks that
 > core logic, architecture and key design decisions be your own work — describe honestly where that line fell.
-
-## Remaining TODOs before submitting
-
-- [x] Add reports page + comments mutation
-- [ ] TLE propagation + contact-planning map (`/map`) — see *Planned* section for scope
-- [x] Tests on business logic
-- [x] CI pipeline (unit tests, lint, stylelint, format, build)
-- [x] Add Prettier and Stylelint
-- [ ] Error/loading states, polish
-
-- [ ] Write the AI usage section in your own words
-- [ ] Fill in the state management and design rationale sections
-- [ ] `make clean` before packaging, to strip `node_modules` and build output
