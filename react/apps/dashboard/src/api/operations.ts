@@ -103,6 +103,46 @@ export const GROUND_STATIONS_QUERY = graphql(`
   }
 `);
 
+/* Contacts ///////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+export const CONTACTS_QUERY = graphql(`
+  query Contacts($perPage: Int!, $page: Int!) {
+    allContacts(perPage: $perPage, page: $page, sortField: "date", sortOrder: "desc") {
+      id
+      date
+      type
+      executionScript
+      configuration
+      Satellite {
+        id
+        name
+        status
+        tle
+      }
+      GroundStation {
+        id
+        name
+        status
+        coordinates
+      }
+      Payload {
+        id
+        name
+        category
+        Customer {
+          id
+          name
+        }
+      }
+      Employee {
+        id
+        name
+        role
+      }
+    }
+  }
+`);
+
 /* reports /////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 export const REPORTS_QUERY = graphql(`
