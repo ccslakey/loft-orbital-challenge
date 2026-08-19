@@ -252,10 +252,10 @@
   color: var(--ink-3);
 }
 
+// No overflow clipping: the pass tooltips render outside the strip.
 .timeline {
   position: relative;
   height: 18px;
-  overflow: hidden;
   background: var(--panel-sunk);
   border: 1px solid var(--rule);
   border-radius: var(--radius-sm);
@@ -279,7 +279,36 @@
   border-radius: 1px;
   opacity: 0.85;
 
+  // Invisible halo so a 3 px tick doesn't demand pixel-perfect hovering.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -5px -4px;
+  }
+
+  &::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    padding: 2px var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+    color: var(--panel);
+    background: var(--ink);
+    border-radius: var(--radius-sm);
+    pointer-events: none;
+  }
+
   &:hover {
+    z-index: 1;
     opacity: 1;
+
+    &::after {
+      display: block;
+    }
   }
 }

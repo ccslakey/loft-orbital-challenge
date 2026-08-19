@@ -53,7 +53,7 @@ interface FleetRow {
   nextAosMs: number | null;
   contact: PassWindow | null;
   contactEta: string | null;
-  timeline: TimelineSegment[];
+  timeline: Array<TimelineSegment & {tip: string}>;
 }
 
 const HORIZON_MS = CONTACT_HORIZON_HOURS * 3_600_000;
@@ -61,10 +61,16 @@ const HORIZON_MS = CONTACT_HORIZON_HOURS * 3_600_000;
 // Keyed by satellite + TLE + station set, so entries survive remounts and stale keys are simply never hit again.
 const contactCache: WindowsCache = new Map();
 
-const formatWindowTitle = ({stationName, aosMs, losMs, truncated}: PassWindow): string => {
-  const time = (ms: number) => new Date(ms).toISOString().slice(11, 16);
+// "STATION · 12:34–12:46 UTC"; a pass on the next UTC day gets one trailing "+1d", one that straddles
+// midnight marks only the end time, and a truncated LOS (still open at the horizon) gets a "+".
+const formatWindowTip = ({stationName, aosMs, losMs, truncated}: PassWindow, reference: Date): string => {
+  const hhmm = (ms: number) => new Date(ms).toISOString().slice(11, 16);
+  const straddles = new Date(losMs).getUTCDate() !== new Date(aosMs).getUTCDate();
+  const nextDay = new Date(aosMs).getUTCDate() !== reference.getUTCDate();
 
-  return `${stationName} · ${time(aosMs)}–${time(losMs)}${truncated ? "+" : ""} UTC`;
+  return `${stationName} · ${hhmm(aosMs)}–${hhmm(losMs)}${straddles ? " +1d" : ""}${truncated ? "+" : ""} UTC${
+    nextDay ? " +1d" : ""
+  }`;
 };
 
 interface FilterOption {
@@ -168,7 +174,10 @@ function FleetPage() {
             : contact.aosMs <= now.getTime()
               ? "In view"
               : `in ${formatSpan(contact.aosMs - now.getTime())}`,
-        timeline: timelineSegments(windows, now.getTime(), HORIZON_MS),
+        timeline: timelineSegments(windows, now.getTime(), HORIZON_MS).map((segment) => ({
+          ...segment,
+          tip: formatWindowTip(segment.window, now),
+        })),
       };
     });
   }, [satellites, activeStations]);
@@ -440,7 +449,7 @@ function FleetPage() {
                               key={`${segment.window.stationName}-${segment.window.aosMs}`}
                               className={styles.pass}
                               style={{left: `${segment.start * 100}%`, width: `${segment.span * 100}%`}}
-                              title={formatWindowTitle(segment.window)}
+                              data-tip={segment.tip}
                             />
                           ))}
                         </div>
