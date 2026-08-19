@@ -43,20 +43,19 @@ reason — a fresh clone type-checks before anything is started.
 - Satellite positions are recomputed from TLEs server-side once per second. There are no subscriptions, so keeping
   coordinates live means polling.
 
-
 ## Routing
 
 `src/router.tsx` defines a single layout route that owns the shell, so the header and navigation persist across
 navigations and only the outlet re-renders.
 
-| Route | View |
-| --- | --- |
-| `/` | Redirects to `/fleet` |
-| `/fleet` | Satellite list with live sub-satellite positions |
+| Route                 | View                                                          |
+| --------------------- | ------------------------------------------------------------- |
+| `/`                   | Redirects to `/fleet`                                         |
+| `/fleet`              | Satellite list with live sub-satellite positions              |
 | `/fleet/:satelliteId` | Satellite detail: position, spacecraft, launch, TLE, payloads |
-| `/ground-stations` | Contracted antenna sites |
-| `/reports` | Routed but not implemented |
-| `*` | Not found |
+| `/ground-stations`    | Contracted antenna sites                                      |
+| `/reports`            | Routed but not implemented                                    |
+| `*`                   | Not found                                                     |
 
 ## Styling
 

@@ -1,6 +1,3 @@
 {
-  "recommendations": [
-    "GitHub.copilot",
-    "stackbreak.comment-divider",
-  ]
+  "recommendations": ["GitHub.copilot", "stackbreak.comment-divider"]
 }

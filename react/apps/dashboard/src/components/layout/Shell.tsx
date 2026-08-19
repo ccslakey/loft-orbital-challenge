@@ -67,7 +67,9 @@ function Shell() {
                   <li key={item.to}>
                     <NavLink
                       to={item.to}
-                      className={({isActive}) => (isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink)}
+                      className={({isActive}) =>
+                        isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+                      }
                     >
                       {item.label}
                     </NavLink>
@@ -87,4 +89,3 @@ function Shell() {
 }
 
 export default Shell;
-

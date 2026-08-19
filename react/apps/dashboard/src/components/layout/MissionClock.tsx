@@ -1,6 +1,6 @@
 /* Imports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
 function MissionClock() {
   const [now, setNow] = useState(() => new Date());
@@ -21,4 +21,3 @@ function MissionClock() {
 }
 
 export default MissionClock;
-

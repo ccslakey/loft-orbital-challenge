@@ -54,4 +54,3 @@ function QueryState({loading, error, empty, emptyMessage, onRetry, children}: Qu
 }
 
 export default QueryState;
-

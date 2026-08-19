@@ -57,4 +57,3 @@ export default defineConfig({
     environment: "jsdom",
   },
 });
-

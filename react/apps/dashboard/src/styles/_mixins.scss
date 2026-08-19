@@ -47,14 +47,13 @@
 }
 
 @mixin below-md {
-  @media (max-width: 900px) {
+  @media (width <= 900px) {
     @content;
   }
 }
 
 @mixin below-sm {
-  @media (max-width: 600px) {
+  @media (width <= 600px) {
     @content;
   }
 }
-

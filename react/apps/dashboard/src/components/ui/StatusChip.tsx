@@ -21,4 +21,3 @@ function StatusChip({label, state}: StatusChipProps) {
 }
 
 export default StatusChip;
-

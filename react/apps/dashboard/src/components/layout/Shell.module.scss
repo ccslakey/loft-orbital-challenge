@@ -152,7 +152,9 @@
   color: var(--ink-2);
   border-radius: var(--radius-sm);
   box-shadow: inset 2px 0 0 transparent;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
 
   &:hover {
     background: var(--panel-sunk);
@@ -175,4 +177,3 @@
     padding: var(--space-4);
   }
 }
-

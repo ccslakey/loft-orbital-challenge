@@ -2,12 +2,7 @@
 
 import {describe, expect, it} from "vitest";
 
-import {
-  getGroundStationState,
-  getLaunchState,
-  getPayloadState,
-  getSatelliteState,
-} from "@/lib/status.js";
+import {getGroundStationState, getLaunchState, getPayloadState, getSatelliteState} from "@/lib/status.js";
 
 /* Tests //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -62,4 +57,3 @@ describe("getPayloadState", () => {
     expect(getPayloadState("Inactive")).toBe("inert");
   });
 });
-

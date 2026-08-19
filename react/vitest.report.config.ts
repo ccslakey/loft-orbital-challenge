@@ -7,10 +7,7 @@ export default defineConfig({
       enabled: true,
       provider: "v8",
       include: ["apps/**"],
-      exclude: [
-        "**/*.{config,*rc}.*",
-        "**/{__tests__,build,dist,coverage,packages/config}/**",
-      ],
+      exclude: ["**/*.{config,*rc}.*", "**/{__tests__,build,dist,coverage,packages/config}/**"],
       reporter: ["text", "cobertura"],
     },
     reporters: ["basic", "junit"],

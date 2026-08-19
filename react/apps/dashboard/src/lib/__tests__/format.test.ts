@@ -2,13 +2,7 @@
 
 import {describe, expect, it} from "vitest";
 
-import {
-  formatAltitude,
-  formatDate,
-  formatLatitude,
-  formatLongitude,
-  longitudeToTrackPosition,
-} from "@/lib/format.js";
+import {formatAltitude, formatDate, formatLatitude, formatLongitude, longitudeToTrackPosition} from "@/lib/format.js";
 
 /* Tests //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -78,4 +72,3 @@ describe("formatDate", () => {
     expect(formatDate("not a date")).toBe("\u2014");
   });
 });
-
