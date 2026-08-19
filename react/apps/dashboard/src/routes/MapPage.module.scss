@@ -1,0 +1,239 @@
+@use "mixins" as *;
+
+$states: nominal, planned, caution, critical, inert;
+
+@mixin state-color {
+  @each $state in $states {
+    &[data-state="#{$state}"] {
+      --state: var(--state-#{$state});
+    }
+  }
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 60ch;
+}
+
+.title {
+  @include display(var(--text-2xl));
+
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.panel {
+  @include panel;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4);
+}
+
+.map {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sphere {
+  fill: var(--panel-sunk);
+  stroke: var(--rule-strong);
+}
+
+.graticule {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 0.5;
+}
+
+.land {
+  fill: var(--rule);
+}
+
+.footprint {
+  fill: var(--state, var(--state-inert));
+  fill-opacity: 0.05;
+  stroke: var(--state, var(--state-inert));
+  stroke-width: 0.75;
+  stroke-opacity: 0.45;
+
+  @include state-color;
+}
+
+.link path {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 1;
+  stroke-opacity: 0.7;
+}
+
+.station {
+  fill: var(--state, var(--state-inert));
+
+  @include state-color;
+}
+
+.satellite {
+  @include state-color;
+
+  circle {
+    fill: var(--state, var(--state-inert));
+    stroke: var(--panel);
+    stroke-width: 1;
+  }
+
+  &[data-degraded] circle {
+    fill: var(--panel);
+    stroke: var(--state, var(--state-inert));
+    stroke-dasharray: 2 1.5;
+  }
+}
+
+.markerLabel {
+  @include tabular;
+
+  font-size: 10px;
+  fill: var(--ink-2);
+  paint-order: stroke;
+  stroke: var(--panel-sunk);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+
+.legendItem {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.legendSatellite {
+  width: 8px;
+  height: 8px;
+  background: var(--ink-2);
+  border-radius: 50%;
+}
+
+.legendStation {
+  width: 7px;
+  height: 7px;
+  background: var(--ink-2);
+  transform: rotate(45deg);
+}
+
+.legendFootprint {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--ink-3);
+  border-radius: 50%;
+}
+
+.legendLink {
+  width: 14px;
+  border-top: 1px solid var(--ink-2);
+}
+
+.legendNote {
+  color: var(--ink-3);
+}
+
+.contacts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.contactsTitle {
+  @include label;
+}
+
+.contactsNote {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.tableWrap {
+  @include panel;
+
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+  }
+
+  thead th {
+    @include label;
+
+    white-space: nowrap;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--rule);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &:hover {
+      background: var(--panel-sunk);
+    }
+  }
+
+  tbody td {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+}
+
+.numeric {
+  @include tabular;
+
+  font-size: var(--text-sm);
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.rowName {
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px;
+
+  &:hover {
+    text-decoration-color: var(--ink);
+  }
+}

@@ -21,7 +21,7 @@ Everything runs inside Docker because the workspace pins Node `>=20.10.0 <21`.
 | Command | Result |
 | --- | --- |
 | `pnpm build` | Type-check and production build, both exit 0 |
-| `pnpm test` | 27 tests across 3 files |
+| `pnpm test` | 44 tests across 6 files |
 | `pnpm lint` | ESLint, clean |
 | `pnpm lint:styles` | Stylelint over the SCSS, clean |
 | `pnpm format:check` | Prettier, clean (`pnpm format` to write) |
@@ -37,6 +37,7 @@ A fleet operations console with four routes under a persistent shell:
 | `/fleet` | Satellite list with live sub-satellite positions |
 | `/fleet/:satelliteId` | Position, spacecraft, launch, TLE, payloads and their customers |
 | `/ground-stations` | Contracted antenna sites |
+| `/map` | Contact-planning map: live client-propagated positions, footprints, links and next-contact windows |
 | `/reports` | Incident/maintenance records with threaded comments and an optimistic `createComment` write |
 
 ## Architecture
@@ -138,25 +139,29 @@ The challenge asks for these to be called out.
 
 ## Testing
 
-27 tests covering the business logic, not the components:
+44 tests covering the business logic, not the components:
 
 - `lib/status.ts` — status→state mapping, including every value in the server's enums and the unknown-value fallback
 - `lib/tle.ts` — TLE validation and NORAD catalog number extraction
 - `lib/format.ts` — coordinate/altitude formatting and longitude→track-position wrapping
+- `lib/propagation.ts` — TLE→satrec guards (including satellite.js accepting garbage with `error` still 0) and geodetic output sanity
+- `lib/visibility.ts` — footprint radius, elevation geometry, and the mask/footprint-edge roundtrip
+- `lib/windows.ts` — AOS/LOS search: a bounded LEO pass, a pass already in progress, an unreachable latitude
 
 > TODO: component tests are not present. Either add a couple (React Testing Library is not installed yet) or state
 > here that you scoped testing to pure logic deliberately.
 
-## Planned: contact-planning map (`/map`)
+## Contact-planning map (`/map`)
 
 A top-level route answering the operator question behind the brief's contact narrative: *which contracted stations can
-reach which satellites, now and next*. Client-side SGP4 propagation (`satellite.js`), rendered as an equirectangular
-SVG via d3-geo, with station visibility footprints, active line-of-sight links, and next-contact windows (AOS/LOS).
+reach which satellites, now and next*. Positions are propagated in the browser once a second with the server's own
+satellite.js recipe (polling drops to 30 s, used only to refresh TLEs), rendered as an equirectangular SVG via d3-geo
+with visibility footprints, active line-of-sight links, and a next-contact table (AOS/LOS, duration, max elevation)
+over a 24 h horizon.
 
-The full plan — phases, scope exclusions, spike results and rejected alternatives — lives in
-[`plans/contact-planning-map.md`](./plans/contact-planning-map.md).
-
-> TODO: once the feature lands, replace this pointer with what was actually built.
+The plan it was built to — phases, scope exclusions, spike results and rejected alternatives — lives in
+[`plans/contact-planning-map.md`](./plans/contact-planning-map.md). The scope exclusions there (no time scrubber, no
+link-budget modelling, one fleet-wide 10° mask, read-only, degrade-don't-fail) all held.
 
 ## Not implemented
 
