@@ -37,6 +37,11 @@ Equirectangular SVG, d3-geo for projection/footprints/antimeridian clipping.
 Plan and rejected alternatives in [`plans/contact-planning-map.md`](./plans/contact-planning-map.md).
 **Why:** _TODO_
 
+### Map L3: contact windows via coarse scan + bisection
+30 s steps over a 24 h horizon, crossings refined by bisection; an
+inclination/apogee reachability bound skips pairs that can never see each other.
+**Why:** _TODO_
+
 ### Map L2: 10° elevation mask; footprints/links skip inert assets
 Geometric LOS only, per the plan's scope; decommissioned satellites and
 offline stations keep their marker but cast no footprint or link.

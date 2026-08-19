@@ -3,6 +3,7 @@
 import {useQuery} from "@apollo/client/react";
 import {geoCircle, geoEquirectangular, geoGraticule10, geoPath} from "d3-geo";
 import {useEffect, useMemo, useState} from "react";
+import {Link} from "react-router-dom";
 import {feature} from "topojson-client";
 import type {Topology} from "topojson-specification";
 import landTopology from "world-atlas/land-110m.json";
@@ -14,6 +15,7 @@ import {createSatrec, propagateToGeodetic} from "@/lib/propagation.js";
 import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
 import {centralAngleDeg, DEFAULT_ELEVATION_MASK_DEG, elevationDeg, footprintRadiusDeg} from "@/lib/visibility.js";
+import {findNextWindow, type ContactWindow} from "@/lib/windows.js";
 
 import styles from "./MapPage.module.scss";
 
@@ -44,6 +46,17 @@ const LAND_PATH = toPath(feature(topology, topology.objects.land)) ?? "";
 // Coordinates arrive as a nullable list of nullable floats; a missing component drops the marker.
 const project = (latitude: number | null | undefined, longitude: number | null | undefined): [number, number] | null =>
   latitude == null || longitude == null ? null : projection([longitude, latitude]);
+
+/* Formatting /////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+const formatUtcTime = (date: Date, reference: Date): string => {
+  const time = date.toISOString().slice(11, 16);
+
+  return date.getUTCDate() === reference.getUTCDate() ? time : `${time} +1d`;
+};
+
+const formatWindowDuration = ({aos, los, truncated}: ContactWindow): string =>
+  `${Math.max(1, Math.round((los.getTime() - aos.getTime()) / 60000))}${truncated ? "+" : ""} min`;
 
 /* Hooks //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -82,7 +95,39 @@ function MapPage() {
     [satellitesQuery.data],
   );
 
-  const stations = (stationsQuery.data?.allGroundStations ?? []).filter((station) => station !== null);
+  const stations = useMemo(
+    () => (stationsQuery.data?.allGroundStations ?? []).filter((station) => station !== null),
+    [stationsQuery.data],
+  );
+
+  // Recomputed per poll, not per animation tick: the search costs milliseconds thanks to the
+  // reachability bound, but is far too heavy for the 1 Hz clock.
+  const upcoming = useMemo(() => {
+    const from = new Date();
+    const rows = [];
+
+    for (const {satellite, satrec} of tracked) {
+      if (!satrec || getSatelliteState(satellite.status) === "inert") {
+        continue;
+      }
+
+      for (const station of stations) {
+        const [stationLat, stationLon] = station.coordinates;
+
+        if (getGroundStationState(station.status) === "inert" || stationLat == null || stationLon == null) {
+          continue;
+        }
+
+        const window = findNextWindow(satrec, stationLat, stationLon, from);
+
+        if (window) {
+          rows.push({satellite, station, window});
+        }
+      }
+    }
+
+    return rows.sort((a, b) => a.window.aos.getTime() - b.window.aos.getTime());
+  }, [tracked, stations]);
 
   const fleet = tracked.map(({satellite, satrec}) => ({
     satellite,
@@ -255,6 +300,61 @@ function MapPage() {
             </span>
           </figcaption>
         </figure>
+
+        <section className={styles.contacts}>
+          <h2 className={styles.contactsTitle}>Next contacts — 24 h horizon, times UTC</h2>
+
+          {upcoming.length === 0 ? (
+            <p className={styles.contactsNote}>No contacts clear the mask within the next 24 hours.</p>
+          ) : (
+            <>
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th scope="col">Station</th>
+                      <th scope="col">Satellite</th>
+                      <th scope="col" className={styles.numeric}>
+                        <abbr title="Acquisition of signal">AOS</abbr>
+                      </th>
+                      <th scope="col" className={styles.numeric}>
+                        <abbr title="Loss of signal">LOS</abbr>
+                      </th>
+                      <th scope="col" className={styles.numeric}>
+                        Duration
+                      </th>
+                      <th scope="col" className={styles.numeric}>
+                        Max elev
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {upcoming.slice(0, 10).map(({satellite, station, window}) => (
+                      <tr key={`${station.id}-${satellite.id}`}>
+                        <td>{station.name}</td>
+                        <td>
+                          <Link className={styles.rowName} to={`/fleet/${satellite.id}`}>
+                            {satellite.name}
+                          </Link>
+                        </td>
+                        <td className={styles.numeric}>{formatUtcTime(window.aos, now)}</td>
+                        <td className={styles.numeric}>{window.truncated ? "—" : formatUtcTime(window.los, now)}</td>
+                        <td className={styles.numeric}>{formatWindowDuration(window)}</td>
+                        <td className={styles.numeric}>{`${Math.round(window.maxElevationDeg)}°`}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {upcoming.length > 10 ? (
+                <p className={styles.contactsNote}>
+                  {upcoming.length - 10} more pairs have a window inside the horizon.
+                </p>
+              ) : null}
+            </>
+          )}
+        </section>
       </QueryState>
     </section>
   );

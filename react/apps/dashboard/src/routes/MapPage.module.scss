@@ -160,3 +160,80 @@ $states: nominal, planned, caution, critical, inert;
 .legendNote {
   color: var(--ink-3);
 }
+
+.contacts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.contactsTitle {
+  @include label;
+}
+
+.contactsNote {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.tableWrap {
+  @include panel;
+
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+  }
+
+  thead th {
+    @include label;
+
+    white-space: nowrap;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--rule);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &:hover {
+      background: var(--panel-sunk);
+    }
+  }
+
+  tbody td {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+}
+
+.numeric {
+  @include tabular;
+
+  font-size: var(--text-sm);
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.rowName {
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px;
+
+  &:hover {
+    text-decoration-color: var(--ink);
+  }
+}
