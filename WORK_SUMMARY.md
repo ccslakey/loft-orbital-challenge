@@ -37,7 +37,7 @@ A fleet operations console with four routes under a persistent shell:
 | `/fleet` | Satellite list with live sub-satellite positions |
 | `/fleet/:satelliteId` | Position, spacecraft, launch, TLE, payloads and their customers |
 | `/ground-stations` | Contracted antenna sites |
-| `/reports` | Routed, **not implemented** |
+| `/reports` | Incident/maintenance records with threaded comments and an optimistic `createComment` write |
 
 ## Architecture
 
@@ -150,9 +150,6 @@ The challenge asks for these to be called out.
 
 Being explicit about the edges:
 
-- **`/reports`** is routed and styled but not built. `allReports` exposes threaded comments and a `createComment`
-  mutation, which is the obvious place to demonstrate writes and optimistic cache updates.
-- **No mutations anywhere.** The app is read-only.
 - **No CI pipeline** and no production Docker image.
 - **Accessibility** is at the "reasonably accessible" floor the brief asks for: visible focus, semantic tables and
   lists, `prefers-reduced-motion` respected. Not screen-reader audited.
@@ -181,9 +178,13 @@ Claude Code was used substantially throughout. Concretely:
 
 ## Remaining TODOs before submitting
 
-- [ ] Delete `vue/`
+- [x] Add reports page + comments mutation
+- [ ] TLE propagation and globe/map
+- [x] Tests on business logic
+- [ ] Error/loading states, polish
+- [ ] 
+
 - [ ] Write the AI usage section in your own words
 - [ ] Fill in the state management and design rationale sections
-- [ ] Decide whether `/reports` ships unbuilt or gets implemented
 - [ ] Consider adding Prettier (the template README claims it exists; it does not)
 - [ ] `make clean` before packaging, to strip `node_modules` and build output

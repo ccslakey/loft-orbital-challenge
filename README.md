@@ -6,7 +6,9 @@ Your mission, should you choose to accept it, is to build a front-end web applic
 
 Here's some insider information on the satellite company's business practices...
 
-The satellite company's customers provide payloads that are integrated into the satellite bus and then launched into space via a third party like SpaceX. A satellite can support many payloads across a variety of customers. Multiple satellites and their payloads can even work in tandem to achieve some common goal; this concept is called a "constellation". Customers can then request that a representative of the satellite company make contact with the satellite to execute some task with their payloads. 
+The satellite company's customers provide payloads that are integrated into the satellite bus and then launched into space via a third party like SpaceX. A satellite can support many payloads across a variety of customers. 
+Multiple satellites and their payloads can even work in tandem to achieve some common goal; this concept is called a "constellation". 
+Customers can then request that a representative of the satellite company make contact with the satellite to execute some task with their payloads. 
 Contact with the satellite is achieved by directing contracted ground stations to communicate with the satellite via a large antennae array. 
 Satellite employees also often need to make contact with a satellite for general maintenancing tasks. 
 Satellite company employees can create reports and comment about ongoing events with the satellites and/or ground stations.
