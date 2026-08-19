@@ -31,6 +31,35 @@ export const longitudeToTrackPosition = (longitude: number | null | undefined): 
   return wrapped / 360;
 };
 
+/* Durations //////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+// Humanized span at the coarsest useful unit: "3 min", "4.5 h", "12 d", "1.3 yr". Sub-minute rounds up to 1 min.
+export const formatSpan = (ms: number | null | undefined): string => {
+  if (ms === null || ms === undefined || !Number.isFinite(ms) || ms < 0) {
+    return "—";
+  }
+
+  const minutes = ms / 60_000;
+
+  if (minutes < 60) {
+    return `${Math.max(1, Math.round(minutes))} min`;
+  }
+
+  const hours = minutes / 60;
+
+  if (hours < 48) {
+    return `${hours.toFixed(1)} h`;
+  }
+
+  const days = hours / 24;
+
+  if (days < 365) {
+    return `${Math.round(days)} d`;
+  }
+
+  return `${(days / 365.25).toFixed(1)} yr`;
+};
+
 /* Dates //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 export const formatDate = (value: string | null | undefined): string => {

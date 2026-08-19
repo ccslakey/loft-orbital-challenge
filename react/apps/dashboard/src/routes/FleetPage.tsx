@@ -1,15 +1,70 @@
 /* Imports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 import {useQuery} from "@apollo/client/react";
-import {Link} from "react-router-dom";
+import {useEffect, useMemo, useRef, useState} from "react";
+import {Link, useSearchParams} from "react-router-dom";
 
-import {SATELLITE_OVERVIEW_QUERY} from "@/api/operations.js";
+import {GROUND_STATIONS_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
-import {formatAltitude, formatLatitude, formatLongitude, longitudeToTrackPosition} from "@/lib/format.js";
-import {getSatelliteState} from "@/lib/status.js";
+import {
+  filterRows,
+  findNextContact,
+  getCachedNextContact,
+  hasActiveFilters,
+  launchedAtMs,
+  readFleetParams,
+  sortRows,
+  type FleetFilters,
+  type FleetSortField,
+  type FleetStation,
+  type NextContact,
+  type NextContactCache,
+  type SortDirection,
+} from "@/lib/fleet.js";
+import {
+  formatAltitude,
+  formatDate,
+  formatLatitude,
+  formatLongitude,
+  formatSpan,
+  longitudeToTrackPosition,
+} from "@/lib/format.js";
+import {createSatrec} from "@/lib/propagation.js";
+import {getGroundStationState, getSatelliteState, type State} from "@/lib/status.js";
+import {parseTle} from "@/lib/tle.js";
+import {DEFAULT_ELEVATION_MASK_DEG} from "@/lib/visibility.js";
 
 import styles from "./FleetPage.module.scss";
+
+/* Types //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+interface FleetRow {
+  id: string;
+  name: string;
+  status: string;
+  state: State;
+  altitude: number | null;
+  coordinates: readonly (number | null)[];
+  constellationId: string | null;
+  constellationName: string | null;
+  customerIds: string[];
+  payloadCategories: string[];
+  launchedMs: number | null;
+  launchedLabel: string;
+  launchDate: string | null;
+  nextAosMs: number | null;
+  contact: NextContact | null;
+  contactEta: string | null;
+}
+
+// Keyed by satellite + TLE + station set, so entries survive remounts and stale keys are simply never hit again.
+const contactCache: NextContactCache = new Map();
+
+interface FilterOption {
+  value: string;
+  label: string;
+}
 
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -18,15 +73,208 @@ function FleetPage() {
     variables: {perPage: 50, page: 0},
     pollInterval: 5000,
   });
+  const stationsQuery = useQuery(GROUND_STATIONS_QUERY, {variables: {perPage: 50, page: 0}});
 
-  const satellites = (data?.allSatellites ?? []).filter((satellite) => satellite !== null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const {filters, sort, direction} = readFleetParams(searchParams);
+
+  // The router applies search-param updates in a transition, so an input bound straight to the URL drops fast
+  // keystrokes. The field owns its value; the URL is written debounced, and the ref distinguishes those writes
+  // flushing back from external changes (back/forward, clear filters) that must reset the field.
+  const [searchInput, setSearchInput] = useState(filters.search);
+  const writtenSearch = useRef(filters.search);
+
+  useEffect(() => {
+    if (filters.search !== writtenSearch.current) {
+      writtenSearch.current = filters.search;
+      setSearchInput(filters.search);
+    }
+  }, [filters.search]);
+
+  const satellites = useMemo(() => (data?.allSatellites ?? []).filter((satellite) => satellite !== null), [data]);
+
+  // Contact search only considers stations that could actually take a pass.
+  const activeStations = useMemo(
+    () =>
+      (stationsQuery.data?.allGroundStations ?? [])
+        .filter((station) => station !== null)
+        .flatMap((station): FleetStation[] => {
+          const [latitude, longitude] = station.coordinates;
+
+          return getGroundStationState(station.status) === "inert" || latitude == null || longitude == null
+            ? []
+            : [{name: station.name, latitude, longitude}];
+        }),
+    [stationsQuery.data],
+  );
+
+  // Rebuilt every poll; the expensive window search inside is served from the TTL cache between refreshes.
+  const rows = useMemo((): FleetRow[] => {
+    const now = new Date();
+    const stationsKey = activeStations.map((station) => station.name).join("|");
+
+    return satellites.map((satellite) => {
+      const state = getSatelliteState(satellite.status);
+      const tle = parseTle(satellite.tle);
+      const satrec = tle && state !== "inert" ? createSatrec(tle) : null;
+      const contact = satrec
+        ? getCachedNextContact(contactCache, `${satellite.id}\n${tle!.line1}\n${stationsKey}`, now, () =>
+            findNextContact(satrec, activeStations, now),
+          )
+        : null;
+
+      const payloads = (satellite.Payloads ?? []).filter((payload) => payload !== null);
+      const customerIds: string[] = [];
+
+      for (const payload of payloads) {
+        if (payload.Customer && !customerIds.includes(payload.Customer.id)) {
+          customerIds.push(payload.Customer.id);
+        }
+      }
+
+      const launchedMs = launchedAtMs(satellite.Launch?.date, satellite.Launch?.status);
+
+      return {
+        id: satellite.id,
+        name: satellite.name,
+        status: satellite.status,
+        state,
+        altitude: satellite.altitude,
+        coordinates: satellite.coordinates,
+        constellationId: satellite.Constellation?.id ?? null,
+        constellationName: satellite.Constellation?.name ?? null,
+        customerIds,
+        payloadCategories: [...new Set(payloads.map((payload) => payload.category))],
+        launchedMs,
+        launchedLabel:
+          launchedMs === null
+            ? satellite.Launch?.status === "Pending"
+              ? "Not launched"
+              : "—"
+            : formatSpan(now.getTime() - launchedMs),
+        launchDate: satellite.Launch?.date ?? null,
+        nextAosMs: contact?.aosMs ?? null,
+        contact,
+        contactEta:
+          contact === null
+            ? null
+            : contact.aosMs <= now.getTime()
+              ? "In view"
+              : `in ${formatSpan(contact.aosMs - now.getTime())}`,
+      };
+    });
+  }, [satellites, activeStations]);
+
+  // Customer names live on the payloads, not the rows; both option lists derive from the unfiltered data.
+  const options = useMemo(() => {
+    const constellations = new Map<string, string>();
+    const customers = new Map<string, string>();
+
+    for (const satellite of satellites) {
+      if (satellite.Constellation) {
+        constellations.set(satellite.Constellation.id, satellite.Constellation.name);
+      }
+
+      for (const payload of satellite.Payloads ?? []) {
+        if (payload?.Customer) {
+          customers.set(payload.Customer.id, payload.Customer.name);
+        }
+      }
+    }
+
+    const toOptions = (entries: Map<string, string>): FilterOption[] =>
+      [...entries].map(([value, label]) => ({value, label})).sort((a, b) => a.label.localeCompare(b.label));
+
+    return {
+      statuses: [...new Set(rows.map((row) => row.status))].sort(),
+      constellations: toOptions(constellations),
+      customers: toOptions(customers),
+      categories: [...new Set(rows.flatMap((row) => row.payloadCategories))].sort(),
+    };
+  }, [satellites, rows]);
+
+  // A stale URL value (deleted constellation, mistyped status) deactivates that filter instead of matching nothing.
+  const valid = (value: string | null, known: readonly string[]): string | null =>
+    value !== null && known.includes(value) ? value : null;
+
+  const effectiveFilters: FleetFilters = {
+    status: valid(filters.status, options.statuses),
+    constellation: valid(
+      filters.constellation,
+      options.constellations.map((option) => option.value),
+    ),
+    customer: valid(
+      filters.customer,
+      options.customers.map((option) => option.value),
+    ),
+    payloadCategory: valid(filters.payloadCategory, options.categories),
+    search: filters.search,
+  };
+
+  const filtered = filterRows(rows, effectiveFilters);
+  const visible = sort === null ? filtered : sortRows(filtered, sort, direction);
+  const filtersActive = hasActiveFilters(effectiveFilters);
+
+  const updateParams = (mutate: (next: URLSearchParams) => void, replace = false) =>
+    setSearchParams(
+      (previous) => {
+        const next = new URLSearchParams(previous);
+
+        mutate(next);
+
+        return next;
+      },
+      {replace},
+    );
+
+  const setFilter = (key: string, value: string, replace = false) =>
+    updateParams((next) => (value === "" ? next.delete(key) : next.set(key, value)), replace);
+
+  // Debounced so a burst of keystrokes lands as one history replacement instead of one per character.
+  useEffect(() => {
+    if (searchInput === filters.search) {
+      return;
+    }
+
+    const id = window.setTimeout(() => {
+      writtenSearch.current = searchInput;
+      setFilter("q", searchInput, true);
+    }, 250);
+
+    return () => window.clearTimeout(id);
+  });
+
+  const clearFilters = () =>
+    updateParams((next) => {
+      for (const key of ["status", "constellation", "customer", "payload", "q"]) {
+        next.delete(key);
+      }
+    });
+
+  // asc -> desc -> back to the server's name order.
+  const toggleSort = (field: FleetSortField) =>
+    updateParams((next) => {
+      if (sort !== field) {
+        next.set("sort", field);
+        next.delete("dir");
+      } else if (direction === "asc") {
+        next.set("sort", field);
+        next.set("dir", "desc");
+      } else {
+        next.delete("sort");
+        next.delete("dir");
+      }
+    });
+
+  const headerProps = {sort, direction, onToggle: toggleSort};
 
   return (
     <section className={styles.page}>
       <header className={styles.head}>
         <h1 className={styles.title}>Satellites</h1>
         <p className={styles.subtitle}>
-          Sub-satellite point and altitude, refreshed every five seconds from the current two-line element set.
+          Sub-satellite point and altitude refreshed every five seconds; next contact is the earliest pass over an
+          operational ground station within 24 hours, above a {DEFAULT_ELEVATION_MASK_DEG}° elevation mask.
         </p>
       </header>
 
@@ -37,77 +285,232 @@ function FleetPage() {
         emptyMessage="No satellites are registered against this operator."
         onRetry={() => void refetch()}
       >
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th scope="col">Satellite</th>
-                <th scope="col">Status</th>
-                <th scope="col" className={styles.numeric}>
-                  Altitude
-                </th>
-                <th scope="col" className={styles.numeric}>
-                  Latitude
-                </th>
-                <th scope="col" className={styles.numeric}>
-                  Longitude
-                </th>
-                <th scope="col" className={styles.trackHeader}>
-                  Ground track
-                  <span className={styles.scale} aria-hidden="true">
-                    <span>180W</span>
-                    <span>0</span>
-                    <span>180E</span>
-                  </span>
-                </th>
-              </tr>
-            </thead>
+        <div className={styles.toolbar}>
+          <input
+            type="search"
+            className={styles.search}
+            placeholder="Search name…"
+            aria-label="Search by satellite name"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+          />
 
-            <tbody>
-              {satellites.map((satellite) => {
-                const state = getSatelliteState(satellite.status);
-                const [latitude, longitude] = satellite.coordinates;
-                const position = longitudeToTrackPosition(longitude);
+          <FilterSelect
+            label="Status"
+            value={effectiveFilters.status}
+            options={options.statuses.map((status) => ({value: status, label: status}))}
+            onChange={(value) => setFilter("status", value)}
+          />
+          <FilterSelect
+            label="Constellation"
+            value={effectiveFilters.constellation}
+            options={options.constellations}
+            onChange={(value) => setFilter("constellation", value)}
+          />
+          <FilterSelect
+            label="Customer"
+            value={effectiveFilters.customer}
+            options={options.customers}
+            onChange={(value) => setFilter("customer", value)}
+          />
+          <FilterSelect
+            label="Payload"
+            value={effectiveFilters.payloadCategory}
+            options={options.categories.map((category) => ({value: category, label: category}))}
+            onChange={(value) => setFilter("payload", value)}
+          />
 
-                return (
-                  <tr key={satellite.id} data-state={state}>
-                    <th scope="row" className={styles.nameCell}>
-                      <Link className={styles.name} to={`/fleet/${satellite.id}`}>
-                        {satellite.name}
-                      </Link>
-                      {satellite.Constellation ? (
-                        <span className={styles.constellation}>{satellite.Constellation.name}</span>
-                      ) : null}
-                    </th>
+          {filtersActive ? (
+            <button type="button" className={styles.clear} onClick={clearFilters}>
+              Clear filters
+            </button>
+          ) : null}
 
-                    <td>
-                      <StatusChip label={satellite.status} state={state} />
-                    </td>
-
-                    <td className={styles.numeric}>{formatAltitude(satellite.altitude)}</td>
-                    <td className={styles.numeric}>{formatLatitude(latitude)}</td>
-                    <td className={styles.numeric}>{formatLongitude(longitude)}</td>
-
-                    <td>
-                      <div className={styles.track}>
-                        <span className={styles.meridian} aria-hidden="true" />
-                        {position === null ? null : (
-                          <span
-                            className={styles.marker}
-                            style={{left: `${position * 100}%`}}
-                            title={`${formatLatitude(latitude)}, ${formatLongitude(longitude)}`}
-                          />
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <span className={styles.count} role="status">
+            {visible.length} of {rows.length}
+          </span>
         </div>
+
+        {visible.length === 0 ? (
+          <div className={styles.noMatches}>
+            <p>No satellites match the current filters.</p>
+            <button type="button" className={styles.clear} onClick={clearFilters}>
+              Clear filters
+            </button>
+          </div>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <SortHeader field="name" {...headerProps}>
+                    Satellite
+                  </SortHeader>
+                  <SortHeader field="status" {...headerProps}>
+                    Status
+                  </SortHeader>
+                  <SortHeader field="launched" className={styles.numeric} {...headerProps}>
+                    Launched
+                  </SortHeader>
+                  <SortHeader field="altitude" className={styles.numeric} {...headerProps}>
+                    Altitude
+                  </SortHeader>
+                  <th scope="col" className={styles.numeric}>
+                    Latitude
+                  </th>
+                  <th scope="col" className={styles.numeric}>
+                    Longitude
+                  </th>
+                  <SortHeader field="contact" {...headerProps}>
+                    Next contact
+                  </SortHeader>
+                  <th scope="col" className={styles.trackHeader}>
+                    Ground track
+                    <span className={styles.scale} aria-hidden="true">
+                      <span>180W</span>
+                      <span>0</span>
+                      <span>180E</span>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {visible.map((row) => {
+                  const [latitude, longitude] = row.coordinates;
+                  const position = longitudeToTrackPosition(longitude);
+
+                  return (
+                    <tr key={row.id} data-state={row.state}>
+                      <th scope="row" className={styles.nameCell}>
+                        <Link className={styles.name} to={`/fleet/${row.id}`}>
+                          {row.name}
+                        </Link>
+                        {row.constellationName ? (
+                          <span className={styles.constellation}>{row.constellationName}</span>
+                        ) : null}
+                      </th>
+
+                      <td>
+                        <StatusChip label={row.status} state={row.state} />
+                      </td>
+
+                      <td
+                        className={styles.numeric}
+                        title={row.launchedMs === null ? undefined : formatDate(row.launchDate)}
+                      >
+                        {row.launchedLabel}
+                      </td>
+
+                      <td className={styles.numeric}>{formatAltitude(row.altitude)}</td>
+                      <td className={styles.numeric}>{formatLatitude(latitude)}</td>
+                      <td className={styles.numeric}>{formatLongitude(longitude)}</td>
+
+                      <td>
+                        {row.contact === null ? (
+                          <span className={styles.noContact}>—</span>
+                        ) : (
+                          <div
+                            className={styles.contactCell}
+                            title={`AOS ${new Date(row.contact.aosMs).toISOString().slice(11, 19)} UTC`}
+                          >
+                            <span className={styles.contactEta}>{row.contactEta}</span>
+                            <span className={styles.contactStation}>{row.contact.stationName}</span>
+                          </div>
+                        )}
+                      </td>
+
+                      <td>
+                        <div className={styles.track}>
+                          <span className={styles.meridian} aria-hidden="true" />
+                          {position === null ? null : (
+                            <span
+                              className={styles.marker}
+                              style={{left: `${position * 100}%`}}
+                              title={`${formatLatitude(latitude)}, ${formatLongitude(longitude)}`}
+                            />
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </QueryState>
     </section>
+  );
+}
+
+/* Filter select //////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+function FilterSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string | null;
+  options: FilterOption[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <select
+      className={styles.select}
+      aria-label={`Filter by ${label.toLowerCase()}`}
+      value={value ?? ""}
+      onChange={(event) => onChange(event.target.value)}
+    >
+      <option value="">{label}: all</option>
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+/* Sort header ////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+function SortHeader({
+  field,
+  sort,
+  direction,
+  onToggle,
+  className,
+  children,
+}: {
+  field: FleetSortField;
+  sort: FleetSortField | null;
+  direction: SortDirection;
+  onToggle: (field: FleetSortField) => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const active = sort === field;
+
+  return (
+    <th
+      scope="col"
+      className={className}
+      aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : undefined}
+    >
+      <button
+        type="button"
+        className={styles.sortButton}
+        data-active={active || undefined}
+        onClick={() => onToggle(field)}
+      >
+        {children}
+        <span className={styles.sortIndicator} aria-hidden="true">
+          {active ? (direction === "asc" ? "▲" : "▼") : ""}
+        </span>
+      </button>
+    </th>
   );
 }
 

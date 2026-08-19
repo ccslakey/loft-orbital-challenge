@@ -30,8 +30,19 @@ export const SATELLITE_OVERVIEW_QUERY = graphql(`
       }
       Launch {
         id
+        date
+        status
         rocket
         provider
+      }
+      Payloads {
+        id
+        category
+        status
+        Customer {
+          id
+          name
+        }
       }
     }
   }

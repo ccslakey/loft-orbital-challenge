@@ -25,6 +25,71 @@
   color: var(--ink-2);
 }
 
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.search,
+.select {
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  background: var(--panel-sunk);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.search {
+  min-width: 14ch;
+}
+
+.clear {
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  background: none;
+  border: 0;
+  padding: var(--space-2);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  &:hover {
+    color: var(--ink);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.count {
+  @include label;
+
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.noMatches {
+  @include panel;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
 .tableWrap {
   @include panel;
 
@@ -33,7 +98,7 @@
 
 .table {
   width: 100%;
-  min-width: 780px;
+  min-width: 960px;
   border-collapse: collapse;
 
   th,
@@ -87,6 +152,55 @@
     font-size: var(--text-sm);
     color: var(--ink-2);
   }
+}
+
+.sortButton {
+  @include label;
+
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: baseline;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+
+  &:hover,
+  &[data-active] {
+    color: var(--ink);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.sortIndicator {
+  font-size: 8px;
+  min-width: 1ch;
+}
+
+.contactCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.contactEta {
+  @include tabular;
+
+  color: var(--ink);
+}
+
+.contactStation {
+  @include label;
+
+  letter-spacing: 0.06em;
+}
+
+.noContact {
+  @include tabular;
 }
 
 .numeric {

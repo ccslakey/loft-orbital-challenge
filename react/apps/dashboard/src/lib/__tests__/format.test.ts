@@ -2,7 +2,14 @@
 
 import {describe, expect, it} from "vitest";
 
-import {formatAltitude, formatDate, formatLatitude, formatLongitude, longitudeToTrackPosition} from "@/lib/format.js";
+import {
+  formatAltitude,
+  formatDate,
+  formatLatitude,
+  formatLongitude,
+  formatSpan,
+  longitudeToTrackPosition,
+} from "@/lib/format.js";
 
 /* Tests //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -59,6 +66,25 @@ describe("longitudeToTrackPosition", () => {
   it("returns null when there is no fix", () => {
     expect(longitudeToTrackPosition(null)).toBeNull();
     expect(longitudeToTrackPosition(Number.NaN)).toBeNull();
+  });
+});
+
+describe("formatSpan", () => {
+  it("picks the coarsest useful unit", () => {
+    expect(formatSpan(3 * 60_000)).toBe("3 min");
+    expect(formatSpan(4.5 * 3_600_000)).toBe("4.5 h");
+    expect(formatSpan(12 * 86_400_000)).toBe("12 d");
+    expect(formatSpan(1.3 * 365.25 * 86_400_000)).toBe("1.3 yr");
+  });
+
+  it("rounds sub-minute spans up to one minute", () => {
+    expect(formatSpan(5_000)).toBe("1 min");
+  });
+
+  it("renders an em dash for missing or negative spans", () => {
+    expect(formatSpan(null)).toBe("—");
+    expect(formatSpan(-60_000)).toBe("—");
+    expect(formatSpan(Number.NaN)).toBe("—");
   });
 });
 
