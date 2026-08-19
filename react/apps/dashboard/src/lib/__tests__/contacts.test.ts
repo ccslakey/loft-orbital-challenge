@@ -5,6 +5,7 @@ import {describe, expect, it} from "vitest";
 import {
   busyInterval,
   conflictsFor,
+  contactPhase,
   FALLBACK_WINDOW_MS,
   PASS_PAD_MS,
   recoverContactWindow,
@@ -66,6 +67,20 @@ describe("busyInterval", () => {
 
   it("assumes a worst-case pass when the LOS is unrecoverable", () => {
     expect(busyInterval(1_000_000, null).endMs).toBe(1_000_000 + FALLBACK_WINDOW_MS + PASS_PAD_MS);
+  });
+});
+
+describe("contactPhase", () => {
+  it("moves a contact through upcoming, active and past against its recovered window", () => {
+    expect(contactPhase(1_000, 2_000, 500)).toBe("upcoming");
+    expect(contactPhase(1_000, 2_000, 1_000)).toBe("active");
+    expect(contactPhase(1_000, 2_000, 1_999)).toBe("active");
+    expect(contactPhase(1_000, 2_000, 2_000)).toBe("past");
+  });
+
+  it("bounds the active phase by the worst-case pass when the LOS is unrecoverable", () => {
+    expect(contactPhase(1_000, null, 1_000 + FALLBACK_WINDOW_MS - 1)).toBe("active");
+    expect(contactPhase(1_000, null, 1_000 + FALLBACK_WINDOW_MS)).toBe("past");
   });
 });
 
