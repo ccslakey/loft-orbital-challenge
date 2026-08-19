@@ -78,7 +78,7 @@ bound straight to the URL drops fast keystrokes (hit during testing); a ref
 distinguishes our writes flushing back from external changes (back/forward).
 **Why:** _TODO_
 
-### Contacts (planned): scheduling at `/contacts`, request intake out of scope
+### Contacts: scheduling at `/contacts`, request intake out of scope
 Schedule list + a three-section form ending in `createContact`; fleet pass
 timeline deep-links in via URL params. `Contact.date` stores the window's AOS;
 LOS is derived physics, recomputed against the current TLE (a stored LOS

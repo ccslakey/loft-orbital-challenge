@@ -30,6 +30,9 @@ type ContactType = (typeof CONTACT_TYPES)[number];
 
 const CONTACTS_VARIABLES = {perPage: 100, page: 0};
 
+// Consecutive passes at one station are orbit-period apart, so a few minutes of slack is unambiguous.
+const PREFILL_AOS_TOLERANCE_MS = 5 * 60_000;
+
 /* Formatting /////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 const hhmm = (ms: number): string => new Date(ms).toISOString().slice(11, 16);
@@ -50,11 +53,14 @@ function ScheduleContactPage() {
   const [satelliteId, setSatelliteId] = useState(searchParams.get("satellite") ?? "");
   const [type, setType] = useState<ContactType>("Customer Task");
   const [payloadId, setPayloadId] = useState("");
-  const [selectedKey, setSelectedKey] = useState(() => {
+  const [selectedKey, setSelectedKey] = useState("");
+  // Deep-link window prefill. The linking page bisected its AOS from a different scan grid, so the values
+  // differ by milliseconds — the prefill matches by station plus AOS proximity, never exact equality.
+  const [prefill, setPrefill] = useState(() => {
     const station = searchParams.get("station");
-    const aos = searchParams.get("aos");
+    const aosMs = Number(searchParams.get("aos"));
 
-    return station && aos ? `${station}:${aos}` : "";
+    return station && Number.isFinite(aosMs) ? {stationId: station, aosMs} : null;
   });
   const [script, setScript] = useState("");
   const [configRows, setConfigRows] = useState([{key: "", value: ""}]);
@@ -138,7 +144,16 @@ function ScheduleContactPage() {
     return uses;
   }, [contactsQuery.data]);
 
-  const selectedWindow = windows?.find((window) => windowKey(window) === selectedKey) ?? null;
+  const prefillWindow =
+    prefill === null
+      ? null
+      : (windows?.find(
+          (window) =>
+            window.stationId === prefill.stationId &&
+            Math.abs(window.aosMs - prefill.aosMs) <= PREFILL_AOS_TOLERANCE_MS,
+        ) ?? null);
+
+  const selectedWindow = (windows?.find((window) => windowKey(window) === selectedKey) ?? null) || prefillWindow;
 
   const configuration = Object.fromEntries(
     configRows.filter((row) => row.key.trim() !== "").map((row) => [row.key.trim(), row.value]),
@@ -152,10 +167,19 @@ function ScheduleContactPage() {
     (type === "Maintenance" || payloadId !== "") &&
     !saving;
 
+  const activeKey = selectedWindow === null ? "" : windowKey(selectedWindow);
+
   const pickSatellite = (id: string) => {
     setSatelliteId(id);
     setPayloadId("");
     setSelectedKey("");
+    setPrefill(null);
+    setStaleWindow(false);
+  };
+
+  const pickWindow = (key: string) => {
+    setSelectedKey(key);
+    setPrefill(null);
     setStaleWindow(false);
   };
 
@@ -170,6 +194,7 @@ function ScheduleContactPage() {
     if (selectedWindow.aosMs <= new Date().getTime() + PASS_PAD_MS) {
       setStaleWindow(true);
       setSelectedKey("");
+      setPrefill(null);
 
       return;
     }
@@ -337,17 +362,14 @@ function ScheduleContactPage() {
                       const conflicts = conflictsFor({...window, satelliteId: satellite.id}, scheduledUses);
 
                       return (
-                        <tr key={key} data-selected={selectedKey === key || undefined}>
+                        <tr key={key} data-selected={activeKey === key || undefined}>
                           <td className={styles.pickCell}>
                             <input
                               type="radio"
                               name="window"
                               aria-label={`${window.stationName}, ${hhmm(window.aosMs)} UTC`}
-                              checked={selectedKey === key}
-                              onChange={() => {
-                                setSelectedKey(key);
-                                setStaleWindow(false);
-                              }}
+                              checked={activeKey === key}
+                              onChange={() => pickWindow(key)}
                             />
                           </td>
                           <td>{window.stationName}</td>

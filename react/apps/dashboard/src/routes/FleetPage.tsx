@@ -292,7 +292,7 @@ function FleetPage() {
         <p className={styles.subtitle}>
           Sub-satellite point and altitude refreshed every five seconds; next contact and the passes strip cover every
           window over an operational ground station within {CONTACT_HORIZON_HOURS} hours, above a{" "}
-          {DEFAULT_ELEVATION_MASK_DEG}° elevation mask.
+          {DEFAULT_ELEVATION_MASK_DEG}° elevation mask. Click a pass to schedule a contact in it.
         </p>
       </header>
 
@@ -427,13 +427,14 @@ function FleetPage() {
                         {row.contact === null ? (
                           <span className={styles.noContact}>—</span>
                         ) : (
-                          <div
+                          <Link
                             className={styles.contactCell}
-                            title={`AOS ${new Date(row.contact.aosMs).toISOString().slice(11, 19)} UTC`}
+                            title={`AOS ${new Date(row.contact.aosMs).toISOString().slice(11, 19)} UTC — schedule a contact in this window`}
+                            to={`/contacts/new?satellite=${row.id}&station=${row.contact.stationId}&aos=${row.contact.aosMs}`}
                           >
                             <span className={styles.contactEta}>{row.contactEta}</span>
                             <span className={styles.contactStation}>{row.contact.stationName}</span>
-                          </div>
+                          </Link>
                         )}
                       </td>
 
@@ -451,12 +452,14 @@ function FleetPage() {
                             const align = center >= 0.5 ? "right" : center <= 0.15 ? "left" : "center";
 
                             return (
-                              <span
-                                key={`${segment.window.stationName}-${segment.window.aosMs}`}
+                              <Link
+                                key={`${segment.window.stationId}-${segment.window.aosMs}`}
                                 className={styles.pass}
                                 style={{left: `${segment.start * 100}%`, width: `${segment.span * 100}%`}}
                                 data-tip={segment.tip}
                                 data-align={align}
+                                aria-label={`Schedule contact — ${segment.tip}`}
+                                to={`/contacts/new?satellite=${row.id}&station=${segment.window.stationId}&aos=${segment.window.aosMs}`}
                               />
                             );
                           })}
