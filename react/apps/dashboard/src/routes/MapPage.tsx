@@ -1,7 +1,7 @@
 /* Imports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 import {useQuery} from "@apollo/client/react";
-import {geoEquirectangular, geoGraticule10, geoPath} from "d3-geo";
+import {geoCircle, geoEquirectangular, geoGraticule10, geoPath} from "d3-geo";
 import {useEffect, useMemo, useState} from "react";
 import {feature} from "topojson-client";
 import type {Topology} from "topojson-specification";
@@ -13,6 +13,7 @@ import {formatAltitude, formatLatitude, formatLongitude} from "@/lib/format.js";
 import {createSatrec, propagateToGeodetic} from "@/lib/propagation.js";
 import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
+import {centralAngleDeg, DEFAULT_ELEVATION_MASK_DEG, elevationDeg, footprintRadiusDeg} from "@/lib/visibility.js";
 
 import styles from "./MapPage.module.scss";
 
@@ -83,13 +84,61 @@ function MapPage() {
 
   const stations = (stationsQuery.data?.allGroundStations ?? []).filter((station) => station !== null);
 
+  const fleet = tracked.map(({satellite, satrec}) => ({
+    satellite,
+    state: getSatelliteState(satellite.status),
+    live: satrec ? propagateToGeodetic(satrec, now) : null,
+  }));
+
+  const stationEntries = stations.map((station) => ({station, state: getGroundStationState(station.status)}));
+
+  // Footprints and links are planning aids: decommissioned satellites and offline stations keep only their marker.
+  const links = [];
+
+  for (const {satellite, state, live} of fleet) {
+    if (state === "inert" || !live) {
+      continue;
+    }
+
+    for (const {station, state: stationState} of stationEntries) {
+      const [stationLat, stationLon] = station.coordinates;
+
+      if (stationState === "inert" || stationLat == null || stationLon == null) {
+        continue;
+      }
+
+      const elevation = elevationDeg(
+        centralAngleDeg(stationLat, stationLon, live.latitude, live.longitude),
+        live.altitude,
+      );
+
+      if (elevation === null || elevation < DEFAULT_ELEVATION_MASK_DEG) {
+        continue;
+      }
+
+      links.push({
+        satellite,
+        station,
+        elevation,
+        path:
+          toPath({
+            type: "LineString",
+            coordinates: [
+              [stationLon, stationLat],
+              [live.longitude, live.latitude],
+            ],
+          }) ?? "",
+      });
+    }
+  }
+
   return (
     <section className={styles.page}>
       <header className={styles.head}>
         <h1 className={styles.title}>Contact map</h1>
         <p className={styles.subtitle}>
-          Sub-satellite points propagated in the browser from each TLE once a second, over the contracted ground-station
-          network.
+          Sub-satellite points propagated in the browser from each TLE once a second, with visibility footprints and
+          active line-of-sight links above a {DEFAULT_ELEVATION_MASK_DEG}° elevation mask.
         </p>
       </header>
 
@@ -114,7 +163,30 @@ function MapPage() {
             <path className={styles.graticule} d={GRATICULE_PATH} />
             <path className={styles.land} d={LAND_PATH} />
 
-            {stations.map((station) => {
+            {fleet.map(({satellite, state, live}) => {
+              if (state === "inert" || !live) {
+                return null;
+              }
+
+              const radius = footprintRadiusDeg(live.altitude);
+
+              if (radius === null) {
+                return null;
+              }
+
+              const d = toPath(geoCircle().center([live.longitude, live.latitude]).radius(radius)()) ?? "";
+
+              return <path key={satellite.id} className={styles.footprint} data-state={state} d={d} />;
+            })}
+
+            {links.map(({satellite, station, elevation, path}) => (
+              <g key={`${station.id}-${satellite.id}`} className={styles.link}>
+                <title>{`${station.name} ↔ ${satellite.name} — elevation ${elevation.toFixed(0)}°`}</title>
+                <path d={path} />
+              </g>
+            ))}
+
+            {stationEntries.map(({station, state}) => {
               const [latitude, longitude] = station.coordinates;
               const point = project(latitude, longitude);
 
@@ -126,7 +198,7 @@ function MapPage() {
                 <g
                   key={station.id}
                   className={styles.station}
-                  data-state={getGroundStationState(station.status)}
+                  data-state={state}
                   transform={`translate(${point[0]} ${point[1]})`}
                 >
                   <title>{`${station.name} — ${station.status ?? "Unknown"} · ${formatLatitude(latitude)}, ${formatLongitude(longitude)}`}</title>
@@ -135,8 +207,7 @@ function MapPage() {
               );
             })}
 
-            {tracked.map(({satellite, satrec}) => {
-              const live = satrec ? propagateToGeodetic(satrec, now) : null;
+            {fleet.map(({satellite, state, live}) => {
               const [latitude, longitude] = live ? [live.latitude, live.longitude] : satellite.coordinates;
               const altitude = live ? live.altitude : satellite.altitude;
               const point = project(latitude, longitude);
@@ -151,7 +222,7 @@ function MapPage() {
                 <g
                   key={satellite.id}
                   className={styles.satellite}
-                  data-state={getSatelliteState(satellite.status)}
+                  data-state={state}
                   data-degraded={live ? undefined : true}
                   transform={`translate(${point[0]} ${point[1]})`}
                 >
@@ -172,9 +243,15 @@ function MapPage() {
             <span className={styles.legendItem}>
               <span className={styles.legendStation} aria-hidden="true" /> Ground station
             </span>
+            <span className={styles.legendItem}>
+              <span className={styles.legendFootprint} aria-hidden="true" /> Visibility footprint
+            </span>
+            <span className={styles.legendItem}>
+              <span className={styles.legendLink} aria-hidden="true" /> Line of sight
+            </span>
             <span className={styles.legendNote}>
-              Colour encodes reported status. A hollow marker means the TLE could not be used and the position is the
-              server&apos;s last poll.
+              Colour encodes reported status. Footprints and links skip decommissioned or offline assets; a hollow
+              marker means the TLE could not be used and the position is the server&apos;s last poll.
             </span>
           </figcaption>
         </figure>

@@ -66,6 +66,23 @@ $states: nominal, planned, caution, critical, inert;
   fill: var(--rule);
 }
 
+.footprint {
+  fill: var(--state, var(--state-inert));
+  fill-opacity: 0.05;
+  stroke: var(--state, var(--state-inert));
+  stroke-width: 0.75;
+  stroke-opacity: 0.45;
+
+  @include state-color;
+}
+
+.link path {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 1;
+  stroke-opacity: 0.7;
+}
+
 .station {
   fill: var(--state, var(--state-inert));
 
@@ -126,6 +143,18 @@ $states: nominal, planned, caution, critical, inert;
   height: 7px;
   background: var(--ink-2);
   transform: rotate(45deg);
+}
+
+.legendFootprint {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--ink-3);
+  border-radius: 50%;
+}
+
+.legendLink {
+  width: 14px;
+  border-top: 1px solid var(--ink-2);
 }
 
 .legendNote {

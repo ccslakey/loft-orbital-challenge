@@ -2,7 +2,7 @@
 
 - [x] Add reports page + comments mutation
 - [ ] TLE propagation + contact-planning map (`/map`) — plan in `contact-planning-map.md`
-  - L1 (live positions) done; L2 footprints/links and L3 contact windows remain
+  - L1 (live positions) and L2 (footprints/links) done; L3 contact windows remain
   - server never signals TLE failure (logs it, freezes last coords — or seed `[0,0]`); client must detect bad TLEs itself
 - [ ] mission planning 
 - [x] Tests on business logic
