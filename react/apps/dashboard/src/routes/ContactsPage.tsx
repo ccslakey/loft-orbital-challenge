@@ -80,7 +80,12 @@ function ContactsPage() {
   return (
     <section className={styles.page}>
       <header className={styles.head}>
-        <h1 className={styles.title}>Contacts</h1>
+        <div className={styles.headRow}>
+          <h1 className={styles.title}>Contacts</h1>
+          <Link className={styles.scheduleButton} to="/contacts/new">
+            Schedule contact
+          </Link>
+        </div>
         <p className={styles.subtitle}>
           Scheduled communication sessions between satellites and contracted ground stations. Window durations are
           recomputed from the current TLE; a dash means the stored time no longer matches a pass.

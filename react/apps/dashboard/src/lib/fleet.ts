@@ -38,6 +38,7 @@ export const launchedAtMs = (date: string | null | undefined, status: string | n
 export const CONTACT_HORIZON_HOURS = 24;
 
 export interface FleetStation {
+  id: string;
   name: string;
   latitude: number;
   longitude: number;
@@ -46,7 +47,9 @@ export interface FleetStation {
 export interface PassWindow {
   aosMs: number;
   losMs: number;
+  stationId: string;
   stationName: string;
+  maxElevationDeg: number;
   // The pass was still open at the horizon, so losMs is the horizon, not a real loss of signal.
   truncated: boolean;
 }
@@ -77,7 +80,9 @@ export const findContactWindows = (
       windows.push({
         aosMs: window.aos.getTime(),
         losMs: window.los.getTime(),
+        stationId: station.id,
         stationName: station.name,
+        maxElevationDeg: window.maxElevationDeg,
         truncated: window.truncated,
       });
 

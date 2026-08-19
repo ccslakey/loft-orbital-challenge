@@ -37,6 +37,7 @@ export const SATELLITE_OVERVIEW_QUERY = graphql(`
       }
       Payloads {
         id
+        name
         category
         status
         Customer {
@@ -139,6 +140,36 @@ export const CONTACTS_QUERY = graphql(`
         name
         role
       }
+    }
+  }
+`);
+
+export const CREATE_CONTACT = graphql(`
+  mutation CreateContact(
+    $date: Date!
+    $type: String!
+    $executionScript: String!
+    $configuration: JSON!
+    $groundStation_id: ID!
+    $satellite_id: ID!
+    $payload_id: ID
+    $employee_id: ID!
+  ) {
+    createContact(
+      date: $date
+      type: $type
+      executionScript: $executionScript
+      configuration: $configuration
+      groundStation_id: $groundStation_id
+      satellite_id: $satellite_id
+      payload_id: $payload_id
+      employee_id: $employee_id
+    ) {
+      id
+      date
+      type
+      satellite_id
+      groundStation_id
     }
   }
 `);

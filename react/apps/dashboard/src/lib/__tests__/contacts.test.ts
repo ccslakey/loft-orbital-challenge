@@ -2,7 +2,14 @@
 
 import {describe, expect, it} from "vitest";
 
-import {recoverContactWindow} from "@/lib/contacts.js";
+import {
+  busyInterval,
+  conflictsFor,
+  FALLBACK_WINDOW_MS,
+  PASS_PAD_MS,
+  recoverContactWindow,
+  type ScheduledUse,
+} from "@/lib/contacts.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {findNextWindow} from "@/lib/windows.js";
 
@@ -46,5 +53,50 @@ describe("recoverContactWindow", () => {
 
   it("returns null for an unreachable station", () => {
     expect(recoverContactWindow(satrec, 88, 0, realWindow.aos.getTime())).toBeNull();
+  });
+});
+
+describe("busyInterval", () => {
+  it("pads a recovered pass on both sides", () => {
+    expect(busyInterval(1_000_000, 1_600_000)).toEqual({
+      startMs: 1_000_000 - PASS_PAD_MS,
+      endMs: 1_600_000 + PASS_PAD_MS,
+    });
+  });
+
+  it("assumes a worst-case pass when the LOS is unrecoverable", () => {
+    expect(busyInterval(1_000_000, null).endMs).toBe(1_000_000 + FALLBACK_WINDOW_MS + PASS_PAD_MS);
+  });
+});
+
+describe("conflictsFor", () => {
+  const use: ScheduledUse = {
+    startMs: 1_000,
+    endMs: 2_000,
+    satelliteId: "sat-a",
+    satelliteName: "SAT-A",
+    stationId: "gs-1",
+    stationName: "Station 1",
+  };
+
+  it("flags an overlapping window at the same station", () => {
+    const hits = conflictsFor({aosMs: 1_500, losMs: 3_000, stationId: "gs-1", satelliteId: "sat-b"}, [use]);
+
+    expect(hits).toEqual([use]);
+  });
+
+  it("flags an overlapping window for the same satellite at another station", () => {
+    const hits = conflictsFor({aosMs: 1_500, losMs: 3_000, stationId: "gs-2", satelliteId: "sat-a"}, [use]);
+
+    expect(hits).toEqual([use]);
+  });
+
+  it("ignores overlaps that share neither station nor satellite", () => {
+    expect(conflictsFor({aosMs: 1_500, losMs: 3_000, stationId: "gs-2", satelliteId: "sat-b"}, [use])).toEqual([]);
+  });
+
+  it("ignores same-resource windows that do not overlap in time", () => {
+    expect(conflictsFor({aosMs: 2_000, losMs: 3_000, stationId: "gs-1", satelliteId: "sat-a"}, [use])).toEqual([]);
+    expect(conflictsFor({aosMs: 0, losMs: 1_000, stationId: "gs-1", satelliteId: "sat-a"}, [use])).toEqual([]);
   });
 });

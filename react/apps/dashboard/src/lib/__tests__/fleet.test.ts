@@ -22,6 +22,15 @@ import {findNextWindow} from "@/lib/windows.js";
 
 /* Fixtures ///////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
+const pass = (aosMs: number, losMs: number, station = "A"): PassWindow => ({
+  aosMs,
+  losMs,
+  stationId: station,
+  stationName: station,
+  maxElevationDeg: 45,
+  truncated: false,
+});
+
 const row = (overrides: Partial<FleetRowValues>): FleetRowValues => ({
   name: "SAT",
   status: "In Orbit",
@@ -167,7 +176,7 @@ describe("readFleetParams", () => {
 });
 
 describe("getCachedWindows", () => {
-  const windows = [{aosMs: 100_000, losMs: 200_000, stationName: "Guam", truncated: false}];
+  const windows = [pass(100_000, 200_000, "Guam")];
 
   it("computes once and serves from cache within the TTL", () => {
     const cache: WindowsCache = new Map();
@@ -206,8 +215,8 @@ describe("findContactWindows", () => {
     line2: "2 00022  50.2831  94.4956 0136813  90.0531 271.6094 14.96180956562418",
   })!;
   const from = new Date("2022-02-23T00:00:00Z");
-  const guam = {name: "ATLAS Guam", latitude: 13.4443, longitude: 144.7937};
-  const unreachable = {name: "North Pole", latitude: 88, longitude: 0};
+  const guam = {id: "gs-guam", name: "ATLAS Guam", latitude: 13.4443, longitude: 144.7937};
+  const unreachable = {id: "gs-pole", name: "North Pole", latitude: 88, longitude: 0};
 
   it("enumerates every pass in the horizon, sorted by AOS", () => {
     const windows = findContactWindows(satrec, [unreachable, guam], from);
@@ -216,7 +225,8 @@ describe("findContactWindows", () => {
     expect(windows.length).toBeGreaterThan(1);
 
     for (const [index, window] of windows.entries()) {
-      expect(window.stationName).toBe("ATLAS Guam");
+      expect(window.stationId).toBe("gs-guam");
+      expect(window.maxElevationDeg).toBeGreaterThanOrEqual(10);
       expect(window.losMs).toBeGreaterThan(window.aosMs);
 
       if (index > 0) {
@@ -239,10 +249,7 @@ describe("findContactWindows", () => {
 });
 
 describe("firstUpcomingWindow", () => {
-  const windows: PassWindow[] = [
-    {aosMs: 100, losMs: 200, stationName: "A", truncated: false},
-    {aosMs: 300, losMs: 400, stationName: "B", truncated: false},
-  ];
+  const windows: PassWindow[] = [pass(100, 200, "A"), pass(300, 400, "B")];
 
   it("returns an in-progress pass, then the next, then null", () => {
     expect(firstUpcomingWindow(windows, 150)!.stationName).toBe("A");
@@ -255,21 +262,14 @@ describe("timelineSegments", () => {
   const horizonMs = 1_000;
 
   it("maps a future window to unit fractions of the axis", () => {
-    const [segment] = timelineSegments([{aosMs: 250, losMs: 500, stationName: "A", truncated: false}], 0, horizonMs);
+    const [segment] = timelineSegments([pass(250, 500)], 0, horizonMs);
 
     expect(segment.start).toBeCloseTo(0.25);
     expect(segment.span).toBeCloseTo(0.25);
   });
 
   it("clamps an in-progress pass to the start and a long pass to the horizon", () => {
-    const segments = timelineSegments(
-      [
-        {aosMs: -100, losMs: 100, stationName: "A", truncated: false},
-        {aosMs: 900, losMs: 1_500, stationName: "B", truncated: false},
-      ],
-      0,
-      horizonMs,
-    );
+    const segments = timelineSegments([pass(-100, 100, "A"), pass(900, 1_500, "B")], 0, horizonMs);
 
     expect(segments[0].start).toBe(0);
     expect(segments[0].span).toBeCloseTo(0.1);
@@ -278,8 +278,6 @@ describe("timelineSegments", () => {
   });
 
   it("drops fully elapsed windows", () => {
-    expect(timelineSegments([{aosMs: -200, losMs: -100, stationName: "A", truncated: false}], 0, horizonMs)).toEqual(
-      [],
-    );
+    expect(timelineSegments([pass(-200, -100)], 0, horizonMs)).toEqual([]);
   });
 });

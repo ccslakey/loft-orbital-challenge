@@ -10,6 +10,7 @@ import GroundStationsPage from "@/routes/GroundStationsPage.js";
 import NotFoundPage from "@/routes/NotFoundPage.js";
 import ReportsPage from "@/routes/ReportsPage.js";
 import SatellitePage from "@/routes/SatellitePage.js";
+import ScheduleContactPage from "@/routes/ScheduleContactPage.js";
 
 // Lazy: the map carries its own geo dependencies and world geometry, so it loads as a separate chunk.
 const MapPage = lazy(() => import("@/routes/MapPage.js"));
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
         ),
       },
       {path: "contacts", element: <ContactsPage />},
+      {path: "contacts/new", element: <ScheduleContactPage />},
       {path: "reports", element: <ReportsPage />},
       {path: "*", element: <NotFoundPage />},
     ],

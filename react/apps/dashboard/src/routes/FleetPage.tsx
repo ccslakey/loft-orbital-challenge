@@ -115,7 +115,7 @@ function FleetPage() {
 
           return getGroundStationState(station.status) === "inert" || latitude == null || longitude == null
             ? []
-            : [{name: station.name, latitude, longitude}];
+            : [{id: station.id, name: station.name, latitude, longitude}];
         }),
     [stationsQuery.data],
   );
@@ -123,7 +123,7 @@ function FleetPage() {
   // Rebuilt every poll; the expensive window search inside is served from the TTL cache between refreshes.
   const rows = useMemo((): FleetRow[] => {
     const now = new Date();
-    const stationsKey = activeStations.map((station) => station.name).join("|");
+    const stationsKey = activeStations.map((station) => station.id).join("|");
 
     return satellites.map((satellite) => {
       const state = getSatelliteState(satellite.status);
