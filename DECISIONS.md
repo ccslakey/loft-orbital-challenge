@@ -61,11 +61,23 @@ Bundled GraphiQL never loaded on 3.1.1 (unpinned unpkg CDN 404s on v5).
 **Why:** _TODO — rot bug vs. deliberate gotcha; worth raising on the call._
 
 ### Tooling: added ESLint (flat config, not strict)
-Template README claims configs exist; none did. Prettier still absent.
+Template README claims configs exist; none did.
 **Why:** _TODO_
+
+### CI: GitHub Actions, five parallel gates
+`test`, `lint`, `lint:styles`, `format:check`, `build` on every PR + push to
+`main`. Matrix with `fail-fast: false` so a PR shows all failures at once.
+**Why:** _TODO — GitHub-hosted, so Actions; build gate catches the codegen /
+prettier string desync that unit tests can't._
+
+### Formatting: added Prettier + Stylelint, pinned to existing style
+Prettier `printWidth 120` / `bracketSpacing false` to match the hand-written
+style (near-zero restyle). Stylelint `standard-scss`, relaxed for SCSS-Module
+camelCase class names. Both gated in CI.
+**Why:** _TODO — README claimed Prettier existed; now it does. Stylelint
+already caught a real bug (deprecated `clip` → `clip-path`)._
 
 ---
 
 ### Open / not decided
-- Add Prettier?
 - Component tests?

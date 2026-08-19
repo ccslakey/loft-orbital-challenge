@@ -24,7 +24,9 @@ Everything runs inside Docker because the workspace pins Node `>=20.10.0 <21`.
 | --- | --- |
 | `pnpm build` | Type-check and production build, both exit 0 |
 | `pnpm test` | 27 tests across 3 files |
-| `pnpm lint` | Clean |
+| `pnpm lint` | ESLint, clean |
+| `pnpm lint:styles` | Stylelint over the SCSS, clean |
+| `pnpm format:check` | Prettier, clean (`pnpm format` to write) |
 | `pnpm codegen` | Regenerates typed documents; works with no server running |
 | `pnpm codegen:schema` | Re-introspects the live API into `schema.graphql`; needs the server up |
 
@@ -132,8 +134,9 @@ The challenge asks for these to be called out.
 | `apps/server/src/db.ts`: `Object` → `object` (3 fields) | `Object` is the wrapper type; `object` is correct. Type-level only, no behaviour change |
 | `vite.config.ts`: added Sass `includePaths` | Lets modules `@use "mixins"`. Vite 5.3 drives Sass through its legacy API, which reads `includePaths`, not `loadPaths` |
 | `docker-compose.yml`: commented out `version: "3.8"` | Obsolete key; Compose warns on every command |
-| Added ESLint | The template README claims ESLint and Prettier configs are provided, but no config exists anywhere in the template |
+| Added ESLint, Prettier and Stylelint | The template README claims ESLint and Prettier configs are provided, but none exist. Prettier is pinned to the codebase's existing style (`printWidth 120`, `bracketSpacing false`) so adoption was near-zero restyle |
 | Upgraded `json-graphql-server` 3.1.1 → 3.3.1 | The bundled GraphiQL page never loads on 3.1.1 (see above). No server code changed |
+| Added GitHub Actions CI | Five parallel gates on every PR and push to `main`: `test`, `lint`, `lint:styles`, `format:check`, `build` |
 
 ## Testing
 
@@ -150,7 +153,8 @@ The challenge asks for these to be called out.
 
 Being explicit about the edges:
 
-- **No CI pipeline** and no production Docker image.
+- **No production Docker image.** CI runs unit tests, lint, stylelint, format and build on every PR, but there is no
+  built prod image or deploy step.
 - **Accessibility** is at the "reasonably accessible" floor the brief asks for: visible focus, semantic tables and
   lists, `prefers-reduced-motion` respected. Not screen-reader audited.
 - **Seed data is small** (7 satellites, 9 ground stations, 1 constellation, 1 report), so views are designed for
@@ -181,10 +185,10 @@ Claude Code was used substantially throughout. Concretely:
 - [x] Add reports page + comments mutation
 - [ ] TLE propagation and globe/map
 - [x] Tests on business logic
+- [x] CI pipeline (unit tests, lint, stylelint, format, build)
+- [x] Add Prettier and Stylelint
 - [ ] Error/loading states, polish
-- [ ] 
 
 - [ ] Write the AI usage section in your own words
 - [ ] Fill in the state management and design rationale sections
-- [ ] Consider adding Prettier (the template README claims it exists; it does not)
 - [ ] `make clean` before packaging, to strip `node_modules` and build output
