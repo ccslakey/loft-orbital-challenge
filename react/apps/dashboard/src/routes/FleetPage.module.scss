@@ -185,6 +185,16 @@
   flex-direction: column;
   gap: 2px;
   white-space: nowrap;
+
+  &:hover .contactEta,
+  &:focus-visible .contactEta {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
 }
 
 .contactEta {
@@ -315,12 +325,17 @@
     transform: none;
   }
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     z-index: 1;
     opacity: 1;
 
     &::after {
       display: block;
     }
+  }
+
+  &:focus-visible {
+    @include focus-ring;
   }
 }

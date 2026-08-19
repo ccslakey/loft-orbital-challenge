@@ -78,6 +78,33 @@ bound straight to the URL drops fast keystrokes (hit during testing); a ref
 distinguishes our writes flushing back from external changes (back/forward).
 **Why:** _TODO_
 
+### Contacts: scheduling at `/contacts`, request intake out of scope
+Schedule list + a three-section form ending in `createContact`; fleet pass
+timeline deep-links in via URL params. `Contact.date` stores the window's AOS;
+LOS is derived physics, recomputed against the current TLE (a stored LOS
+freezes at scheduling-day accuracy). Double-booking (same station or same
+satellite) warns via interval checks over recomputed busy windows plus a
+fixed pre/post-pass pad — warn, never block.
+Plan in [`plans/contact-scheduling.md`](./plans/contact-scheduling.md).
+**Why:** _TODO_
+
+### Writes are ephemeral: persistence consciously out of scope
+json-graphql-server holds the db in memory; a restart re-seeds it, discarding
+created contacts and comments. Left as-is: the schema is the evaluated
+contract, storage is template design, and within one review session writes
+hold. If it mattered: a JSON snapshot on the server (~40 lines, dates revived
+on load) — rejected alternatives were client-side cache persistence (an
+illusion the first refetch clobbers) and a real DB (reimplements the entire
+generated schema surface).
+**Why:** _TODO — the evaluated surface is the client; effort goes there._
+
+### Seed ids: stable literals instead of boot-time `uuid()`
+`db.ts` generated every id fresh per server start, so all URLs referencing
+ids (fleet filters, scheduler deep-links) died on restart. Ids are now
+readable slugs (`satellite-yam-3`, `customer-google`); `uuid` dependency
+dropped.
+**Why:** _TODO — URL-as-store is only shareable if ids survive restarts._
+
 ### Reports page: the deliberate place to demonstrate writes
 Read-only everywhere else; `/reports` adds `createComment` with an optimistic
 cache update (patch `Report.Comments` via `cache.modify`, roll back on error).

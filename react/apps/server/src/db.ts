@@ -9,7 +9,9 @@ import {
   propagate,
   twoline2satrec,
 } from "satellite.js";
-import {v4 as uuid} from "uuid";
+
+// Ids are stable literals, not generated at boot: client URLs (fleet filters, scheduler deep-links)
+// reference them and must survive server restarts.
 
 /* Constellations /////////////////////////////////////////////////////////////////////////////////////////////////// */
 // A collection of satellites working together to achieve a common goal.
@@ -22,7 +24,7 @@ interface Constellation {
 
 const constellations: Constellation[] = [
   {
-    id: uuid(),
+    id: "constellation-starlink",
     name: "Starlink",
     description: "A satellite constellation being constructed by SpaceX to provide satellite Internet access.",
   },
@@ -60,7 +62,7 @@ interface Launch {
 
 const launches: Launch[] = [
   {
-    id: uuid(),
+    id: "launch-falcon9-2021",
     date: new Date("2021-01-09"),
     provider: LaunchProvider.SpaceX,
     status: LaunchStatus.Completed,
@@ -68,7 +70,7 @@ const launches: Launch[] = [
     rocket: "Falcon 9",
   },
   {
-    id: uuid(),
+    id: "launch-electron-2022",
     date: new Date("2022-09-28"),
     provider: LaunchProvider.RocketLab,
     status: LaunchStatus.Completed,
@@ -76,7 +78,7 @@ const launches: Launch[] = [
     rocket: "Electron",
   },
   {
-    id: uuid(),
+    id: "launch-new-shepard-2023",
     date: new Date("2023-03-15"),
     provider: LaunchProvider.BlueOrigin,
     status: LaunchStatus.Completed,
@@ -84,14 +86,14 @@ const launches: Launch[] = [
     rocket: "New Shepard",
   },
   {
-    id: uuid(),
+    id: "launch-falcon-heavy-2024a",
     date: new Date("2024-11-02"),
     provider: LaunchProvider.SpaceX,
     status: LaunchStatus.Pending,
     rocket: "Falcon Heavy",
   },
   {
-    id: uuid(),
+    id: "launch-falcon-heavy-2024b",
     date: new Date("2024-12-25"),
     provider: LaunchProvider.SpaceX,
     status: LaunchStatus.Terminated,
@@ -148,7 +150,7 @@ interface Satellite {
 
 const satellites: Satellite[] = [
   {
-    id: uuid(),
+    id: "satellite-starlink-1",
     name: "Starlink-1",
     description: "The first satellite in an operational batch of Starlink satellites.",
     status: SatelliteStatus.InOrbit,
@@ -170,7 +172,7 @@ const satellites: Satellite[] = [
     constellation_id: constellations[0].id,
   },
   {
-    id: uuid(),
+    id: "satellite-starlink-2",
     name: "Starlink-2",
     description: "The second satellite in an operational batch of Starlink satellites.",
     status: SatelliteStatus.InOrbit,
@@ -192,7 +194,7 @@ const satellites: Satellite[] = [
     constellation_id: constellations[0].id,
   },
   {
-    id: uuid(),
+    id: "satellite-starlink-3",
     name: "Starlink-3",
     description: "The third satellite in an operational batch of Starlink satellites.",
     status: SatelliteStatus.Decommissioned,
@@ -214,7 +216,7 @@ const satellites: Satellite[] = [
     constellation_id: constellations[0].id,
   },
   {
-    id: uuid(),
+    id: "satellite-yam-2",
     name: "YAM-2",
     description: "The second satellite in the Loft YAM iteration.",
     status: SatelliteStatus.InOrbit,
@@ -235,7 +237,7 @@ const satellites: Satellite[] = [
     launch_id: launches[1].id,
   },
   {
-    id: uuid(),
+    id: "satellite-yam-3",
     name: "YAM-3",
     description: "The third satellite in the Loft YAM iteration.",
     status: SatelliteStatus.InOrbit,
@@ -256,7 +258,7 @@ const satellites: Satellite[] = [
     launch_id: launches[1].id,
   },
   {
-    id: uuid(),
+    id: "satellite-yam-4",
     name: "YAM-4",
     description: "The fourth satellite in the Loft YAM iteration. Lost in space.",
     status: SatelliteStatus.Decommissioned,
@@ -277,7 +279,7 @@ const satellites: Satellite[] = [
     launch_id: launches[2].id,
   },
   {
-    id: uuid(),
+    id: "satellite-yam-5",
     name: "YAM-5",
     description: "The fifth satellite in the Loft YAM iteration.",
     status: SatelliteStatus.Planned,
@@ -359,7 +361,7 @@ interface GroundStation {
 
 const groundStations: GroundStation[] = [
   {
-    id: uuid(),
+    id: "station-ksat-svalbard",
     name: "KSAT Svalbard",
     image:
       "https://cdn.theatlantic.com/thumbor/HJ3i8wckKz1urZQv4tMiNbOx_i4=/1500x1000/media/img/photo/2022/05/photos-svalbard/a01_1240634861/original.jpg",
@@ -368,7 +370,7 @@ const groundStations: GroundStation[] = [
     status: GroundStationStatus.Online,
   },
   {
-    id: uuid(),
+    id: "station-ksat-fairbanks",
     name: "KSAT Fairbanks",
     image: "https://www.satellitetoday.com/wp-content/uploads/2016/01/KSAT-antennas-Tromso.jpg",
     coordinates: [64.8401, -147.72],
@@ -376,7 +378,7 @@ const groundStations: GroundStation[] = [
     status: GroundStationStatus.Online,
   },
   {
-    id: uuid(),
+    id: "station-ksat-tokyo",
     name: "KSAT Tokyo",
     image: "https://spacewatch.global/wp-content/uploads/2024/03/download-13.jpg",
     coordinates: [35.6764, 139.65],
@@ -384,7 +386,7 @@ const groundStations: GroundStation[] = [
     status: GroundStationStatus.Maintenance,
   },
   {
-    id: uuid(),
+    id: "station-ksat-trollsat",
     name: "KSAT TrollSat",
     image: "https://www.ksat.no/globalassets/ksat/news/img-20190222-wa0001.jpg",
     coordinates: [-72.01, 2.32],
@@ -392,7 +394,7 @@ const groundStations: GroundStation[] = [
     status: GroundStationStatus.Unknown,
   },
   {
-    id: uuid(),
+    id: "station-ksat-hawaii",
     name: "KSAT Hawaii",
     image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/02/rsz_3troll_antarctica_2.png",
     coordinates: [21.3341, -158.1421],
@@ -400,7 +402,7 @@ const groundStations: GroundStation[] = [
     status: GroundStationStatus.Offline,
   },
   {
-    id: uuid(),
+    id: "station-nasa-landsat",
     name: "NASA Landsat",
     image:
       "https://gdmissionsystems.com/-/media/general-dynamics/space-and-intelligence-systems/images/sgss/sgss-stgt-at-dawn-02.ashx",
@@ -409,7 +411,7 @@ const groundStations: GroundStation[] = [
     status: GroundStationStatus.Online,
   },
   {
-    id: uuid(),
+    id: "station-nasa-white-sands",
     name: "NASA White Sands",
     image: "https://www.nasa.gov/wp-content/uploads/2019/01/wsgtantennas.jpg",
     coordinates: [32.5056, -106.6126],
@@ -417,7 +419,7 @@ const groundStations: GroundStation[] = [
     status: GroundStationStatus.Error,
   },
   {
-    id: uuid(),
+    id: "station-aws-dublin",
     name: "AWS Dublin",
     image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2020/08/d39w7f4ix9f5s9.cloudfront.jpg",
     coordinates: [53.3498, -6.2603],
@@ -425,7 +427,7 @@ const groundStations: GroundStation[] = [
     status: GroundStationStatus.Online,
   },
   {
-    id: uuid(),
+    id: "station-atlas-guam",
     name: "ATLAS Guam",
     image: "https://www.nasa.gov/wp-content/uploads/2023/03/1998_july_guam.jpg",
     coordinates: [13.4443, 144.7937],
@@ -453,49 +455,49 @@ interface Employee {
 
 const employees: Employee[] = [
   {
-    id: uuid(),
+    id: "employee-thomas-anderson",
     name: "Thomas Anderson",
     email: "thomas@company.com",
     role: EmployeeRole.Admin,
   },
   {
-    id: uuid(),
+    id: "employee-matthew-johnson",
     name: "Matthew Johnson",
     email: "matt@company.com",
     role: EmployeeRole.Manager,
   },
   {
-    id: uuid(),
+    id: "employee-jacob-smith",
     name: "Jacob Smith",
     email: "jacob@company.com",
     role: EmployeeRole.Engineer,
   },
   {
-    id: uuid(),
+    id: "employee-melanie-brown",
     name: "Melanie Brown",
     email: "mel@company.com",
     role: EmployeeRole.Engineer,
   },
   {
-    id: uuid(),
+    id: "employee-emma-baker",
     name: "Emma Baker",
     email: "emma@company.com",
     role: EmployeeRole.Engineer,
   },
   {
-    id: uuid(),
+    id: "employee-edith-wilson",
     name: "Edith Wilson",
     email: "edith@company.com",
     role: EmployeeRole.Engineer,
   },
   {
-    id: uuid(),
+    id: "employee-lucas-davis",
     name: "Lucas Davis",
     email: "lucas@company.com",
     role: EmployeeRole.Technician,
   },
   {
-    id: uuid(),
+    id: "employee-kevin-white",
     name: "Kevin White",
     email: "kevin@company.com",
     role: EmployeeRole.Technician,
@@ -515,25 +517,25 @@ interface Customer {
 
 const customers: Customer[] = [
   {
-    id: uuid(),
+    id: "customer-spacex",
     name: "SpaceX",
     email: "contact@spacex.com",
     employee_id: employees[2].id,
   },
   {
-    id: uuid(),
+    id: "customer-microsoft",
     name: "Micorsoft",
     email: "contact@microsoft.com",
     employee_id: employees[3].id,
   },
   {
-    id: uuid(),
+    id: "customer-amazon",
     name: "Amazon",
     email: "contact@amazon.com",
     employee_id: employees[4].id,
   },
   {
-    id: uuid(),
+    id: "customer-google",
     name: "Google",
     email: "contact@google.com",
     employee_id: employees[5].id,
@@ -568,7 +570,7 @@ interface Payload {
 
 const payloads: Payload[] = [
   {
-    id: uuid(),
+    id: "payload-starlink-antenna-1",
     name: "Starlink Antenna",
     description: "A satellite antenna used to communicate with the Starlink satellite constellation.",
     category: PayloadCategory.Communication,
@@ -582,7 +584,7 @@ const payloads: Payload[] = [
     customer_id: customers[0].id,
   },
   {
-    id: uuid(),
+    id: "payload-starlink-antenna-2",
     name: "Starlink Antenna",
     description: "A satellite antenna used to communicate with the Starlink satellite constellation.",
     category: PayloadCategory.Communication,
@@ -596,7 +598,7 @@ const payloads: Payload[] = [
     customer_id: customers[0].id,
   },
   {
-    id: uuid(),
+    id: "payload-starlink-antenna-3",
     name: "Starlink Antenna",
     description: "A satellite antenna used to communicate with the Starlink satellite constellation.",
     category: PayloadCategory.Communication,
@@ -610,7 +612,7 @@ const payloads: Payload[] = [
     customer_id: customers[0].id,
   },
   {
-    id: uuid(),
+    id: "payload-hd-camera",
     name: "High Definition Camera",
     description: "A camera used to take pictures of Earth from space.",
     category: PayloadCategory.EarthObservation,
@@ -624,7 +626,7 @@ const payloads: Payload[] = [
     customer_id: customers[1].id,
   },
   {
-    id: uuid(),
+    id: "payload-gps-receiver-1",
     name: "GPS Receiver",
     description: "A receiver used to determine location in space.",
     category: PayloadCategory.Navigation,
@@ -638,7 +640,7 @@ const payloads: Payload[] = [
     customer_id: customers[2].id,
   },
   {
-    id: uuid(),
+    id: "payload-rf-antenna",
     name: "RF Antenna",
     description: "A system used to communicate using radio frequency.",
     category: PayloadCategory.Communication,
@@ -652,7 +654,7 @@ const payloads: Payload[] = [
     customer_id: customers[3].id,
   },
   {
-    id: uuid(),
+    id: "payload-gps-receiver-2",
     name: "GPS Receiver",
     description: "A receiver used to determine location in space.",
     category: PayloadCategory.Navigation,
@@ -666,7 +668,7 @@ const payloads: Payload[] = [
     customer_id: customers[2].id,
   },
   {
-    id: uuid(),
+    id: "payload-laser-comms",
     name: "Laser Communication System",
     description: "A system used to communicate using lasers.",
     category: PayloadCategory.Communication,
@@ -680,7 +682,7 @@ const payloads: Payload[] = [
     customer_id: customers[3].id,
   },
   {
-    id: uuid(),
+    id: "payload-gps-receiver-3",
     name: "GPS Receiver",
     description: "A receiver used to determine location in space.",
     category: PayloadCategory.Navigation,
@@ -694,7 +696,7 @@ const payloads: Payload[] = [
     customer_id: customers[2].id,
   },
   {
-    id: uuid(),
+    id: "payload-spectral-camera",
     name: "Spectral Imaging Camera",
     description: "A camera used to take pictures of Earth from space.",
     category: PayloadCategory.EarthObservation,
@@ -708,7 +710,7 @@ const payloads: Payload[] = [
     customer_id: customers[1].id,
   },
   {
-    id: uuid(),
+    id: "payload-thermal-camera",
     name: "Thermal Imaging Camera",
     description: "A camera used to take pictures of Earth from space.",
     category: PayloadCategory.EarthObservation,
@@ -746,7 +748,7 @@ interface Contact {
 
 const contacts: Contact[] = [
   {
-    id: uuid(),
+    id: "contact-1",
     date: new Date("2022-05-07"),
     type: ContactType.CustomerTask,
     executionScript: "echo 'Hello, World!'",
@@ -760,7 +762,7 @@ const contacts: Contact[] = [
     employee_id: employees[2].id,
   },
   {
-    id: uuid(),
+    id: "contact-2",
     date: new Date("2023-11-25"),
     type: ContactType.Maintenance,
     executionScript: "sudo rm -rf /",
@@ -798,7 +800,7 @@ interface Report {
 
 const reports: Report[] = [
   {
-    id: uuid(),
+    id: "report-1",
     type: ReportType.Incident,
     date: new Date("2023-11-26"),
     title: "Satellite Data Lost",
@@ -807,7 +809,7 @@ const reports: Report[] = [
     employee_id: employees[3].id,
   },
   {
-    id: uuid(),
+    id: "report-2",
     type: ReportType.Issue,
     date: new Date("2024-01-20"),
     title: "Ground Station Issue",
@@ -816,7 +818,7 @@ const reports: Report[] = [
     employee_id: employees[3].id,
   },
   {
-    id: uuid(),
+    id: "report-3",
     type: ReportType.Maintenance,
     date: new Date("2024-02-15"),
     title: "Satellite Maintenance",
@@ -825,7 +827,7 @@ const reports: Report[] = [
     employee_id: employees[6].id,
   },
   {
-    id: uuid(),
+    id: "report-4",
     type: ReportType.Issue,
     date: new Date("2024-03-10"),
     title: "Satellite Signal Strength",
@@ -849,7 +851,7 @@ interface Comment {
 
 const comments: Comment[] = [
   {
-    id: uuid(),
+    id: "comment-1",
     date: new Date("2023-11-27"),
     content:
       "After looking at the command logs, it looks like someone deleted the entire spacecraft volume! Why would they do that?",
