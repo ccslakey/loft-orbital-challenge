@@ -64,6 +64,14 @@ The full-fleet window search costs ~100 ms (measured), too heavy for the 5 s
 position poll; entries also refresh when their cached pass ends.
 **Why:** _TODO_
 
+### Fleet: ground-track strip replaced by a 24 h pass timeline
+The strip was a 1-D longitude gauge — right model for GEO slots, noise for a
+LEO fleet, and outclassed by `/map`. The timeline draws every contact window
+(full-horizon enumeration, ~200 ms measured, same 60 s cache) as
+state-coloured segments; rendering clamps against the current time, so a
+stale cache only misses windows entering the far end of the horizon.
+**Why:** _TODO — dead pixels vs. the window-picking surface scheduling needs._
+
 ### Fleet: search input owns its value, URL written debounced
 React Router applies `setSearchParams` in a transition, so a controlled input
 bound straight to the URL drops fast keystrokes (hit during testing); a ref

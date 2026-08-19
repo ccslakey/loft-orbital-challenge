@@ -101,6 +101,13 @@ with tests, per the existing testing decision; the component stays thin.
   asks, but breadth without a story here; the detail page already shows them
   (TLE age excepted). Add later if the contact flow wants them.
 - **No saved views or persistence beyond the URL.**
-- **No changes to the ground-track column** — it stays as-is.
+- ~~**No changes to the ground-track column** — it stays as-is.~~ Superseded
+  after review: the strip was a 1-D longitude gauge that discarded latitude and
+  duplicated the Longitude column — meaningful for GEO slots, noise for this
+  LEO fleet, and outclassed by `/map`. Replaced by a **pass timeline**: every
+  contact window in the next 24 h drawn as state-coloured segments on a
+  now→+24 h axis (one full-horizon enumeration feeds both this and the Next
+  contact column). This is the window-picking surface the contact-scheduling
+  feature will build on.
 - **Contact scheduling itself** — separate plan; this only leaves the hook
   (the Next contact column) for it.
