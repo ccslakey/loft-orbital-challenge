@@ -303,6 +303,18 @@
     pointer-events: none;
   }
 
+  // Tooltips near the axis ends grow inward instead of past the panel's overflow clip.
+  &[data-align="left"]::after {
+    left: 0;
+    transform: none;
+  }
+
+  &[data-align="right"]::after {
+    right: 0;
+    left: auto;
+    transform: none;
+  }
+
   &:hover {
     z-index: 1;
     opacity: 1;

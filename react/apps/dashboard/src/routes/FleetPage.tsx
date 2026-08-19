@@ -444,14 +444,22 @@ function FleetPage() {
                           aria-label={`${row.timeline.length} passes in the next ${CONTACT_HORIZON_HOURS} hours`}
                         >
                           <span className={styles.timelineMid} aria-hidden="true" />
-                          {row.timeline.map((segment) => (
-                            <span
-                              key={`${segment.window.stationName}-${segment.window.aosMs}`}
-                              className={styles.pass}
-                              style={{left: `${segment.start * 100}%`, width: `${segment.span * 100}%`}}
-                              data-tip={segment.tip}
-                            />
-                          ))}
+                          {row.timeline.map((segment) => {
+                            // Anchor the tooltip so it grows inward: the panel's overflow clips anything
+                            // extending past its edges.
+                            const center = segment.start + segment.span / 2;
+                            const align = center >= 0.5 ? "right" : center <= 0.15 ? "left" : "center";
+
+                            return (
+                              <span
+                                key={`${segment.window.stationName}-${segment.window.aosMs}`}
+                                className={styles.pass}
+                                style={{left: `${segment.start * 100}%`, width: `${segment.span * 100}%`}}
+                                data-tip={segment.tip}
+                                data-align={align}
+                              />
+                            );
+                          })}
                         </div>
                       </td>
                     </tr>
