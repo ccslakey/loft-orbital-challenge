@@ -60,7 +60,11 @@
 .sectionTitle {
   @include label;
 
-  padding: 0 var(--space-2);
+  // Floated legends lose the native border-notch rendering, so the title sits inside the panel
+  // instead of straddling its rounded top edge.
+  float: left;
+  width: 100%;
+  padding: 0;
 }
 
 .sectionNote {
