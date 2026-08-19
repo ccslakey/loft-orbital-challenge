@@ -20,6 +20,10 @@ const NAV_GROUPS = [
     items: [{to: "/ground-stations", label: "Ground stations"}],
   },
   {
+    label: "Planning",
+    items: [{to: "/map", label: "Contact map"}],
+  },
+  {
     label: "Records",
     items: [{to: "/reports", label: "Reports"}],
   },

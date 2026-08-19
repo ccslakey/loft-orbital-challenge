@@ -1,0 +1,133 @@
+@use "mixins" as *;
+
+$states: nominal, planned, caution, critical, inert;
+
+@mixin state-color {
+  @each $state in $states {
+    &[data-state="#{$state}"] {
+      --state: var(--state-#{$state});
+    }
+  }
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 60ch;
+}
+
+.title {
+  @include display(var(--text-2xl));
+
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
+.panel {
+  @include panel;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4);
+}
+
+.map {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sphere {
+  fill: var(--panel-sunk);
+  stroke: var(--rule-strong);
+}
+
+.graticule {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 0.5;
+}
+
+.land {
+  fill: var(--rule);
+}
+
+.station {
+  fill: var(--state, var(--state-inert));
+
+  @include state-color;
+}
+
+.satellite {
+  @include state-color;
+
+  circle {
+    fill: var(--state, var(--state-inert));
+    stroke: var(--panel);
+    stroke-width: 1;
+  }
+
+  &[data-degraded] circle {
+    fill: var(--panel);
+    stroke: var(--state, var(--state-inert));
+    stroke-dasharray: 2 1.5;
+  }
+}
+
+.markerLabel {
+  @include tabular;
+
+  font-size: 10px;
+  fill: var(--ink-2);
+  paint-order: stroke;
+  stroke: var(--panel-sunk);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+}
+
+.legendItem {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.legendSatellite {
+  width: 8px;
+  height: 8px;
+  background: var(--ink-2);
+  border-radius: 50%;
+}
+
+.legendStation {
+  width: 7px;
+  height: 7px;
+  background: var(--ink-2);
+  transform: rotate(45deg);
+}
+
+.legendNote {
+  color: var(--ink-3);
+}

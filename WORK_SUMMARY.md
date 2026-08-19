@@ -37,6 +37,7 @@ A fleet operations console with four routes under a persistent shell:
 | `/fleet` | Satellite list with live sub-satellite positions |
 | `/fleet/:satelliteId` | Position, spacecraft, launch, TLE, payloads and their customers |
 | `/ground-stations` | Contracted antenna sites |
+| `/map` | Contact-planning map: sub-satellite positions propagated in the browser, over the station network |
 | `/reports` | Incident/maintenance records with threaded comments and an optimistic `createComment` write |
 
 ## Architecture

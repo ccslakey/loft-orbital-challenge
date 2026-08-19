@@ -37,6 +37,11 @@ Equirectangular SVG, d3-geo for projection/footprints/antimeridian clipping.
 Plan and rejected alternatives in [`plans/contact-planning-map.md`](./plans/contact-planning-map.md).
 **Why:** _TODO_
 
+### Map L1: satellite.js pinned to server's 5.0.0; `/map` is a lazy chunk
+Same version rules out client/server skew; the route carries ~100 KB of world
+geometry, so it code-splits instead of joining the vendor bundle.
+**Why:** _TODO_
+
 ### Reports page: the deliberate place to demonstrate writes
 Read-only everywhere else; `/reports` adds `createComment` with an optimistic
 cache update (patch `Report.Comments` via `cache.modify`, roll back on error).
