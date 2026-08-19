@@ -25,6 +25,71 @@
   color: var(--ink-2);
 }
 
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.search,
+.select {
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  background: var(--panel-sunk);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.search {
+  min-width: 14ch;
+}
+
+.clear {
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  background: none;
+  border: 0;
+  padding: var(--space-2);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  &:hover {
+    color: var(--ink);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.count {
+  @include label;
+
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.noMatches {
+  @include panel;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+}
+
 .tableWrap {
   @include panel;
 
@@ -33,7 +98,7 @@
 
 .table {
   width: 100%;
-  min-width: 780px;
+  min-width: 960px;
   border-collapse: collapse;
 
   th,
@@ -89,6 +154,55 @@
   }
 }
 
+.sortButton {
+  @include label;
+
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: baseline;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+
+  &:hover,
+  &[data-active] {
+    color: var(--ink);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.sortIndicator {
+  font-size: 8px;
+  min-width: 1ch;
+}
+
+.contactCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.contactEta {
+  @include tabular;
+
+  color: var(--ink);
+}
+
+.contactStation {
+  @include label;
+
+  letter-spacing: 0.06em;
+}
+
+.noContact {
+  @include tabular;
+}
+
 .numeric {
   @include tabular;
 
@@ -124,7 +238,7 @@
   letter-spacing: 0.06em;
 }
 
-.trackHeader {
+.timelineHeader {
   width: 34%;
   min-width: 220px;
 }
@@ -138,7 +252,8 @@
   color: var(--ink-3);
 }
 
-.track {
+// No overflow clipping: the pass tooltips render outside the strip.
+.timeline {
   position: relative;
   height: 18px;
   background: var(--panel-sunk);
@@ -146,7 +261,7 @@
   border-radius: var(--radius-sm);
 }
 
-.meridian {
+.timelineMid {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -155,14 +270,57 @@
   background: var(--rule-strong);
 }
 
-.marker {
+.pass {
   position: absolute;
-  top: 50%;
-  width: 9px;
-  height: 9px;
+  top: 3px;
+  bottom: 3px;
+  min-width: 3px;
   background: var(--state);
-  border: 1px solid var(--panel);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: left 400ms linear;
+  border-radius: 1px;
+  opacity: 0.85;
+
+  // Invisible halo so a 3 px tick doesn't demand pixel-perfect hovering.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -5px -4px;
+  }
+
+  &::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    padding: 2px var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+    color: var(--panel);
+    background: var(--ink);
+    border-radius: var(--radius-sm);
+    pointer-events: none;
+  }
+
+  // Tooltips near the axis ends grow inward instead of past the panel's overflow clip.
+  &[data-align="left"]::after {
+    left: 0;
+    transform: none;
+  }
+
+  &[data-align="right"]::after {
+    right: 0;
+    left: auto;
+    transform: none;
+  }
+
+  &:hover {
+    z-index: 1;
+    opacity: 1;
+
+    &::after {
+      display: block;
+    }
+  }
 }

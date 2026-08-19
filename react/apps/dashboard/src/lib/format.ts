@@ -18,17 +18,33 @@ const formatDegrees = (value: number | null | undefined, positive: string, negat
 export const formatAltitude = (km: number | null | undefined): string =>
   km === null || km === undefined || Number.isNaN(km) ? "—" : `${km.toFixed(1)} km`;
 
-/* Positions //////////////////////////////////////////////////////////////////////////////////////////////////////// */
+/* Durations //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
-// Longitude -> 0-1 across an equirectangular strip. Wraps rather than clamps: 190 == -170.
-export const longitudeToTrackPosition = (longitude: number | null | undefined): number | null => {
-  if (longitude === null || longitude === undefined || Number.isNaN(longitude)) {
-    return null;
+// Humanized span at the coarsest useful unit: "3 min", "4.5 h", "12 d", "1.3 yr". Sub-minute rounds up to 1 min.
+export const formatSpan = (ms: number | null | undefined): string => {
+  if (ms === null || ms === undefined || !Number.isFinite(ms) || ms < 0) {
+    return "—";
   }
 
-  const wrapped = (((longitude + 180) % 360) + 360) % 360;
+  const minutes = ms / 60_000;
 
-  return wrapped / 360;
+  if (minutes < 60) {
+    return `${Math.max(1, Math.round(minutes))} min`;
+  }
+
+  const hours = minutes / 60;
+
+  if (hours < 48) {
+    return `${hours.toFixed(1)} h`;
+  }
+
+  const days = hours / 24;
+
+  if (days < 365) {
+    return `${Math.round(days)} d`;
+  }
+
+  return `${(days / 365.25).toFixed(1)} yr`;
 };
 
 /* Dates //////////////////////////////////////////////////////////////////////////////////////////////////////////// */

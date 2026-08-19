@@ -52,6 +52,32 @@ Same version rules out client/server skew; the route carries ~100 KB of world
 geometry, so it code-splits instead of joining the vendor bundle.
 **Why:** _TODO_
 
+### Fleet: client-side filter/sort, state in URL search params
+Filtering/sorting over the polled set (derived sort fields, join-through-payload
+customer filter); the URL is the store, so views are shareable links. Stale
+param values deactivate the filter rather than matching nothing.
+Plan in [`plans/fleet-filter-sort.md`](./plans/fleet-filter-sort.md).
+**Why:** _TODO_
+
+### Fleet: next-contact column cached 60 s, keyed by TLE + station set
+The full-fleet window search costs ~100 ms (measured), too heavy for the 5 s
+position poll; entries also refresh when their cached pass ends.
+**Why:** _TODO_
+
+### Fleet: ground-track strip replaced by a 24 h pass timeline
+The strip was a 1-D longitude gauge — right model for GEO slots, noise for a
+LEO fleet, and outclassed by `/map`. The timeline draws every contact window
+(full-horizon enumeration, ~200 ms measured, same 60 s cache) as
+state-coloured segments; rendering clamps against the current time, so a
+stale cache only misses windows entering the far end of the horizon.
+**Why:** _TODO — dead pixels vs. the window-picking surface scheduling needs._
+
+### Fleet: search input owns its value, URL written debounced
+React Router applies `setSearchParams` in a transition, so a controlled input
+bound straight to the URL drops fast keystrokes (hit during testing); a ref
+distinguishes our writes flushing back from external changes (back/forward).
+**Why:** _TODO_
+
 ### Reports page: the deliberate place to demonstrate writes
 Read-only everywhere else; `/reports` adds `createComment` with an optimistic
 cache update (patch `Report.Comments` via `cache.modify`, roll back on error).
