@@ -78,6 +78,16 @@ bound straight to the URL drops fast keystrokes (hit during testing); a ref
 distinguishes our writes flushing back from external changes (back/forward).
 **Why:** _TODO_
 
+### Contacts (planned): scheduling at `/contacts`, request intake out of scope
+Schedule list + a three-section form ending in `createContact`; fleet pass
+timeline deep-links in via URL params. `Contact.date` stores the window's AOS;
+LOS is derived physics, recomputed against the current TLE (a stored LOS
+freezes at scheduling-day accuracy). Double-booking (same station or same
+satellite) warns via interval checks over recomputed busy windows plus a
+fixed pre/post-pass pad — warn, never block.
+Plan in [`plans/contact-scheduling.md`](./plans/contact-scheduling.md).
+**Why:** _TODO_
+
 ### Reports page: the deliberate place to demonstrate writes
 Read-only everywhere else; `/reports` adds `createComment` with an optimistic
 cache update (patch `Report.Comments` via `cache.modify`, roll back on error).
