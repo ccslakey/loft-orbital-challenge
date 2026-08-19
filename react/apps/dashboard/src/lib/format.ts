@@ -18,19 +18,6 @@ const formatDegrees = (value: number | null | undefined, positive: string, negat
 export const formatAltitude = (km: number | null | undefined): string =>
   km === null || km === undefined || Number.isNaN(km) ? "—" : `${km.toFixed(1)} km`;
 
-/* Positions //////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
-// Longitude -> 0-1 across an equirectangular strip. Wraps rather than clamps: 190 == -170.
-export const longitudeToTrackPosition = (longitude: number | null | undefined): number | null => {
-  if (longitude === null || longitude === undefined || Number.isNaN(longitude)) {
-    return null;
-  }
-
-  const wrapped = (((longitude + 180) % 360) + 360) % 360;
-
-  return wrapped / 360;
-};
-
 /* Durations //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 // Humanized span at the coarsest useful unit: "3 min", "4.5 h", "12 d", "1.3 yr". Sub-minute rounds up to 1 min.

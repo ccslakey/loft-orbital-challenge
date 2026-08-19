@@ -4,17 +4,21 @@ import {describe, expect, it} from "vitest";
 
 import {
   filterRows,
-  findNextContact,
-  getCachedNextContact,
+  findContactWindows,
+  firstUpcomingWindow,
+  getCachedWindows,
   hasActiveFilters,
   launchedAtMs,
   NO_FILTERS,
   readFleetParams,
   sortRows,
+  timelineSegments,
   type FleetRowValues,
-  type NextContactCache,
+  type PassWindow,
+  type WindowsCache,
 } from "@/lib/fleet.js";
 import {createSatrec} from "@/lib/propagation.js";
+import {findNextWindow} from "@/lib/windows.js";
 
 /* Fixtures ///////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -162,71 +166,40 @@ describe("readFleetParams", () => {
   });
 });
 
-describe("getCachedNextContact", () => {
-  const contact = {aosMs: 100_000, losMs: 200_000, stationName: "Guam"};
+describe("getCachedWindows", () => {
+  const windows = [{aosMs: 100_000, losMs: 200_000, stationName: "Guam", truncated: false}];
 
   it("computes once and serves from cache within the TTL", () => {
-    const cache: NextContactCache = new Map();
+    const cache: WindowsCache = new Map();
     let computes = 0;
     const compute = () => {
       computes++;
 
-      return contact;
+      return windows;
     };
 
-    expect(getCachedNextContact(cache, "k", new Date(0), compute)).toEqual(contact);
-    expect(getCachedNextContact(cache, "k", new Date(30_000), compute)).toEqual(contact);
+    expect(getCachedWindows(cache, "k", new Date(0), compute)).toEqual(windows);
+    expect(getCachedWindows(cache, "k", new Date(30_000), compute)).toEqual(windows);
     expect(computes).toBe(1);
   });
 
   it("recomputes once the entry ages out", () => {
-    const cache: NextContactCache = new Map();
+    const cache: WindowsCache = new Map();
     let computes = 0;
     const compute = () => {
       computes++;
 
-      return contact;
+      return windows;
     };
 
-    getCachedNextContact(cache, "k", new Date(0), compute, 60_000);
-    getCachedNextContact(cache, "k", new Date(61_000), compute, 60_000);
+    getCachedWindows(cache, "k", new Date(0), compute, 60_000);
+    getCachedWindows(cache, "k", new Date(61_000), compute, 60_000);
 
-    expect(computes).toBe(2);
-  });
-
-  it("recomputes when the cached pass has already ended", () => {
-    const cache: NextContactCache = new Map();
-    let computes = 0;
-    const compute = () => {
-      computes++;
-
-      return contact;
-    };
-
-    getCachedNextContact(cache, "k", new Date(190_000), compute, 60_000);
-    getCachedNextContact(cache, "k", new Date(201_000), compute, 60_000);
-
-    expect(computes).toBe(2);
-  });
-
-  it("caches a null result until the TTL, not forever", () => {
-    const cache: NextContactCache = new Map();
-    let computes = 0;
-    const compute = () => {
-      computes++;
-
-      return null;
-    };
-
-    expect(getCachedNextContact(cache, "k", new Date(0), compute, 60_000)).toBeNull();
-    getCachedNextContact(cache, "k", new Date(30_000), compute, 60_000);
-    expect(computes).toBe(1);
-    getCachedNextContact(cache, "k", new Date(61_000), compute, 60_000);
     expect(computes).toBe(2);
   });
 });
 
-describe("findNextContact", () => {
+describe("findContactWindows", () => {
   // Seed TLE from apps/server/src/db.ts (Starlink-3): ~560 km LEO at 50.3° inclination, epoch 2022-02-22.
   const satrec = createSatrec({
     line1: "1 00022U 59009A   22053.49750630  .00000970  00000-0  93426-4 0  9997",
@@ -236,16 +209,77 @@ describe("findNextContact", () => {
   const guam = {name: "ATLAS Guam", latitude: 13.4443, longitude: 144.7937};
   const unreachable = {name: "North Pole", latitude: 88, longitude: 0};
 
-  it("returns the earliest window and names its station", () => {
-    const contact = findNextContact(satrec, [unreachable, guam], from);
+  it("enumerates every pass in the horizon, sorted by AOS", () => {
+    const windows = findContactWindows(satrec, [unreachable, guam], from);
 
-    expect(contact).not.toBeNull();
-    expect(contact!.stationName).toBe("ATLAS Guam");
-    expect(contact!.aosMs).toBeGreaterThan(from.getTime());
-    expect(contact!.losMs).toBeGreaterThan(contact!.aosMs);
+    // A 50° LEO makes several Guam passes per day, in consecutive-orbit clusters.
+    expect(windows.length).toBeGreaterThan(1);
+
+    for (const [index, window] of windows.entries()) {
+      expect(window.stationName).toBe("ATLAS Guam");
+      expect(window.losMs).toBeGreaterThan(window.aosMs);
+
+      if (index > 0) {
+        expect(window.aosMs).toBeGreaterThanOrEqual(windows[index - 1].aosMs);
+      }
+    }
   });
 
-  it("returns null when no station can see the satellite", () => {
-    expect(findNextContact(satrec, [unreachable], from)).toBeNull();
+  it("agrees with the single-window search on the first pass", () => {
+    const [first] = findContactWindows(satrec, [guam], from);
+    const single = findNextWindow(satrec, guam.latitude, guam.longitude, from)!;
+
+    expect(first.aosMs).toBe(single.aos.getTime());
+    expect(first.losMs).toBe(single.los.getTime());
+  });
+
+  it("returns an empty list when no station can see the satellite", () => {
+    expect(findContactWindows(satrec, [unreachable], from)).toEqual([]);
+  });
+});
+
+describe("firstUpcomingWindow", () => {
+  const windows: PassWindow[] = [
+    {aosMs: 100, losMs: 200, stationName: "A", truncated: false},
+    {aosMs: 300, losMs: 400, stationName: "B", truncated: false},
+  ];
+
+  it("returns an in-progress pass, then the next, then null", () => {
+    expect(firstUpcomingWindow(windows, 150)!.stationName).toBe("A");
+    expect(firstUpcomingWindow(windows, 250)!.stationName).toBe("B");
+    expect(firstUpcomingWindow(windows, 450)).toBeNull();
+  });
+});
+
+describe("timelineSegments", () => {
+  const horizonMs = 1_000;
+
+  it("maps a future window to unit fractions of the axis", () => {
+    const [segment] = timelineSegments([{aosMs: 250, losMs: 500, stationName: "A", truncated: false}], 0, horizonMs);
+
+    expect(segment.start).toBeCloseTo(0.25);
+    expect(segment.span).toBeCloseTo(0.25);
+  });
+
+  it("clamps an in-progress pass to the start and a long pass to the horizon", () => {
+    const segments = timelineSegments(
+      [
+        {aosMs: -100, losMs: 100, stationName: "A", truncated: false},
+        {aosMs: 900, losMs: 1_500, stationName: "B", truncated: false},
+      ],
+      0,
+      horizonMs,
+    );
+
+    expect(segments[0].start).toBe(0);
+    expect(segments[0].span).toBeCloseTo(0.1);
+    expect(segments[1].start).toBeCloseTo(0.9);
+    expect(segments[1].span).toBeCloseTo(0.1);
+  });
+
+  it("drops fully elapsed windows", () => {
+    expect(timelineSegments([{aosMs: -200, losMs: -100, stationName: "A", truncated: false}], 0, horizonMs)).toEqual(
+      [],
+    );
   });
 });

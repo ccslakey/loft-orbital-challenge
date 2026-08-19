@@ -33,7 +33,9 @@ export const launchedAtMs = (date: string | null | undefined, status: string | n
   return Number.isNaN(ms) ? null : ms;
 };
 
-/* Next contact ///////////////////////////////////////////////////////////////////////////////////////////////////// */
+/* Contact windows ////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+export const CONTACT_HORIZON_HOURS = 24;
 
 export interface FleetStation {
   name: string;
@@ -41,57 +43,119 @@ export interface FleetStation {
   longitude: number;
 }
 
-export interface NextContact {
+export interface PassWindow {
   aosMs: number;
   losMs: number;
   stationName: string;
+  // The pass was still open at the horizon, so losMs is the horizon, not a real loss of signal.
+  truncated: boolean;
 }
 
-// Earliest AOS over the given stations within the default 24 h horizon.
-export const findNextContact = (satrec: SatRec, stations: readonly FleetStation[], from: Date): NextContact | null => {
-  let best: NextContact | null = null;
+// Every window over the given stations within the horizon, sorted by AOS. Windows from different stations
+// may overlap when one orbit crosses several footprints.
+export const findContactWindows = (
+  satrec: SatRec,
+  stations: readonly FleetStation[],
+  from: Date,
+  horizonHours: number = CONTACT_HORIZON_HOURS,
+): PassWindow[] => {
+  const horizonEndMs = from.getTime() + horizonHours * 3_600_000;
+  const windows: PassWindow[] = [];
 
   for (const station of stations) {
-    const window = findNextWindow(satrec, station.latitude, station.longitude, from);
+    let cursorMs = from.getTime();
 
-    if (window && (!best || window.aos.getTime() < best.aosMs)) {
-      best = {aosMs: window.aos.getTime(), losMs: window.los.getTime(), stationName: station.name};
+    while (cursorMs < horizonEndMs) {
+      const window = findNextWindow(satrec, station.latitude, station.longitude, new Date(cursorMs), {
+        horizonHours: (horizonEndMs - cursorMs) / 3_600_000,
+      });
+
+      if (!window) {
+        break;
+      }
+
+      windows.push({
+        aosMs: window.aos.getTime(),
+        losMs: window.los.getTime(),
+        stationName: station.name,
+        truncated: window.truncated,
+      });
+
+      if (window.truncated) {
+        break;
+      }
+
+      // Step past LOS so the scan resumes after this pass instead of refinding it.
+      cursorMs = window.los.getTime() + 60_000;
     }
   }
 
-  return best;
+  return windows.sort((a, b) => a.aosMs - b.aosMs);
 };
 
-export interface NextContactCacheEntry {
+// The next contact: earliest window that has not ended yet (an in-progress pass counts).
+export const firstUpcomingWindow = (windows: readonly PassWindow[], nowMs: number): PassWindow | null =>
+  windows.find((window) => window.losMs > nowMs) ?? null;
+
+export interface WindowsCacheEntry {
   computedMs: number;
-  contact: NextContact | null;
+  windows: PassWindow[];
 }
 
-export type NextContactCache = Map<string, NextContactCacheEntry>;
+export type WindowsCache = Map<string, WindowsCacheEntry>;
 
-const NEXT_CONTACT_TTL_MS = 60_000;
+const WINDOWS_TTL_MS = 60_000;
 
-// The full-fleet window search costs ~100 ms, far too heavy for the 5 s position poll. Entries are keyed by
-// TLE + station set and reused until they age out or the cached pass ends.
-export const getCachedNextContact = (
-  cache: NextContactCache,
+// The full-fleet enumeration costs ~200 ms, far too heavy for the 5 s position poll. Entries are keyed by
+// TLE + station set; rendering clamps against the current time, so a stale list only misses windows newly
+// entering the far end of the horizon until the TTL refreshes it.
+export const getCachedWindows = (
+  cache: WindowsCache,
   key: string,
   now: Date,
-  compute: () => NextContact | null,
-  ttlMs: number = NEXT_CONTACT_TTL_MS,
-): NextContact | null => {
-  const nowMs = now.getTime();
+  compute: () => PassWindow[],
+  ttlMs: number = WINDOWS_TTL_MS,
+): PassWindow[] => {
   const hit = cache.get(key);
 
-  if (hit && nowMs - hit.computedMs < ttlMs && (hit.contact === null || hit.contact.losMs > nowMs)) {
-    return hit.contact;
+  if (hit && now.getTime() - hit.computedMs < ttlMs) {
+    return hit.windows;
   }
 
-  const contact = compute();
+  const windows = compute();
 
-  cache.set(key, {computedMs: nowMs, contact});
+  cache.set(key, {computedMs: now.getTime(), windows});
 
-  return contact;
+  return windows;
+};
+
+/* Pass timeline //////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+export interface TimelineSegment {
+  // Unit fractions of the now -> horizon axis.
+  start: number;
+  span: number;
+  window: PassWindow;
+}
+
+// Windows clamped onto a now -> now+horizon axis; fully elapsed windows drop out.
+export const timelineSegments = (
+  windows: readonly PassWindow[],
+  nowMs: number,
+  horizonMs: number,
+): TimelineSegment[] => {
+  const segments: TimelineSegment[] = [];
+
+  for (const window of windows) {
+    const startMs = Math.max(window.aosMs, nowMs);
+    const endMs = Math.min(window.losMs, nowMs + horizonMs);
+
+    if (endMs > startMs) {
+      segments.push({start: (startMs - nowMs) / horizonMs, span: (endMs - startMs) / horizonMs, window});
+    }
+  }
+
+  return segments;
 };
 
 /* Filtering //////////////////////////////////////////////////////////////////////////////////////////////////////// */

@@ -2,14 +2,7 @@
 
 import {describe, expect, it} from "vitest";
 
-import {
-  formatAltitude,
-  formatDate,
-  formatLatitude,
-  formatLongitude,
-  formatSpan,
-  longitudeToTrackPosition,
-} from "@/lib/format.js";
+import {formatAltitude, formatDate, formatLatitude, formatLongitude, formatSpan} from "@/lib/format.js";
 
 /* Tests //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -44,28 +37,6 @@ describe("formatAltitude", () => {
 
   it("renders an em dash when the altitude is unknown", () => {
     expect(formatAltitude(null)).toBe("\u2014");
-  });
-});
-
-describe("longitudeToTrackPosition", () => {
-  it("places the antimeridian at each edge and the prime meridian at the centre", () => {
-    expect(longitudeToTrackPosition(-180)).toBe(0);
-    expect(longitudeToTrackPosition(0)).toBe(0.5);
-    expect(longitudeToTrackPosition(180)).toBe(0);
-  });
-
-  it("places a mid-longitude proportionally", () => {
-    expect(longitudeToTrackPosition(-90)).toBe(0.25);
-    expect(longitudeToTrackPosition(90)).toBe(0.75);
-  });
-
-  it("wraps rather than clamps once a satellite crosses the antimeridian", () => {
-    expect(longitudeToTrackPosition(190)).toBeCloseTo(longitudeToTrackPosition(-170) as number, 10);
-  });
-
-  it("returns null when there is no fix", () => {
-    expect(longitudeToTrackPosition(null)).toBeNull();
-    expect(longitudeToTrackPosition(Number.NaN)).toBeNull();
   });
 });
 

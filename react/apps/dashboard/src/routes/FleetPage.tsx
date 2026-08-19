@@ -8,28 +8,25 @@ import {GROUND_STATIONS_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
 import {
+  CONTACT_HORIZON_HOURS,
   filterRows,
-  findNextContact,
-  getCachedNextContact,
+  findContactWindows,
+  firstUpcomingWindow,
+  getCachedWindows,
   hasActiveFilters,
   launchedAtMs,
   readFleetParams,
   sortRows,
+  timelineSegments,
   type FleetFilters,
   type FleetSortField,
   type FleetStation,
-  type NextContact,
-  type NextContactCache,
+  type PassWindow,
   type SortDirection,
+  type TimelineSegment,
+  type WindowsCache,
 } from "@/lib/fleet.js";
-import {
-  formatAltitude,
-  formatDate,
-  formatLatitude,
-  formatLongitude,
-  formatSpan,
-  longitudeToTrackPosition,
-} from "@/lib/format.js";
+import {formatAltitude, formatDate, formatLatitude, formatLongitude, formatSpan} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getGroundStationState, getSatelliteState, type State} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
@@ -54,12 +51,21 @@ interface FleetRow {
   launchedLabel: string;
   launchDate: string | null;
   nextAosMs: number | null;
-  contact: NextContact | null;
+  contact: PassWindow | null;
   contactEta: string | null;
+  timeline: TimelineSegment[];
 }
 
+const HORIZON_MS = CONTACT_HORIZON_HOURS * 3_600_000;
+
 // Keyed by satellite + TLE + station set, so entries survive remounts and stale keys are simply never hit again.
-const contactCache: NextContactCache = new Map();
+const contactCache: WindowsCache = new Map();
+
+const formatWindowTitle = ({stationName, aosMs, losMs, truncated}: PassWindow): string => {
+  const time = (ms: number) => new Date(ms).toISOString().slice(11, 16);
+
+  return `${stationName} · ${time(aosMs)}–${time(losMs)}${truncated ? "+" : ""} UTC`;
+};
 
 interface FilterOption {
   value: string;
@@ -117,11 +123,12 @@ function FleetPage() {
       const state = getSatelliteState(satellite.status);
       const tle = parseTle(satellite.tle);
       const satrec = tle && state !== "inert" ? createSatrec(tle) : null;
-      const contact = satrec
-        ? getCachedNextContact(contactCache, `${satellite.id}\n${tle!.line1}\n${stationsKey}`, now, () =>
-            findNextContact(satrec, activeStations, now),
+      const windows = satrec
+        ? getCachedWindows(contactCache, `${satellite.id}\n${tle!.line1}\n${stationsKey}`, now, () =>
+            findContactWindows(satrec, activeStations, now),
           )
-        : null;
+        : [];
+      const contact = firstUpcomingWindow(windows, now.getTime());
 
       const payloads = (satellite.Payloads ?? []).filter((payload) => payload !== null);
       const customerIds: string[] = [];
@@ -161,6 +168,7 @@ function FleetPage() {
             : contact.aosMs <= now.getTime()
               ? "In view"
               : `in ${formatSpan(contact.aosMs - now.getTime())}`,
+        timeline: timelineSegments(windows, now.getTime(), HORIZON_MS),
       };
     });
   }, [satellites, activeStations]);
@@ -273,8 +281,9 @@ function FleetPage() {
       <header className={styles.head}>
         <h1 className={styles.title}>Satellites</h1>
         <p className={styles.subtitle}>
-          Sub-satellite point and altitude refreshed every five seconds; next contact is the earliest pass over an
-          operational ground station within 24 hours, above a {DEFAULT_ELEVATION_MASK_DEG}° elevation mask.
+          Sub-satellite point and altitude refreshed every five seconds; next contact and the passes strip cover every
+          window over an operational ground station within {CONTACT_HORIZON_HOURS} hours, above a{" "}
+          {DEFAULT_ELEVATION_MASK_DEG}° elevation mask.
         </p>
       </header>
 
@@ -364,12 +373,12 @@ function FleetPage() {
                   <SortHeader field="contact" {...headerProps}>
                     Next contact
                   </SortHeader>
-                  <th scope="col" className={styles.trackHeader}>
-                    Ground track
+                  <th scope="col" className={styles.timelineHeader}>
+                    Passes
                     <span className={styles.scale} aria-hidden="true">
-                      <span>180W</span>
-                      <span>0</span>
-                      <span>180E</span>
+                      <span>now</span>
+                      <span>+{CONTACT_HORIZON_HOURS / 2} h</span>
+                      <span>+{CONTACT_HORIZON_HOURS} h</span>
                     </span>
                   </th>
                 </tr>
@@ -378,7 +387,6 @@ function FleetPage() {
               <tbody>
                 {visible.map((row) => {
                   const [latitude, longitude] = row.coordinates;
-                  const position = longitudeToTrackPosition(longitude);
 
                   return (
                     <tr key={row.id} data-state={row.state}>
@@ -421,15 +429,20 @@ function FleetPage() {
                       </td>
 
                       <td>
-                        <div className={styles.track}>
-                          <span className={styles.meridian} aria-hidden="true" />
-                          {position === null ? null : (
+                        <div
+                          className={styles.timeline}
+                          role="img"
+                          aria-label={`${row.timeline.length} passes in the next ${CONTACT_HORIZON_HOURS} hours`}
+                        >
+                          <span className={styles.timelineMid} aria-hidden="true" />
+                          {row.timeline.map((segment) => (
                             <span
-                              className={styles.marker}
-                              style={{left: `${position * 100}%`}}
-                              title={`${formatLatitude(latitude)}, ${formatLongitude(longitude)}`}
+                              key={`${segment.window.stationName}-${segment.window.aosMs}`}
+                              className={styles.pass}
+                              style={{left: `${segment.start * 100}%`, width: `${segment.span * 100}%`}}
+                              title={formatWindowTitle(segment.window)}
                             />
-                          )}
+                          ))}
                         </div>
                       </td>
                     </tr>

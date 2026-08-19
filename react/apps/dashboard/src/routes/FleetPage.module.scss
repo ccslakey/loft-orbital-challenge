@@ -238,7 +238,7 @@
   letter-spacing: 0.06em;
 }
 
-.trackHeader {
+.timelineHeader {
   width: 34%;
   min-width: 220px;
 }
@@ -252,15 +252,16 @@
   color: var(--ink-3);
 }
 
-.track {
+.timeline {
   position: relative;
   height: 18px;
+  overflow: hidden;
   background: var(--panel-sunk);
   border: 1px solid var(--rule);
   border-radius: var(--radius-sm);
 }
 
-.meridian {
+.timelineMid {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -269,14 +270,16 @@
   background: var(--rule-strong);
 }
 
-.marker {
+.pass {
   position: absolute;
-  top: 50%;
-  width: 9px;
-  height: 9px;
+  top: 3px;
+  bottom: 3px;
+  min-width: 3px;
   background: var(--state);
-  border: 1px solid var(--panel);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: left 400ms linear;
+  border-radius: 1px;
+  opacity: 0.85;
+
+  &:hover {
+    opacity: 1;
+  }
 }
