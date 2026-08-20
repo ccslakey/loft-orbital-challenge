@@ -9,6 +9,7 @@ import type {Topology} from "topojson-specification";
 import landTopology from "world-atlas/land-110m.json";
 
 import {GROUND_STATIONS_QUERY, MAP_SATELLITES_QUERY} from "@/api/operations.js";
+import PassTable from "@/components/ui/PassTable.js";
 import QueryState from "@/components/ui/QueryState.js";
 import {useNow} from "@/hooks/useNow.js";
 import {activeFleetStations} from "@/lib/fleet.js";
@@ -17,7 +18,7 @@ import {createSatrec, groundTrack, orbitalPeriodMinutes, propagateToGeodetic} fr
 import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
 import {centralAngleDeg, DEFAULT_ELEVATION_MASK_DEG, elevationDeg, footprintRadiusDeg} from "@/lib/visibility.js";
-import {findNextWindow, type ContactWindow} from "@/lib/windows.js";
+import {findNextWindow} from "@/lib/windows.js";
 
 import styles from "./MapPage.module.scss";
 
@@ -48,17 +49,6 @@ const LAND_PATH = toPath(feature(topology, topology.objects.land)) ?? "";
 // Coordinates arrive as a nullable list of nullable floats; a missing component drops the marker.
 const project = (latitude: number | null | undefined, longitude: number | null | undefined): [number, number] | null =>
   latitude == null || longitude == null ? null : projection([longitude, latitude]);
-
-/* Formatting /////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
-const formatUtcTime = (date: Date, reference: Date): string => {
-  const time = date.toISOString().slice(11, 16);
-
-  return date.getUTCDate() === reference.getUTCDate() ? time : `${time} +1d`;
-};
-
-const formatWindowDuration = ({aos, los, truncated}: ContactWindow): string =>
-  `${Math.max(1, Math.round((los.getTime() - aos.getTime()) / 60000))}${truncated ? "+" : ""} min`;
 
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -332,44 +322,30 @@ function MapPage() {
             <p className={styles.contactsNote}>No contacts clear the mask within the next 24 hours.</p>
           ) : (
             <>
-              <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th scope="col">Station</th>
-                      <th scope="col">Satellite</th>
-                      <th scope="col" className={styles.numeric}>
-                        <abbr title="Acquisition of signal">AOS</abbr>
-                      </th>
-                      <th scope="col" className={styles.numeric}>
-                        <abbr title="Loss of signal">LOS</abbr>
-                      </th>
-                      <th scope="col" className={styles.numeric}>
-                        Duration
-                      </th>
-                      <th scope="col" className={styles.numeric}>
-                        Max elev
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentUpcoming.slice(0, 10).map(({satellite, station, window}) => (
-                      <tr key={`${station.id}-${satellite.id}`}>
-                        <td>{station.name}</td>
-                        <td>
-                          <Link className={styles.rowName} to={`/fleet/${satellite.id}`}>
-                            {satellite.name}
-                          </Link>
-                        </td>
-                        <td className={styles.numeric}>{formatUtcTime(window.aos, now)}</td>
-                        <td className={styles.numeric}>{window.truncated ? "—" : formatUtcTime(window.los, now)}</td>
-                        <td className={styles.numeric}>{formatWindowDuration(window)}</td>
-                        <td className={styles.numeric}>{`${Math.round(window.maxElevationDeg)}°`}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <PassTable
+                wrapClassName={styles.tableWrap}
+                rows={currentUpcoming.slice(0, 10)}
+                getWindow={({window}) => ({
+                  aosMs: window.aos.getTime(),
+                  losMs: window.los.getTime(),
+                  truncated: window.truncated,
+                  maxElevationDeg: window.maxElevationDeg,
+                })}
+                rowKey={({satellite, station}) => `${station.id}-${satellite.id}`}
+                compact
+                now={now}
+                lead={[
+                  {header: "Station", render: ({station}) => station.name},
+                  {
+                    header: "Satellite",
+                    render: ({satellite}) => (
+                      <Link className={styles.rowName} to={`/fleet/${satellite.id}`}>
+                        {satellite.name}
+                      </Link>
+                    ),
+                  },
+                ]}
+              />
 
               {currentUpcoming.length > 10 ? (
                 <p className={styles.contactsNote}>

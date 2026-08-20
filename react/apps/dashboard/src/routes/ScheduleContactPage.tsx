@@ -14,12 +14,13 @@ import {
   SATELLITE_ACTIVITY_QUERY,
   SATELLITE_OVERVIEW_QUERY,
 } from "@/api/operations.js";
+import PassTable from "@/components/ui/PassTable.js";
 import QueryState from "@/components/ui/QueryState.js";
 import {useNow} from "@/hooks/useNow.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import {busyInterval, conflictsFor, PASS_PAD_MS, recoverContactWindow, type ScheduledUse} from "@/lib/contacts.js";
 import {activeFleetStations, CONTACT_HORIZON_HOURS, findContactWindows, type PassWindow} from "@/lib/fleet.js";
-import {formatSpan, formatUtcHhmm} from "@/lib/format.js";
+import {formatUtcHhmm} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getPayloadState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
@@ -353,68 +354,48 @@ function ScheduleContactPage() {
                 No passes clear the mask within the next {CONTACT_HORIZON_HOURS} hours.
               </p>
             ) : (
-              <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th scope="col" className={styles.pickHeader}>
-                        <span className={styles.srOnly}>Select</span>
-                      </th>
-                      <th scope="col">Station</th>
-                      <th scope="col" className={styles.numeric}>
-                        <abbr title="Acquisition of signal">AOS</abbr>
-                      </th>
-                      <th scope="col" className={styles.numeric}>
-                        <abbr title="Loss of signal">LOS</abbr>
-                      </th>
-                      <th scope="col" className={styles.numeric}>
-                        Duration
-                      </th>
-                      <th scope="col" className={styles.numeric}>
-                        Max elev
-                      </th>
-                      <th scope="col">Conflicts</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {windows.map((window) => {
-                      const key = windowKey(window);
-                      const conflicts = conflictsFor({...window, satelliteId: satellite.id}, scheduledUses);
+              <PassTable
+                wrapClassName={styles.tableWrap}
+                rows={windows}
+                getWindow={(window) => window}
+                rowKey={windowKey}
+                compact
+                now={now}
+                isSelected={(window) => activeKey === windowKey(window)}
+                lead={[
+                  {
+                    header: <span className={styles.srOnly}>Select</span>,
+                    className: styles.pickCell,
+                    render: (window) => (
+                      <input
+                        type="radio"
+                        name="window"
+                        aria-label={`${window.stationName}, ${formatUtcHhmm(window.aosMs)} UTC`}
+                        checked={activeKey === windowKey(window)}
+                        onChange={() => pickWindow(windowKey(window))}
+                      />
+                    ),
+                  },
+                  {header: "Station", render: (window) => window.stationName},
+                ]}
+                trailing={{
+                  header: "Conflicts",
+                  render: (window) => {
+                    const conflicts = conflictsFor({...window, satelliteId: satellite.id}, scheduledUses);
 
-                      return (
-                        <tr key={key} data-selected={activeKey === key || undefined}>
-                          <td className={styles.pickCell}>
-                            <input
-                              type="radio"
-                              name="window"
-                              aria-label={`${window.stationName}, ${formatUtcHhmm(window.aosMs)} UTC`}
-                              checked={activeKey === key}
-                              onChange={() => pickWindow(key)}
-                            />
-                          </td>
-                          <td>{window.stationName}</td>
-                          <td className={styles.numeric}>{formatUtcHhmm(window.aosMs)}</td>
-                          <td className={styles.numeric}>{window.truncated ? "—" : formatUtcHhmm(window.losMs)}</td>
-                          <td className={styles.numeric}>{formatSpan(window.losMs - window.aosMs)}</td>
-                          <td className={styles.numeric}>{Math.round(window.maxElevationDeg)}°</td>
-                          <td>
-                            {conflicts.length === 0 ? (
-                              <span className={styles.clear}>—</span>
-                            ) : (
-                              <span className={styles.conflict}>
-                                {conflicts[0].stationId === window.stationId
-                                  ? `${conflicts[0].stationName} committed to ${conflicts[0].satelliteName}`
-                                  : `${conflicts[0].satelliteName} already booked via ${conflicts[0].stationName}`}{" "}
-                                until {formatUtcHhmm(conflicts[0].endMs)} UTC
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                    return conflicts.length === 0 ? (
+                      <span className={styles.clear}>—</span>
+                    ) : (
+                      <span className={styles.conflict}>
+                        {conflicts[0].stationId === window.stationId
+                          ? `${conflicts[0].stationName} committed to ${conflicts[0].satelliteName}`
+                          : `${conflicts[0].satelliteName} already booked via ${conflicts[0].stationName}`}{" "}
+                        until {formatUtcHhmm(conflicts[0].endMs)} UTC
+                      </span>
+                    );
+                  },
+                }}
+              />
             )}
 
             {contactsQuery.error ? (

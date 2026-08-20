@@ -6,6 +6,7 @@ import {Link, useParams} from "react-router-dom";
 
 import {EMPLOYEES_QUERY, GROUND_STATION_DETAIL_QUERY, MAP_SATELLITES_QUERY} from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
+import PassTable from "@/components/ui/PassTable.js";
 import QueryState from "@/components/ui/QueryState.js";
 import ReportCard from "@/components/ui/ReportCard.js";
 import {useContactRows} from "@/hooks/useContactRows.js";
@@ -19,7 +20,7 @@ import {
   type PassWindow,
   type WindowsCache,
 } from "@/lib/fleet.js";
-import {formatLatitude, formatLongitude, formatSpan, formatUtcDateTime, formatUtcHhmm} from "@/lib/format.js";
+import {formatLatitude, formatLongitude, formatUtcDateTime} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
@@ -186,55 +187,33 @@ function GroundStationPage() {
                     No serviceable satellite clears the mask here within the next {CONTACT_HORIZON_HOURS} hours.
                   </p>
                 ) : (
-                  <div className={styles.tableWrap}>
-                    <table className={styles.table}>
-                      <thead>
-                        <tr>
-                          <th scope="col">Satellite</th>
-                          <th scope="col" className={styles.numeric}>
-                            <abbr title="Acquisition of signal">AOS</abbr>
-                          </th>
-                          <th scope="col" className={styles.numeric}>
-                            <abbr title="Loss of signal">LOS</abbr>
-                          </th>
-                          <th scope="col" className={styles.numeric}>
-                            Duration
-                          </th>
-                          <th scope="col" className={styles.numeric}>
-                            Max elev
-                          </th>
-                          <th scope="col">
-                            <span className={styles.srOnly}>Schedule</span>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {upcomingPasses.map(({satelliteId, satelliteName, window}) => (
-                          <tr key={`${satelliteId}:${window.aosMs}`}>
-                            <td>
-                              <Link className={styles.rowLink} to={`/fleet/${satelliteId}`}>
-                                {satelliteName}
-                              </Link>
-                            </td>
-                            <td className={styles.numeric}>{formatUtcDateTime(window.aosMs)}</td>
-                            <td className={styles.numeric}>
-                              {window.truncated ? "—" : `${formatUtcHhmm(window.losMs)} UTC`}
-                            </td>
-                            <td className={styles.numeric}>{formatSpan(window.losMs - window.aosMs)}</td>
-                            <td className={styles.numeric}>{Math.round(window.maxElevationDeg)}°</td>
-                            <td className={styles.numeric}>
-                              <Link
-                                className={styles.rowLink}
-                                to={`/contacts/new?satellite=${satelliteId}&station=${station.id}&aos=${window.aosMs}`}
-                              >
-                                Schedule
-                              </Link>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <PassTable
+                    rows={upcomingPasses}
+                    getWindow={(pass) => pass.window}
+                    rowKey={(pass) => `${pass.satelliteId}:${pass.window.aosMs}`}
+                    lead={[
+                      {
+                        header: "Satellite",
+                        render: (pass) => (
+                          <Link className={styles.rowLink} to={`/fleet/${pass.satelliteId}`}>
+                            {pass.satelliteName}
+                          </Link>
+                        ),
+                      },
+                    ]}
+                    trailing={{
+                      header: <span className={styles.srOnly}>Schedule</span>,
+                      numeric: true,
+                      render: (pass) => (
+                        <Link
+                          className={styles.rowLink}
+                          to={`/contacts/new?satellite=${pass.satelliteId}&station=${station.id}&aos=${pass.window.aosMs}`}
+                        >
+                          Schedule
+                        </Link>
+                      ),
+                    }}
+                  />
                 )}
               </article>
 

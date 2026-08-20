@@ -12,6 +12,7 @@ import {
   SATELLITE_POSITION_QUERY,
 } from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
+import PassTable from "@/components/ui/PassTable.js";
 import QueryState from "@/components/ui/QueryState.js";
 import ReportCard from "@/components/ui/ReportCard.js";
 import {useContactRows} from "@/hooks/useContactRows.js";
@@ -31,7 +32,6 @@ import {
   formatLongitude,
   formatSpan,
   formatUtcDateTime,
-  formatUtcHhmm,
 } from "@/lib/format.js";
 import {deriveOrbit, tleAgeDays, TLE_STALE_DAYS} from "@/lib/orbit.js";
 import {createSatrec} from "@/lib/propagation.js";
@@ -273,55 +273,28 @@ function SatellitePage() {
                     No passes clear the mask over operational stations within the next {CONTACT_HORIZON_HOURS} hours.
                   </p>
                 ) : (
-                  <div className={styles.tableWrap}>
-                    <table className={styles.table}>
-                      <thead>
-                        <tr>
-                          <th scope="col">Station</th>
-                          <th scope="col" className={styles.numeric}>
-                            <abbr title="Acquisition of signal">AOS</abbr>
-                          </th>
-                          <th scope="col" className={styles.numeric}>
-                            <abbr title="Loss of signal">LOS</abbr>
-                          </th>
-                          <th scope="col" className={styles.numeric}>
-                            Duration
-                          </th>
-                          <th scope="col" className={styles.numeric}>
-                            Max elev
-                          </th>
-                          {inert ? null : (
-                            <th scope="col">
-                              <span className={styles.srOnly}>Schedule</span>
-                            </th>
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {upcomingPasses.map((window) => (
-                          <tr key={`${window.stationId}:${window.aosMs}`}>
-                            <td>{window.stationName}</td>
-                            <td className={styles.numeric}>{formatUtcDateTime(window.aosMs)}</td>
-                            <td className={styles.numeric}>
-                              {window.truncated ? "—" : `${formatUtcHhmm(window.losMs)} UTC`}
-                            </td>
-                            <td className={styles.numeric}>{formatSpan(window.losMs - window.aosMs)}</td>
-                            <td className={styles.numeric}>{Math.round(window.maxElevationDeg)}°</td>
-                            {inert ? null : (
-                              <td className={styles.numeric}>
-                                <Link
-                                  className={styles.rowLink}
-                                  to={`${scheduleHref}&station=${window.stationId}&aos=${window.aosMs}`}
-                                >
-                                  Schedule
-                                </Link>
-                              </td>
-                            )}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <PassTable
+                    rows={upcomingPasses}
+                    getWindow={(window) => window}
+                    rowKey={(window) => `${window.stationId}:${window.aosMs}`}
+                    lead={[{header: "Station", render: (window) => window.stationName}]}
+                    trailing={
+                      inert
+                        ? undefined
+                        : {
+                            header: <span className={styles.srOnly}>Schedule</span>,
+                            numeric: true,
+                            render: (window) => (
+                              <Link
+                                className={styles.rowLink}
+                                to={`${scheduleHref}&station=${window.stationId}&aos=${window.aosMs}`}
+                              >
+                                Schedule
+                              </Link>
+                            ),
+                          }
+                    }
+                  />
                 )}
               </article>
 
