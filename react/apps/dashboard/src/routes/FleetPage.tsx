@@ -4,7 +4,7 @@ import {useQuery} from "@apollo/client/react";
 import {useEffect, useMemo, useRef, useState} from "react";
 import {Link, useSearchParams} from "react-router-dom";
 
-import {GROUND_STATIONS_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.js";
+import {GROUND_STATIONS_QUERY, MAP_SATELLITES_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
 import {useNow} from "@/hooks/useNow.js";
@@ -83,6 +83,11 @@ interface FilterOption {
 function FleetPage() {
   const {data, loading, error, refetch} = useQuery(SATELLITE_OVERVIEW_QUERY, {
     variables: {perPage: 50, page: 0},
+  });
+  // The 5 s cadence polls the lean map query instead: it writes the same allSatellites list and merges
+  // position/status into the normalized entities, so Constellation/Launch/Payloads are fetched once.
+  useQuery(MAP_SATELLITES_QUERY, {
+    variables: {perPage: 50, page: 0},
     pollInterval: 5000,
   });
   const stationsQuery = useQuery(GROUND_STATIONS_QUERY, {variables: {perPage: 50, page: 0}});
@@ -105,6 +110,7 @@ function FleetPage() {
   }, [filters.search]);
 
   const satellites = useMemo(() => (data?.allSatellites ?? []).filter((satellite) => satellite !== null), [data]);
+  const totalCount = data?._allSatellitesMeta?.count ?? null;
 
   const activeStations = useMemo(
     () => activeFleetStations(stationsQuery.data?.allGroundStations),
@@ -304,6 +310,7 @@ function FleetPage() {
       <QueryState
         loading={loading && !data}
         error={error}
+        hasData={Boolean(data)}
         empty={satellites.length === 0}
         emptyMessage="No satellites are registered against this operator."
         onRetry={() => void refetch()}
@@ -351,6 +358,9 @@ function FleetPage() {
 
           <span className={styles.count} role="status">
             {visible.length} of {rows.length}
+            {totalCount !== null && totalCount > rows.length
+              ? ` · first ${rows.length} of ${totalCount} tracked`
+              : null}
           </span>
         </div>
 
@@ -446,7 +456,7 @@ function FleetPage() {
                       <td>
                         <div
                           className={styles.timeline}
-                          role="img"
+                          role="group"
                           aria-label={`${row.timeline.length} passes in the next ${CONTACT_HORIZON_HOURS} hours`}
                         >
                           <span className={styles.timelineMid} aria-hidden="true" />

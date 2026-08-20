@@ -9,9 +9,21 @@ import {
   formatLongitude,
   formatSpan,
   formatUtcDateTime,
+  formatUtcHhmm,
 } from "@/lib/format.js";
 
 /* Tests //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+describe("formatUtcHhmm", () => {
+  it("renders the UTC wall-clock time", () => {
+    expect(formatUtcHhmm(Date.UTC(2022, 1, 23, 14, 32, 59))).toBe("14:32");
+  });
+
+  it("renders an em dash instead of throwing on non-finite input", () => {
+    expect(formatUtcHhmm(Number.NaN)).toBe("—");
+    expect(formatUtcHhmm(Number.POSITIVE_INFINITY)).toBe("—");
+  });
+});
 
 describe("formatLatitude", () => {
   it("qualifies the hemisphere instead of showing a minus sign", () => {

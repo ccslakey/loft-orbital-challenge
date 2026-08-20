@@ -30,6 +30,7 @@ function GroundStationsPage() {
       <QueryState
         loading={loading && !data}
         error={error}
+        hasData={Boolean(data)}
         empty={stations.length === 0}
         emptyMessage="No ground stations are under contract."
         onRetry={() => void refetch()}

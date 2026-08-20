@@ -46,6 +46,11 @@
   color: var(--ink-2);
 }
 
+.capNote {
+  font-size: var(--text-sm);
+  color: var(--state-caution);
+}
+
 .filterRow {
   display: flex;
   gap: var(--space-2);

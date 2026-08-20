@@ -9,14 +9,16 @@ import type {Topology} from "topojson-specification";
 import landTopology from "world-atlas/land-110m.json";
 
 import {GROUND_STATIONS_QUERY, MAP_SATELLITES_QUERY} from "@/api/operations.js";
+import PassTable from "@/components/ui/PassTable.js";
 import QueryState from "@/components/ui/QueryState.js";
 import {useNow} from "@/hooks/useNow.js";
+import {activeFleetStations} from "@/lib/fleet.js";
 import {formatAltitude, formatLatitude, formatLongitude} from "@/lib/format.js";
 import {createSatrec, groundTrack, orbitalPeriodMinutes, propagateToGeodetic} from "@/lib/propagation.js";
 import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
 import {centralAngleDeg, DEFAULT_ELEVATION_MASK_DEG, elevationDeg, footprintRadiusDeg} from "@/lib/visibility.js";
-import {findNextWindow, type ContactWindow} from "@/lib/windows.js";
+import {findNextWindow} from "@/lib/windows.js";
 
 import styles from "./MapPage.module.scss";
 
@@ -48,17 +50,6 @@ const LAND_PATH = toPath(feature(topology, topology.objects.land)) ?? "";
 const project = (latitude: number | null | undefined, longitude: number | null | undefined): [number, number] | null =>
   latitude == null || longitude == null ? null : projection([longitude, latitude]);
 
-/* Formatting /////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
-const formatUtcTime = (date: Date, reference: Date): string => {
-  const time = date.toISOString().slice(11, 16);
-
-  return date.getUTCDate() === reference.getUTCDate() ? time : `${time} +1d`;
-};
-
-const formatWindowDuration = ({aos, los, truncated}: ContactWindow): string =>
-  `${Math.max(1, Math.round((los.getTime() - aos.getTime()) / 60000))}${truncated ? "+" : ""} min`;
-
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 function MapPage() {
@@ -87,6 +78,12 @@ function MapPage() {
     [stationsQuery.data],
   );
 
+  // Footprints and links are planning aids: decommissioned satellites and offline stations keep only their marker.
+  const operationalStations = useMemo(
+    () => activeFleetStations(stationsQuery.data?.allGroundStations),
+    [stationsQuery.data],
+  );
+
   // Recomputed per poll, not per animation tick: the search costs milliseconds thanks to the
   // reachability bound, but is far too heavy for the 1 Hz clock.
   const upcoming = useMemo(() => {
@@ -98,14 +95,8 @@ function MapPage() {
         continue;
       }
 
-      for (const station of stations) {
-        const [stationLat, stationLon] = station.coordinates;
-
-        if (getGroundStationState(station.status) === "inert" || stationLat == null || stationLon == null) {
-          continue;
-        }
-
-        const window = findNextWindow(satrec, stationLat, stationLon, from);
+      for (const station of operationalStations) {
+        const window = findNextWindow(satrec, station.latitude, station.longitude, from);
 
         if (window) {
           rows.push({satellite, station, window});
@@ -114,7 +105,10 @@ function MapPage() {
     }
 
     return rows.sort((a, b) => a.window.aos.getTime() - b.window.aos.getTime());
-  }, [tracked, stations]);
+  }, [tracked, operationalStations]);
+
+  // The scan refreshes on poll boundaries, so between polls a pass can end; hide it once LOS is behind us.
+  const currentUpcoming = upcoming.filter(({window}) => window.truncated || window.los.getTime() > now.getTime());
 
   // The track's shape drifts only with Earth rotation (~0.25°/min), so it recomputes on a minute bucket,
   // not the 1 Hz clock. Inert satellites keep only their marker, same as footprints and links.
@@ -154,7 +148,6 @@ function MapPage() {
     [stations],
   );
 
-  // Footprints and links are planning aids: decommissioned satellites and offline stations keep only their marker.
   const links = [];
 
   for (const {satellite, state, live} of fleet) {
@@ -162,15 +155,9 @@ function MapPage() {
       continue;
     }
 
-    for (const {station, state: stationState} of stationEntries) {
-      const [stationLat, stationLon] = station.coordinates;
-
-      if (stationState === "inert" || stationLat == null || stationLon == null) {
-        continue;
-      }
-
+    for (const station of operationalStations) {
       const elevation = elevationDeg(
-        centralAngleDeg(stationLat, stationLon, live.latitude, live.longitude),
+        centralAngleDeg(station.latitude, station.longitude, live.latitude, live.longitude),
         live.altitude,
       );
 
@@ -186,7 +173,7 @@ function MapPage() {
           toPath({
             type: "LineString",
             coordinates: [
-              [stationLon, stationLat],
+              [station.longitude, station.latitude],
               [live.longitude, live.latitude],
             ],
           }) ?? "",
@@ -207,6 +194,7 @@ function MapPage() {
       <QueryState
         loading={(satellitesQuery.loading && !satellitesQuery.data) || (stationsQuery.loading && !stationsQuery.data)}
         error={satellitesQuery.error ?? stationsQuery.error}
+        hasData={Boolean(satellitesQuery.data && stationsQuery.data)}
         empty={tracked.length === 0}
         emptyMessage="No satellites are registered against this operator."
         onRetry={() => {
@@ -330,52 +318,38 @@ function MapPage() {
         <section className={styles.contacts}>
           <h2 className={styles.contactsTitle}>Next contacts — 24 h horizon, times UTC</h2>
 
-          {upcoming.length === 0 ? (
+          {currentUpcoming.length === 0 ? (
             <p className={styles.contactsNote}>No contacts clear the mask within the next 24 hours.</p>
           ) : (
             <>
-              <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th scope="col">Station</th>
-                      <th scope="col">Satellite</th>
-                      <th scope="col" className={styles.numeric}>
-                        <abbr title="Acquisition of signal">AOS</abbr>
-                      </th>
-                      <th scope="col" className={styles.numeric}>
-                        <abbr title="Loss of signal">LOS</abbr>
-                      </th>
-                      <th scope="col" className={styles.numeric}>
-                        Duration
-                      </th>
-                      <th scope="col" className={styles.numeric}>
-                        Max elev
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {upcoming.slice(0, 10).map(({satellite, station, window}) => (
-                      <tr key={`${station.id}-${satellite.id}`}>
-                        <td>{station.name}</td>
-                        <td>
-                          <Link className={styles.rowName} to={`/fleet/${satellite.id}`}>
-                            {satellite.name}
-                          </Link>
-                        </td>
-                        <td className={styles.numeric}>{formatUtcTime(window.aos, now)}</td>
-                        <td className={styles.numeric}>{window.truncated ? "—" : formatUtcTime(window.los, now)}</td>
-                        <td className={styles.numeric}>{formatWindowDuration(window)}</td>
-                        <td className={styles.numeric}>{`${Math.round(window.maxElevationDeg)}°`}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <PassTable
+                wrapClassName={styles.tableWrap}
+                rows={currentUpcoming.slice(0, 10)}
+                getWindow={({window}) => ({
+                  aosMs: window.aos.getTime(),
+                  losMs: window.los.getTime(),
+                  truncated: window.truncated,
+                  maxElevationDeg: window.maxElevationDeg,
+                })}
+                rowKey={({satellite, station}) => `${station.id}-${satellite.id}`}
+                compact
+                now={now}
+                lead={[
+                  {header: "Station", render: ({station}) => station.name},
+                  {
+                    header: "Satellite",
+                    render: ({satellite}) => (
+                      <Link className={styles.rowName} to={`/fleet/${satellite.id}`}>
+                        {satellite.name}
+                      </Link>
+                    ),
+                  },
+                ]}
+              />
 
-              {upcoming.length > 10 ? (
+              {currentUpcoming.length > 10 ? (
                 <p className={styles.contactsNote}>
-                  {upcoming.length - 10} more pairs have a window inside the horizon.
+                  {currentUpcoming.length - 10} more pairs have a window inside the horizon.
                 </p>
               ) : null}
             </>

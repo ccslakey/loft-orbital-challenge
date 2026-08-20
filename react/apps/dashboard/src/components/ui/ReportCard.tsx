@@ -173,6 +173,7 @@ function CommentForm({reportId, employees}: {reportId: string; employees: Commen
       <textarea
         className={styles.textarea}
         value={content}
+        aria-label="Add a comment"
         placeholder="Add a comment…"
         rows={2}
         onChange={(event) => setContent(event.target.value)}

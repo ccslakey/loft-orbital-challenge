@@ -130,6 +130,16 @@
   color: var(--state-caution);
 }
 
+.retryInline {
+  padding: 0;
+  font-size: var(--text-sm);
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
 .tableWrap {
   overflow-x: auto;
   background: var(--panel-sunk);
@@ -137,61 +147,9 @@
   border-radius: var(--radius-sm);
 }
 
-.table {
-  width: 100%;
-  min-width: 640px;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: var(--space-2) var(--space-3);
-    text-align: left;
-  }
-
-  thead th {
-    @include label;
-
-    white-space: nowrap;
-    border-bottom: 1px solid var(--rule-strong);
-  }
-
-  tbody tr {
-    border-bottom: 1px solid var(--rule);
-
-    &:last-child {
-      border-bottom: 0;
-    }
-
-    &:hover {
-      background: var(--panel);
-    }
-
-    &[data-selected] {
-      background: var(--panel);
-      box-shadow: inset 3px 0 0 var(--state-nominal);
-    }
-  }
-
-  tbody td {
-    font-size: var(--text-sm);
-    color: var(--ink-2);
-  }
-}
-
-.pickHeader {
-  width: 32px;
-}
-
 .pickCell {
+  width: 32px;
   text-align: center !important;
-}
-
-.numeric {
-  @include tabular;
-
-  font-size: var(--text-sm);
-  text-align: right !important;
-  white-space: nowrap;
 }
 
 .clear {

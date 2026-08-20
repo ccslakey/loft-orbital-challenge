@@ -9,19 +9,15 @@ import {
   GROUND_STATIONS_QUERY,
   SATELLITE_ACTIVITY_QUERY,
   SATELLITE_DETAIL_QUERY,
+  SATELLITE_POSITION_QUERY,
 } from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
+import ContactTable from "@/components/ui/ContactTable.js";
+import PassTable from "@/components/ui/PassTable.js";
 import QueryState from "@/components/ui/QueryState.js";
 import ReportCard from "@/components/ui/ReportCard.js";
+import {useContactRows} from "@/hooks/useContactRows.js";
 import {useNow} from "@/hooks/useNow.js";
-import {
-  compareContactPhase,
-  contactPhase,
-  contactWindowLabel,
-  PHASE_PRESENTATION,
-  recoverContactWindow,
-  type ContactPhase,
-} from "@/lib/contacts.js";
 import {
   activeFleetStations,
   CONTACT_HORIZON_HOURS,
@@ -36,26 +32,15 @@ import {
   formatLongitude,
   formatSpan,
   formatUtcDateTime,
-  formatUtcHhmm,
 } from "@/lib/format.js";
 import {deriveOrbit, tleAgeDays, TLE_STALE_DAYS} from "@/lib/orbit.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getLaunchState, getPayloadState, getSatelliteState} from "@/lib/status.js";
 import {getCatalogNumber, parseTle} from "@/lib/tle.js";
-import type {SatelliteActivityQuery} from "@/gql/graphql.js";
 
 import styles from "./SatellitePage.module.scss";
 
 /* Types //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
-type ActivityContact = NonNullable<NonNullable<NonNullable<SatelliteActivityQuery["Satellite"]>["Contacts"]>[number]>;
-
-interface ContactRow {
-  contact: ActivityContact;
-  dateMs: number;
-  phase: ContactPhase;
-  windowLabel: string | null;
-}
 
 /* Constants //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -68,6 +53,12 @@ function SatellitePage() {
   const {satelliteId} = useParams();
 
   const {data, loading, error, refetch} = useQuery(SATELLITE_DETAIL_QUERY, {
+    variables: {id: satelliteId ?? ""},
+    skip: !satelliteId,
+  });
+  // The 5 s cadence polls only the position fields; they merge into the same Satellite cache entity,
+  // so description/image/specs and relations are fetched once by the detail query above.
+  useQuery(SATELLITE_POSITION_QUERY, {
     variables: {id: satelliteId ?? ""},
     skip: !satelliteId,
     pollInterval: 5000,
@@ -117,28 +108,7 @@ function SatellitePage() {
     [activityQuery.data],
   );
 
-  const contactRows = useMemo(() => {
-    const nowMs = now.getTime();
-
-    return contacts
-      .flatMap((contact): ContactRow[] => {
-        const dateMs = new Date(contact.date).getTime();
-
-        if (Number.isNaN(dateMs)) {
-          return [];
-        }
-
-        const [stationLat, stationLon] = contact.GroundStation?.coordinates ?? [null, null];
-        const window =
-          satrec && stationLat != null && stationLon != null
-            ? recoverContactWindow(satrec, stationLat, stationLon, dateMs)
-            : null;
-        const phase = contactPhase(dateMs, window?.losMs ?? null, nowMs);
-
-        return [{contact, dateMs, phase, windowLabel: contactWindowLabel(phase, window, dateMs, nowMs)}];
-      })
-      .sort(compareContactPhase);
-  }, [contacts, satrec, now]);
+  const contactRows = useContactRows(contacts, now, {satrec});
 
   const reports = useMemo(
     () =>
@@ -175,6 +145,7 @@ function SatellitePage() {
       <QueryState
         loading={loading && !data}
         error={error}
+        hasData={Boolean(data)}
         empty={!satellite}
         emptyMessage="No satellite matches that identifier."
         onRetry={() => void refetch()}
@@ -302,55 +273,28 @@ function SatellitePage() {
                     No passes clear the mask over operational stations within the next {CONTACT_HORIZON_HOURS} hours.
                   </p>
                 ) : (
-                  <div className={styles.tableWrap}>
-                    <table className={styles.table}>
-                      <thead>
-                        <tr>
-                          <th scope="col">Station</th>
-                          <th scope="col" className={styles.numeric}>
-                            <abbr title="Acquisition of signal">AOS</abbr>
-                          </th>
-                          <th scope="col" className={styles.numeric}>
-                            <abbr title="Loss of signal">LOS</abbr>
-                          </th>
-                          <th scope="col" className={styles.numeric}>
-                            Duration
-                          </th>
-                          <th scope="col" className={styles.numeric}>
-                            Max elev
-                          </th>
-                          {inert ? null : (
-                            <th scope="col">
-                              <span className={styles.srOnly}>Schedule</span>
-                            </th>
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {upcomingPasses.map((window) => (
-                          <tr key={`${window.stationId}:${window.aosMs}`}>
-                            <td>{window.stationName}</td>
-                            <td className={styles.numeric}>{formatUtcDateTime(window.aosMs)}</td>
-                            <td className={styles.numeric}>
-                              {window.truncated ? "—" : `${formatUtcHhmm(window.losMs)} UTC`}
-                            </td>
-                            <td className={styles.numeric}>{formatSpan(window.losMs - window.aosMs)}</td>
-                            <td className={styles.numeric}>{Math.round(window.maxElevationDeg)}°</td>
-                            {inert ? null : (
-                              <td className={styles.numeric}>
-                                <Link
-                                  className={styles.rowLink}
-                                  to={`${scheduleHref}&station=${window.stationId}&aos=${window.aosMs}`}
-                                >
-                                  Schedule
-                                </Link>
-                              </td>
-                            )}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <PassTable
+                    rows={upcomingPasses}
+                    getWindow={(window) => window}
+                    rowKey={(window) => `${window.stationId}:${window.aosMs}`}
+                    lead={[{header: "Station", render: (window) => window.stationName}]}
+                    trailing={
+                      inert
+                        ? undefined
+                        : {
+                            header: <span className={styles.srOnly}>Schedule</span>,
+                            numeric: true,
+                            render: (window) => (
+                              <Link
+                                className={styles.rowLink}
+                                to={`${scheduleHref}&station=${window.stationId}&aos=${window.aosMs}`}
+                              >
+                                Schedule
+                              </Link>
+                            ),
+                          }
+                    }
+                  />
                 )}
               </article>
 
@@ -369,43 +313,11 @@ function SatellitePage() {
                   </p>
                 ) : (
                   <>
-                    <div className={styles.tableWrap}>
-                      <table className={styles.table}>
-                        <thead>
-                          <tr>
-                            <th scope="col">Phase</th>
-                            <th scope="col" className={styles.numeric}>
-                              Date
-                            </th>
-                            <th scope="col">Station</th>
-                            <th scope="col">Type</th>
-                            <th scope="col">Payload</th>
-                            <th scope="col">Operator</th>
-                            <th scope="col" className={styles.numeric}>
-                              Window
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {contactRows.map(({contact, dateMs, phase, windowLabel}) => (
-                            <tr key={contact.id} data-state={PHASE_PRESENTATION[phase].state}>
-                              <td>
-                                <StatusChip
-                                  label={PHASE_PRESENTATION[phase].label}
-                                  state={PHASE_PRESENTATION[phase].state}
-                                />
-                              </td>
-                              <td className={styles.numeric}>{formatUtcDateTime(dateMs)}</td>
-                              <td>{contact.GroundStation?.name ?? "—"}</td>
-                              <td>{contact.type}</td>
-                              <td>{contact.Payload?.name ?? "—"}</td>
-                              <td>{contact.Employee?.name ?? "—"}</td>
-                              <td className={styles.numeric}>{windowLabel ?? "—"}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <ContactTable
+                      rows={contactRows}
+                      entityHeader="Station"
+                      renderEntity={(contact) => contact.GroundStation?.name ?? "—"}
+                    />
                     <Link className={styles.inlineLink} to={`/contacts?satellite=${satelliteId}`}>
                       All contacts →
                     </Link>

@@ -44,6 +44,9 @@ export const SATELLITE_OVERVIEW_QUERY = graphql(`
         }
       }
     }
+    _allSatellitesMeta {
+      count
+    }
   }
 `);
 
@@ -82,6 +85,20 @@ export const SATELLITE_DETAIL_QUERY = graphql(`
           name
         }
       }
+    }
+  }
+`);
+
+// Position-cadence fields only, for the 5 s poll; merges into the Satellite entity SATELLITE_DETAIL_QUERY
+// rendered once, so description/image/specs are not re-fetched every tick.
+export const SATELLITE_POSITION_QUERY = graphql(`
+  query SatellitePosition($id: ID!) {
+    Satellite(id: $id) {
+      id
+      status
+      altitude
+      coordinates
+      tle
     }
   }
 `);
@@ -253,6 +270,9 @@ export const CONTACTS_QUERY = graphql(`
         name
         role
       }
+    }
+    _allContactsMeta {
+      count
     }
   }
 `);
