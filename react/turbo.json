@@ -12,6 +12,9 @@
     },
     "start": {
       "dependsOn": ["build"]
+    },
+    "type-check": {
+      "outputs": []
     }
   }
 }

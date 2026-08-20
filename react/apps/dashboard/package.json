@@ -34,6 +34,7 @@
     "codegen": "graphql-codegen --config codegen.ts",
     "codegen:schema": "graphql-codegen --config codegen.schema.ts",
     "dev": "vite",
-    "start": "vite preview"
+    "start": "vite preview",
+    "type-check": "tsc --project ./src/tsconfig.test.json && tsc --project ./tsconfig.vite.json"
   }
 }

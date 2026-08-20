@@ -22,6 +22,7 @@ jobs:
           - lint # eslint
           - lint:styles # stylelint
           - format:check # prettier
+          - type-check # tsc over dashboard src + tests + vite config, and server src
           - build # tsc + vite production build
     steps:
       - uses: actions/checkout@v4
