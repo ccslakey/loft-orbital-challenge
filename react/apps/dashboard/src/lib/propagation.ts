@@ -62,3 +62,33 @@ export const propagateToGeodetic = (satrec: SatRec, time: Date): GeodeticPoint |
     return null;
   }
 };
+
+/* Ground track ///////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+// satrec.no is the mean motion in radians per minute.
+export const orbitalPeriodMinutes = (satrec: SatRec): number | null =>
+  Number.isFinite(satrec.no) && satrec.no > 0 ? (2 * Math.PI) / satrec.no : null;
+
+// Sub-satellite points from `start` over `durationMinutes`, as [longitude, latitude] pairs ready for a
+// GeoJSON LineString. Any failed sample voids the whole track — a gap would render as a false straight line.
+export const groundTrack = (
+  satrec: SatRec,
+  start: Date,
+  durationMinutes: number,
+  samples: number = 128,
+): Array<[number, number]> => {
+  const stepMs = (durationMinutes * 60_000) / samples;
+  const points: Array<[number, number]> = [];
+
+  for (let i = 0; i <= samples; i += 1) {
+    const point = propagateToGeodetic(satrec, new Date(start.getTime() + i * stepMs));
+
+    if (!point) {
+      return [];
+    }
+
+    points.push([point.longitude, point.latitude]);
+  }
+
+  return points;
+};
