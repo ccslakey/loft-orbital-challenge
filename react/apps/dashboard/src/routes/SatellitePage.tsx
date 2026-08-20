@@ -9,6 +9,7 @@ import {
   GROUND_STATIONS_QUERY,
   SATELLITE_ACTIVITY_QUERY,
   SATELLITE_DETAIL_QUERY,
+  SATELLITE_POSITION_QUERY,
 } from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
@@ -68,6 +69,12 @@ function SatellitePage() {
   const {satelliteId} = useParams();
 
   const {data, loading, error, refetch} = useQuery(SATELLITE_DETAIL_QUERY, {
+    variables: {id: satelliteId ?? ""},
+    skip: !satelliteId,
+  });
+  // The 5 s cadence polls only the position fields; they merge into the same Satellite cache entity,
+  // so description/image/specs and relations are fetched once by the detail query above.
+  useQuery(SATELLITE_POSITION_QUERY, {
     variables: {id: satelliteId ?? ""},
     skip: !satelliteId,
     pollInterval: 5000,

@@ -86,6 +86,20 @@ export const SATELLITE_DETAIL_QUERY = graphql(`
   }
 `);
 
+// Position-cadence fields only, for the 5 s poll; merges into the Satellite entity SATELLITE_DETAIL_QUERY
+// rendered once, so description/image/specs are not re-fetched every tick.
+export const SATELLITE_POSITION_QUERY = graphql(`
+  query SatellitePosition($id: ID!) {
+    Satellite(id: $id) {
+      id
+      status
+      altitude
+      coordinates
+      tle
+    }
+  }
+`);
+
 // Contacts and reports for one satellite, fetched apart from SATELLITE_DETAIL_QUERY so its position poll
 // does not re-fetch them every tick. Both normalize into the same Satellite cache entity.
 export const SATELLITE_ACTIVITY_QUERY = graphql(`

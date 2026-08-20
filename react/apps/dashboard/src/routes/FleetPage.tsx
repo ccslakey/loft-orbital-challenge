@@ -4,7 +4,7 @@ import {useQuery} from "@apollo/client/react";
 import {useEffect, useMemo, useRef, useState} from "react";
 import {Link, useSearchParams} from "react-router-dom";
 
-import {GROUND_STATIONS_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.js";
+import {GROUND_STATIONS_QUERY, MAP_SATELLITES_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
 import {useNow} from "@/hooks/useNow.js";
@@ -82,6 +82,11 @@ interface FilterOption {
 
 function FleetPage() {
   const {data, loading, error, refetch} = useQuery(SATELLITE_OVERVIEW_QUERY, {
+    variables: {perPage: 50, page: 0},
+  });
+  // The 5 s cadence polls the lean map query instead: it writes the same allSatellites list and merges
+  // position/status into the normalized entities, so Constellation/Launch/Payloads are fetched once.
+  useQuery(MAP_SATELLITES_QUERY, {
     variables: {perPage: 50, page: 0},
     pollInterval: 5000,
   });
