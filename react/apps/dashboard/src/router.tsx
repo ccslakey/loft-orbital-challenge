@@ -6,6 +6,7 @@ import {createBrowserRouter, Navigate} from "react-router-dom";
 import Shell from "@/components/layout/Shell.js";
 import ContactsPage from "@/routes/ContactsPage.js";
 import FleetPage from "@/routes/FleetPage.js";
+import GroundStationPage from "@/routes/GroundStationPage.js";
 import GroundStationsPage from "@/routes/GroundStationsPage.js";
 import NotFoundPage from "@/routes/NotFoundPage.js";
 import ReportsPage from "@/routes/ReportsPage.js";
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       {path: "fleet", element: <FleetPage />},
       {path: "fleet/:satelliteId", element: <SatellitePage />},
       {path: "ground-stations", element: <GroundStationsPage />},
+      {path: "ground-stations/:stationId", element: <GroundStationPage />},
       {
         path: "map",
         element: (
