@@ -14,7 +14,14 @@ import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
 import ReportCard from "@/components/ui/ReportCard.js";
 import {useNow} from "@/hooks/useNow.js";
-import {contactPhase, recoverContactWindow, type ContactPhase} from "@/lib/contacts.js";
+import {
+  compareContactPhase,
+  contactPhase,
+  contactWindowLabel,
+  PHASE_PRESENTATION,
+  recoverContactWindow,
+  type ContactPhase,
+} from "@/lib/contacts.js";
 import {
   activeFleetStations,
   CONTACT_HORIZON_HOURS,
@@ -29,10 +36,11 @@ import {
   formatLongitude,
   formatSpan,
   formatUtcDateTime,
+  formatUtcHhmm,
 } from "@/lib/format.js";
 import {deriveOrbit, tleAgeDays, TLE_STALE_DAYS} from "@/lib/orbit.js";
 import {createSatrec} from "@/lib/propagation.js";
-import {getLaunchState, getPayloadState, getSatelliteState, type State} from "@/lib/status.js";
+import {getLaunchState, getPayloadState, getSatelliteState} from "@/lib/status.js";
 import {getCatalogNumber, parseTle} from "@/lib/tle.js";
 import type {SatelliteActivityQuery} from "@/gql/graphql.js";
 
@@ -53,14 +61,6 @@ interface ContactRow {
 
 // Keyed by satellite + TLE + station set, shared with remounts; the window search is too heavy per render.
 const passCache: WindowsCache = new Map();
-
-const PHASE_PRESENTATION: Record<ContactPhase, {label: string; state: State; rank: number}> = {
-  active: {label: "In progress", state: "nominal", rank: 0},
-  upcoming: {label: "Upcoming", state: "planned", rank: 1},
-  past: {label: "Past", state: "inert", rank: 2},
-};
-
-const hhmm = (ms: number): string => new Date(ms).toISOString().slice(11, 16);
 
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -135,26 +135,9 @@ function SatellitePage() {
             : null;
         const phase = contactPhase(dateMs, window?.losMs ?? null, nowMs);
 
-        return [
-          {
-            contact,
-            dateMs,
-            phase,
-            windowLabel:
-              phase === "active" && window
-                ? `ends in ${formatSpan(window.losMs - nowMs)}`
-                : window
-                  ? `${formatSpan(window.losMs - dateMs)} · ${Math.round(window.maxElevationDeg)}°`
-                  : null,
-          },
-        ];
+        return [{contact, dateMs, phase, windowLabel: contactWindowLabel(phase, window, dateMs, nowMs)}];
       })
-      .sort((a, b) => {
-        const rank = PHASE_PRESENTATION[a.phase].rank - PHASE_PRESENTATION[b.phase].rank;
-
-        // Past runs most-recent-first; everything else soonest-first.
-        return rank !== 0 ? rank : a.phase === "past" ? b.dateMs - a.dateMs : a.dateMs - b.dateMs;
-      });
+      .sort(compareContactPhase);
   }, [contacts, satrec, now]);
 
   const reports = useMemo(
@@ -323,7 +306,9 @@ function SatellitePage() {
                           <tr key={`${window.stationId}:${window.aosMs}`}>
                             <td>{window.stationName}</td>
                             <td className={styles.numeric}>{formatUtcDateTime(window.aosMs)}</td>
-                            <td className={styles.numeric}>{window.truncated ? "—" : `${hhmm(window.losMs)} UTC`}</td>
+                            <td className={styles.numeric}>
+                              {window.truncated ? "—" : `${formatUtcHhmm(window.losMs)} UTC`}
+                            </td>
                             <td className={styles.numeric}>{formatSpan(window.losMs - window.aosMs)}</td>
                             <td className={styles.numeric}>{Math.round(window.maxElevationDeg)}°</td>
                             {inert ? null : (

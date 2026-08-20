@@ -3,6 +3,7 @@
 import {useMemo, useState} from "react";
 import {useMutation, useQuery} from "@apollo/client/react";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
+import type {SatRec} from "satellite.js";
 
 import {
   CONTACTS_QUERY,
@@ -15,7 +16,7 @@ import QueryState from "@/components/ui/QueryState.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import {busyInterval, conflictsFor, PASS_PAD_MS, recoverContactWindow, type ScheduledUse} from "@/lib/contacts.js";
 import {activeFleetStations, CONTACT_HORIZON_HOURS, findContactWindows, type PassWindow} from "@/lib/fleet.js";
-import {formatSpan} from "@/lib/format.js";
+import {formatSpan, formatUtcHhmm} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getPayloadState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
@@ -33,9 +34,7 @@ const CONTACTS_VARIABLES = {perPage: 100, page: 0};
 // Consecutive passes at one station are orbit-period apart, so a few minutes of slack is unambiguous.
 const PREFILL_AOS_TOLERANCE_MS = 5 * 60_000;
 
-/* Formatting /////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
-const hhmm = (ms: number): string => new Date(ms).toISOString().slice(11, 16);
+/* Helpers ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 const windowKey = ({stationId, aosMs}: PassWindow): string => `${stationId}:${aosMs}`;
 
@@ -90,8 +89,9 @@ function ScheduleContactPage() {
   const payload = payloads.find((candidate) => candidate.id === payloadId) ?? null;
 
   // Candidate windows for the chosen satellite; passes must start at least one pad ahead to be schedulable.
+  const satelliteTle = satellite?.tle;
   const windows = useMemo(() => {
-    const tle = parseTle(satellite?.tle);
+    const tle = parseTle(satelliteTle);
     const satrec = tle ? createSatrec(tle) : null;
 
     if (!satrec) {
@@ -103,21 +103,29 @@ function ScheduleContactPage() {
     return findContactWindows(satrec, activeStations, now).filter(
       (window) => window.aosMs > now.getTime() + PASS_PAD_MS,
     );
-  }, [satellite, activeStations]);
+  }, [satelliteTle, activeStations]);
 
   // Busy intervals from every scheduled contact, for double-booking warnings.
   const scheduledUses = useMemo(() => {
     const uses: ScheduledUse[] = [];
+    const satrecCache = new Map<string, SatRec | null>();
 
     for (const contact of contactsQuery.data?.allContacts ?? []) {
       if (!contact?.Satellite || !contact.GroundStation) {
         continue;
       }
 
+      const satId = contact.Satellite.id;
+
+      if (!satrecCache.has(satId)) {
+        const tle = parseTle(contact.Satellite.tle);
+
+        satrecCache.set(satId, tle ? createSatrec(tle) : null);
+      }
+
       const aosMs = new Date(contact.date).getTime();
       const [stationLat, stationLon] = contact.GroundStation.coordinates;
-      const tle = parseTle(contact.Satellite.tle);
-      const satrec = tle ? createSatrec(tle) : null;
+      const satrec = satrecCache.get(satId) ?? null;
       const recovered =
         satrec && stationLat != null && stationLon != null
           ? recoverContactWindow(satrec, stationLat, stationLon, aosMs)
@@ -358,14 +366,14 @@ function ScheduleContactPage() {
                             <input
                               type="radio"
                               name="window"
-                              aria-label={`${window.stationName}, ${hhmm(window.aosMs)} UTC`}
+                              aria-label={`${window.stationName}, ${formatUtcHhmm(window.aosMs)} UTC`}
                               checked={activeKey === key}
                               onChange={() => pickWindow(key)}
                             />
                           </td>
                           <td>{window.stationName}</td>
-                          <td className={styles.numeric}>{hhmm(window.aosMs)}</td>
-                          <td className={styles.numeric}>{window.truncated ? "—" : hhmm(window.losMs)}</td>
+                          <td className={styles.numeric}>{formatUtcHhmm(window.aosMs)}</td>
+                          <td className={styles.numeric}>{window.truncated ? "—" : formatUtcHhmm(window.losMs)}</td>
                           <td className={styles.numeric}>{formatSpan(window.losMs - window.aosMs)}</td>
                           <td className={styles.numeric}>{Math.round(window.maxElevationDeg)}°</td>
                           <td>
@@ -376,7 +384,7 @@ function ScheduleContactPage() {
                                 {conflicts[0].stationId === window.stationId
                                   ? `${conflicts[0].stationName} committed to ${conflicts[0].satelliteName}`
                                   : `${conflicts[0].satelliteName} already booked via ${conflicts[0].stationName}`}{" "}
-                                until {hhmm(conflicts[0].endMs)} UTC
+                                until {formatUtcHhmm(conflicts[0].endMs)} UTC
                               </span>
                             )}
                           </td>
@@ -472,8 +480,8 @@ function ScheduleContactPage() {
 
             {satellite && selectedWindow ? (
               <p className={styles.review}>
-                {satellite.name} via {selectedWindow.stationName}, {hhmm(selectedWindow.aosMs)}–
-                {selectedWindow.truncated ? "…" : hhmm(selectedWindow.losMs)} UTC · {type}
+                {satellite.name} via {selectedWindow.stationName}, {formatUtcHhmm(selectedWindow.aosMs)}–
+                {selectedWindow.truncated ? "…" : formatUtcHhmm(selectedWindow.losMs)} UTC · {type}
                 {payload && type === "Customer Task" ? ` for ${payload.Customer?.name ?? payload.name}` : ""}
               </p>
             ) : null}

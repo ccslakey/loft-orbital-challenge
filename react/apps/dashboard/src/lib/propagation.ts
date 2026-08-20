@@ -2,6 +2,7 @@
 
 import {eciToGeodetic, gstime, propagate, twoline2satrec, type SatRec} from "satellite.js";
 
+import {toDegrees} from "./math.js";
 import type {TwoLineElement} from "./tle.js";
 
 /* Types //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
@@ -11,10 +12,6 @@ export interface GeodeticPoint {
   longitude: number; // degrees, -180..180
   altitude: number; // km
 }
-
-/* Conversion /////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
-const toDegrees = (radians: number): number => radians * (180 / Math.PI);
 
 // eciToGeodetic longitude is not guaranteed to be in range; wraps rather than clamps.
 const wrapLongitude = (degrees: number): number => {
