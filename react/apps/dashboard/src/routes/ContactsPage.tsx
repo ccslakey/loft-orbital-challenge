@@ -225,7 +225,18 @@ function ContactGroup({title, rows, emptyNote}: {title: string; rows: ContactRow
                     )}
                   </td>
 
-                  <td>{contact.Employee?.name ?? "—"}</td>
+                  <td>
+                    {contact.Employee ? (
+                      <>
+                        {contact.Employee.name}
+                        {contact.Employee.role ? (
+                          <span className={styles.operatorRole}> · {contact.Employee.role}</span>
+                        ) : null}
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                   <td className={styles.numeric}>{windowLabel ?? "—"}</td>
                 </tr>
               ))}

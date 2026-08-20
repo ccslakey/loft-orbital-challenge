@@ -32,8 +32,6 @@ export const SATELLITE_OVERVIEW_QUERY = graphql(`
         id
         date
         status
-        rocket
-        provider
       }
       Payloads {
         id
@@ -66,7 +64,6 @@ export const SATELLITE_DETAIL_QUERY = graphql(`
       Constellation {
         id
         name
-        description
       }
       Launch {
         id
@@ -80,7 +77,6 @@ export const SATELLITE_DETAIL_QUERY = graphql(`
         id
         name
         status
-        category
         Customer {
           id
           name
@@ -233,8 +229,6 @@ export const CONTACTS_QUERY = graphql(`
       id
       date
       type
-      executionScript
-      configuration
       Satellite {
         id
         name
@@ -244,13 +238,11 @@ export const CONTACTS_QUERY = graphql(`
       GroundStation {
         id
         name
-        status
         coordinates
       }
       Payload {
         id
         name
-        category
         Customer {
           id
           name
@@ -305,9 +297,6 @@ export const REPORTS_QUERY = graphql(`
       type
       date
       content
-      employee_id
-      groundStation_id
-      satellite_id
       Comments {
         id
         date
@@ -326,17 +315,12 @@ export const REPORTS_QUERY = graphql(`
       GroundStation {
         id
         name
-        network
         status
-        image
       }
       Satellite {
         id
         name
-        description
         status
-        busType
-        manufacturer
       }
     }
   }

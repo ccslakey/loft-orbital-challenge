@@ -153,6 +153,15 @@ function SatellitePage() {
     [employeesQuery.data],
   );
 
+  const specs = satellite?.specs;
+  const specEntries = useMemo(
+    () =>
+      specs && typeof specs === "object" && !Array.isArray(specs)
+        ? Object.entries(specs as Record<string, unknown>)
+        : [],
+    [specs],
+  );
+
   const scheduleHref = `/contacts/new?satellite=${satelliteId}`;
 
   return (
@@ -173,6 +182,16 @@ function SatellitePage() {
         {satellite ? (
           <>
             <header className={styles.head}>
+              {satellite.image ? (
+                <img
+                  className={styles.heroImage}
+                  src={satellite.image}
+                  alt={satellite.name}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              ) : null}
               <div className={styles.headText}>
                 <h1 className={styles.title}>{satellite.name}</h1>
                 <StatusChip label={satellite.status} state={state} />
@@ -232,6 +251,12 @@ function SatellitePage() {
                     <dt>Constellation</dt>
                     <dd>{satellite.Constellation?.name ?? "Unassigned"}</dd>
                   </div>
+                  {specEntries.map(([key, value]) => (
+                    <div key={key}>
+                      <dt>{key}</dt>
+                      <dd>{String(value)}</dd>
+                    </div>
+                  ))}
                 </dl>
               </article>
 
