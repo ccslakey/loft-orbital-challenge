@@ -9,7 +9,9 @@ import {
   CONTACTS_QUERY,
   CREATE_CONTACT,
   EMPLOYEES_QUERY,
+  GROUND_STATION_DETAIL_QUERY,
   GROUND_STATIONS_QUERY,
+  SATELLITE_ACTIVITY_QUERY,
   SATELLITE_OVERVIEW_QUERY,
 } from "@/api/operations.js";
 import QueryState from "@/components/ui/QueryState.js";
@@ -210,7 +212,13 @@ function ScheduleContactPage() {
         payload_id: type === "Customer Task" ? payloadId : null,
         employee_id: employeeId,
       },
-      refetchQueries: [{query: CONTACTS_QUERY, variables: CONTACTS_VARIABLES}],
+      // The detail pages read contacts through the parent entity, so those queries must be refetched
+      // too; Apollo fetches them network-only even while no page is watching, keeping the cache fresh.
+      refetchQueries: [
+        {query: CONTACTS_QUERY, variables: CONTACTS_VARIABLES},
+        {query: SATELLITE_ACTIVITY_QUERY, variables: {id: satellite.id}},
+        {query: GROUND_STATION_DETAIL_QUERY, variables: {id: selectedWindow.stationId}},
+      ],
       onCompleted: () => navigate("/contacts"),
     }).catch(() => {});
   };
