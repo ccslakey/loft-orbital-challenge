@@ -32,6 +32,7 @@
   "scripts": {
     "build": "concurrently --kill-others-on-fail --names 'type-check,build' --prefix-colors 'magenta,green' 'tsc --project ./src/tsconfig.src.json' 'vite build'",
     "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:refresh": "pnpm codegen:schema && pnpm codegen",
     "codegen:schema": "graphql-codegen --config codegen.schema.ts",
     "dev": "vite",
     "start": "vite preview",

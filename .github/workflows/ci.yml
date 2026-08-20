@@ -44,3 +44,41 @@ jobs:
 
       - name: Run ${{ matrix.task }}
         run: pnpm ${{ matrix.task }}
+
+  # Regenerates schema.graphql + src/gql from live introspection and fails on any diff, so a server
+  # shape change cannot compile green against stale committed types.
+  codegen-drift:
+    name: codegen-drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: react/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and start the server
+        run: |
+          pnpm --filter @loft/server build
+          node apps/server/dist/index.js &
+          for i in $(seq 1 30); do
+            curl -sf -X POST http://localhost:3000/graphql -H 'content-type: application/json' -d '{"query":"{__typename}"}' && break
+            sleep 1
+          done
+
+      - name: Regenerate schema and types
+        run: pnpm --filter @loft/dashboard codegen:refresh
+
+      - name: Fail on drift
+        run: git diff --exit-code -- apps/dashboard/schema.graphql apps/dashboard/src/gql
