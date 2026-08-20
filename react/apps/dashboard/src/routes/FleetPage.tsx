@@ -304,6 +304,7 @@ function FleetPage() {
       <QueryState
         loading={loading && !data}
         error={error}
+        hasData={Boolean(data)}
         empty={satellites.length === 0}
         emptyMessage="No satellites are registered against this operator."
         onRetry={() => void refetch()}

@@ -207,6 +207,7 @@ function MapPage() {
       <QueryState
         loading={(satellitesQuery.loading && !satellitesQuery.data) || (stationsQuery.loading && !stationsQuery.data)}
         error={satellitesQuery.error ?? stationsQuery.error}
+        hasData={Boolean(satellitesQuery.data && stationsQuery.data)}
         empty={tracked.length === 0}
         emptyMessage="No satellites are registered against this operator."
         onRetry={() => {

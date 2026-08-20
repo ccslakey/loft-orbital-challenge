@@ -10,6 +10,8 @@ import styles from "./QueryState.module.scss";
 interface QueryStateProps {
   loading: boolean;
   error?: ErrorLike;
+  /** When data is already on screen, an error renders as a non-blocking banner instead of replacing the page. */
+  hasData?: boolean;
   empty?: boolean;
   emptyMessage?: string;
   onRetry?: () => void;
@@ -18,8 +20,8 @@ interface QueryStateProps {
 
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
-function QueryState({loading, error, empty, emptyMessage, onRetry, children}: QueryStateProps) {
-  if (error) {
+function QueryState({loading, error, hasData, empty, emptyMessage, onRetry, children}: QueryStateProps) {
+  if (error && !hasData) {
     return (
       <div className={styles.state} role="alert">
         <p className={styles.headline}>Link to the API failed</p>
@@ -50,7 +52,21 @@ function QueryState({loading, error, empty, emptyMessage, onRetry, children}: Qu
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {error ? (
+        <p className={styles.stale} role="status">
+          <span>Link degraded — showing last received data.</span>
+          {onRetry ? (
+            <button className={styles.staleRetry} type="button" onClick={onRetry}>
+              Retry
+            </button>
+          ) : null}
+        </p>
+      ) : null}
+      {children}
+    </>
+  );
 }
 
 export default QueryState;

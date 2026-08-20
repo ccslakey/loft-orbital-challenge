@@ -175,6 +175,7 @@ function SatellitePage() {
       <QueryState
         loading={loading && !data}
         error={error}
+        hasData={Boolean(data)}
         empty={!satellite}
         emptyMessage="No satellite matches that identifier."
         onRetry={() => void refetch()}

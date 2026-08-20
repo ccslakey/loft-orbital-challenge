@@ -35,6 +35,7 @@ function ReportsPage() {
       <QueryState
         loading={loading && !data}
         error={error}
+        hasData={Boolean(data)}
         empty={reports.length === 0}
         emptyMessage="No reports have been raised."
         onRetry={() => void refetch()}

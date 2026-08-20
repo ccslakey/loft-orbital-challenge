@@ -151,6 +151,7 @@ function ContactsPage() {
       <QueryState
         loading={loading && !data}
         error={error}
+        hasData={Boolean(data)}
         empty={allContacts.length === 0}
         emptyMessage="No contacts have been scheduled."
         onRetry={() => void refetch()}

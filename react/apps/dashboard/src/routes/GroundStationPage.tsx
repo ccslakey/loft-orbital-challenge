@@ -181,6 +181,7 @@ function GroundStationPage() {
       <QueryState
         loading={loading && !data}
         error={error}
+        hasData={Boolean(data)}
         empty={!station}
         emptyMessage="No ground station matches that identifier."
         onRetry={() => void refetch()}
