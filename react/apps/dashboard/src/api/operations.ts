@@ -346,6 +346,35 @@ export const REPORTS_QUERY = graphql(`
   }
 `);
 
+// A report targets a satellite or a ground station, sometimes neither — both ids are nullable.
+export const CREATE_REPORT = graphql(`
+  mutation CreateReport(
+    $title: String!
+    $type: String!
+    $content: String!
+    $date: Date!
+    $employee_id: ID!
+    $satellite_id: ID
+    $groundStation_id: ID
+  ) {
+    createReport(
+      title: $title
+      type: $type
+      content: $content
+      date: $date
+      employee_id: $employee_id
+      satellite_id: $satellite_id
+      groundStation_id: $groundStation_id
+    ) {
+      id
+      title
+      type
+      date
+      content
+    }
+  }
+`);
+
 export const EMPLOYEES_QUERY = graphql(`
   query Employees {
     allEmployees(sortField: "name", sortOrder: "asc") {
