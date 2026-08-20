@@ -207,65 +207,6 @@
 
 /* Tables /////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
-.tableWrap {
-  overflow-x: auto;
-}
-
-.table {
-  width: 100%;
-  min-width: 640px;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: var(--space-2) var(--space-3);
-    text-align: left;
-  }
-
-  thead th {
-    @include label;
-
-    white-space: nowrap;
-    border-bottom: 1px solid var(--rule-strong);
-  }
-
-  tbody tr {
-    border-bottom: 1px solid var(--rule);
-
-    &[data-state="nominal"] {
-      box-shadow: inset 3px 0 0 var(--state-nominal);
-    }
-
-    &[data-state="planned"] {
-      box-shadow: inset 3px 0 0 var(--state-planned);
-    }
-
-    &[data-state="inert"] {
-      box-shadow: inset 3px 0 0 var(--state-inert);
-    }
-
-    &:last-child {
-      border-bottom: 0;
-    }
-
-    &:hover {
-      background: var(--panel-sunk);
-    }
-  }
-
-  tbody td {
-    font-size: var(--text-sm);
-    color: var(--ink-2);
-  }
-}
-
-.numeric {
-  @include tabular;
-
-  font-size: var(--text-sm);
-  white-space: nowrap;
-}
-
 .rowLink,
 .inlineLink {
   font-size: var(--text-sm);

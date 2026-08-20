@@ -6,12 +6,12 @@ import {Link, useParams} from "react-router-dom";
 
 import {EMPLOYEES_QUERY, GROUND_STATION_DETAIL_QUERY, MAP_SATELLITES_QUERY} from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
+import ContactTable from "@/components/ui/ContactTable.js";
 import PassTable from "@/components/ui/PassTable.js";
 import QueryState from "@/components/ui/QueryState.js";
 import ReportCard from "@/components/ui/ReportCard.js";
 import {useContactRows} from "@/hooks/useContactRows.js";
 import {useNow} from "@/hooks/useNow.js";
-import {PHASE_PRESENTATION} from "@/lib/contacts.js";
 import {
   CONTACT_HORIZON_HOURS,
   findContactWindows,
@@ -20,7 +20,7 @@ import {
   type PassWindow,
   type WindowsCache,
 } from "@/lib/fleet.js";
-import {formatLatitude, formatLongitude, formatUtcDateTime} from "@/lib/format.js";
+import {formatLatitude, formatLongitude} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
@@ -223,51 +223,19 @@ function GroundStationPage() {
                   <p className={styles.missing}>No contacts are scheduled through this station.</p>
                 ) : (
                   <>
-                    <div className={styles.tableWrap}>
-                      <table className={styles.table}>
-                        <thead>
-                          <tr>
-                            <th scope="col">Phase</th>
-                            <th scope="col" className={styles.numeric}>
-                              Date
-                            </th>
-                            <th scope="col">Satellite</th>
-                            <th scope="col">Type</th>
-                            <th scope="col">Payload</th>
-                            <th scope="col">Operator</th>
-                            <th scope="col" className={styles.numeric}>
-                              Window
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {contactRows.map(({contact, dateMs, phase, windowLabel}) => (
-                            <tr key={contact.id} data-state={PHASE_PRESENTATION[phase].state}>
-                              <td>
-                                <StatusChip
-                                  label={PHASE_PRESENTATION[phase].label}
-                                  state={PHASE_PRESENTATION[phase].state}
-                                />
-                              </td>
-                              <td className={styles.numeric}>{formatUtcDateTime(dateMs)}</td>
-                              <td>
-                                {contact.Satellite ? (
-                                  <Link className={styles.rowLink} to={`/fleet/${contact.Satellite.id}`}>
-                                    {contact.Satellite.name}
-                                  </Link>
-                                ) : (
-                                  "—"
-                                )}
-                              </td>
-                              <td>{contact.type}</td>
-                              <td>{contact.Payload?.name ?? "—"}</td>
-                              <td>{contact.Employee?.name ?? "—"}</td>
-                              <td className={styles.numeric}>{windowLabel ?? "—"}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <ContactTable
+                      rows={contactRows}
+                      entityHeader="Satellite"
+                      renderEntity={(contact) =>
+                        contact.Satellite ? (
+                          <Link className={styles.rowLink} to={`/fleet/${contact.Satellite.id}`}>
+                            {contact.Satellite.name}
+                          </Link>
+                        ) : (
+                          "—"
+                        )
+                      }
+                    />
                     <Link className={styles.inlineLink} to={`/contacts?station=${stationId}`}>
                       All contacts →
                     </Link>
