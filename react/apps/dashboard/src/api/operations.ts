@@ -90,6 +90,57 @@ export const SATELLITE_DETAIL_QUERY = graphql(`
   }
 `);
 
+// Contacts and reports for one satellite, fetched apart from SATELLITE_DETAIL_QUERY so its position poll
+// does not re-fetch them every tick. Both normalize into the same Satellite cache entity.
+export const SATELLITE_ACTIVITY_QUERY = graphql(`
+  query SatelliteActivity($id: ID!) {
+    Satellite(id: $id) {
+      id
+      Contacts {
+        id
+        date
+        type
+        GroundStation {
+          id
+          name
+          status
+          coordinates
+        }
+        Payload {
+          id
+          name
+        }
+        Employee {
+          id
+          name
+        }
+      }
+      Reports {
+        id
+        title
+        type
+        date
+        content
+        Employee {
+          id
+          name
+          role
+        }
+        Comments {
+          id
+          date
+          content
+          Employee {
+            id
+            name
+            role
+          }
+        }
+      }
+    }
+  }
+`);
+
 /* Ground segment /////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 export const GROUND_STATIONS_QUERY = graphql(`

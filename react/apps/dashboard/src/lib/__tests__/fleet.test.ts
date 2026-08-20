@@ -3,6 +3,7 @@
 import {describe, expect, it} from "vitest";
 
 import {
+  activeFleetStations,
   filterRows,
   findContactWindows,
   firstUpcomingWindow,
@@ -279,5 +280,23 @@ describe("timelineSegments", () => {
 
   it("drops fully elapsed windows", () => {
     expect(timelineSegments([pass(-200, -100)], 0, horizonMs)).toEqual([]);
+  });
+});
+
+describe("activeFleetStations", () => {
+  it("keeps only operational, positioned stations", () => {
+    const stations = [
+      {id: "a", name: "A", status: "Online", coordinates: [10, 20]},
+      {id: "b", name: "B", status: "Offline", coordinates: [10, 20]},
+      {id: "c", name: "C", status: "Online", coordinates: [null, 20]},
+      null,
+    ];
+
+    expect(activeFleetStations(stations)).toEqual([{id: "a", name: "A", latitude: 10, longitude: 20}]);
+  });
+
+  it("returns an empty list for missing input", () => {
+    expect(activeFleetStations(null)).toEqual([]);
+    expect(activeFleetStations(undefined)).toEqual([]);
   });
 });

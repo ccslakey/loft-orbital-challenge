@@ -60,3 +60,14 @@ export const formatDate = (value: string | null | undefined): string => {
     ? "—"
     : date.toLocaleDateString("en-US", {year: "numeric", month: "short", day: "2-digit", timeZone: "UTC"});
 };
+
+// Epoch ms -> "Jan 09, 2021 · 14:32 UTC".
+export const formatUtcDateTime = (ms: number | null | undefined): string => {
+  if (ms === null || ms === undefined || !Number.isFinite(ms)) {
+    return "—";
+  }
+
+  const iso = new Date(ms).toISOString();
+
+  return `${formatDate(iso)} · ${iso.slice(11, 16)} UTC`;
+};

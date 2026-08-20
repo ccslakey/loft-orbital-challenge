@@ -8,6 +8,7 @@ import {GROUND_STATIONS_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
 import {
+  activeFleetStations,
   CONTACT_HORIZON_HOURS,
   filterRows,
   findContactWindows,
@@ -20,7 +21,6 @@ import {
   timelineSegments,
   type FleetFilters,
   type FleetSortField,
-  type FleetStation,
   type PassWindow,
   type SortDirection,
   type TimelineSegment,
@@ -28,7 +28,7 @@ import {
 } from "@/lib/fleet.js";
 import {formatAltitude, formatDate, formatLatitude, formatLongitude, formatSpan} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
-import {getGroundStationState, getSatelliteState, type State} from "@/lib/status.js";
+import {getSatelliteState, type State} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
 import {DEFAULT_ELEVATION_MASK_DEG} from "@/lib/visibility.js";
 
@@ -105,18 +105,8 @@ function FleetPage() {
 
   const satellites = useMemo(() => (data?.allSatellites ?? []).filter((satellite) => satellite !== null), [data]);
 
-  // Contact search only considers stations that could actually take a pass.
   const activeStations = useMemo(
-    () =>
-      (stationsQuery.data?.allGroundStations ?? [])
-        .filter((station) => station !== null)
-        .flatMap((station): FleetStation[] => {
-          const [latitude, longitude] = station.coordinates;
-
-          return getGroundStationState(station.status) === "inert" || latitude == null || longitude == null
-            ? []
-            : [{id: station.id, name: station.name, latitude, longitude}];
-        }),
+    () => activeFleetStations(stationsQuery.data?.allGroundStations),
     [stationsQuery.data],
   );
 

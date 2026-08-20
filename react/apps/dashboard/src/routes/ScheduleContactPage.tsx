@@ -14,10 +14,10 @@ import {
 import QueryState from "@/components/ui/QueryState.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import {busyInterval, conflictsFor, PASS_PAD_MS, recoverContactWindow, type ScheduledUse} from "@/lib/contacts.js";
-import {CONTACT_HORIZON_HOURS, findContactWindows, type FleetStation, type PassWindow} from "@/lib/fleet.js";
+import {activeFleetStations, CONTACT_HORIZON_HOURS, findContactWindows, type PassWindow} from "@/lib/fleet.js";
 import {formatSpan} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
-import {getGroundStationState, getPayloadState, getSatelliteState} from "@/lib/status.js";
+import {getPayloadState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
 
 import styles from "./ScheduleContactPage.module.scss";
@@ -78,16 +78,7 @@ function ScheduleContactPage() {
   const employees = (employeesQuery.data?.allEmployees ?? []).filter((employee) => employee !== null);
 
   const activeStations = useMemo(
-    () =>
-      (stationsQuery.data?.allGroundStations ?? [])
-        .filter((station) => station !== null)
-        .flatMap((station): FleetStation[] => {
-          const [latitude, longitude] = station.coordinates;
-
-          return getGroundStationState(station.status) === "inert" || latitude == null || longitude == null
-            ? []
-            : [{id: station.id, name: station.name, latitude, longitude}];
-        }),
+    () => activeFleetStations(stationsQuery.data?.allGroundStations),
     [stationsQuery.data],
   );
 

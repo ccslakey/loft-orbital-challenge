@@ -1,14 +1,15 @@
 /* Imports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 import {useQuery} from "@apollo/client/react";
-import {useEffect, useMemo, useState} from "react";
-import {Link} from "react-router-dom";
+import {useMemo} from "react";
+import {Link, useSearchParams} from "react-router-dom";
 
 import {CONTACTS_QUERY} from "@/api/operations.js";
 import QueryState from "@/components/ui/QueryState.js";
 import StatusChip from "@/components/ui/StatusChip.js";
+import {useNow} from "@/hooks/useNow.js";
 import {contactPhase, recoverContactWindow, type ContactPhase} from "@/lib/contacts.js";
-import {formatDate, formatSpan} from "@/lib/format.js";
+import {formatSpan, formatUtcDateTime} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getSatelliteState, type State} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
@@ -29,36 +30,33 @@ interface ContactRow {
   windowLabel: string | null;
 }
 
-/* Formatting /////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
-const formatUtcDateTime = (ms: number): string => {
-  const date = new Date(ms);
-
-  return `${formatDate(date.toISOString())} · ${date.toISOString().slice(11, 16)} UTC`;
-};
-
-/* Hooks //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
-// A contact migrates upcoming -> in progress -> past with no data change, so the grouping needs a clock.
-
-const useNow = (intervalMs: number): Date => {
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), intervalMs);
-
-    return () => window.clearInterval(id);
-  }, [intervalMs]);
-
-  return now;
-};
-
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 function ContactsPage() {
   const {data, loading, error, refetch} = useQuery(CONTACTS_QUERY, {variables: {perPage: 100, page: 0}});
   const now = useNow(15_000);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const contacts = useMemo(() => (data?.allContacts ?? []).filter((contact) => contact !== null), [data]);
+  const satelliteFilter = searchParams.get("satellite");
+
+  const allContacts = useMemo(() => (data?.allContacts ?? []).filter((contact) => contact !== null), [data]);
+  const contacts = useMemo(
+    () =>
+      satelliteFilter === null
+        ? allContacts
+        : allContacts.filter((contact) => contact.Satellite?.id === satelliteFilter),
+    [allContacts, satelliteFilter],
+  );
+
+  // Chip label from any matching contact; an id with no contacts (or an unknown id) falls back to the raw value.
+  const filterLabel = contacts[0]?.Satellite?.name ?? satelliteFilter;
+
+  const clearFilter = () => {
+    const next = new URLSearchParams(searchParams);
+
+    next.delete("satellite");
+    setSearchParams(next, {replace: true});
+  };
 
   // Query order is date desc; in-progress and upcoming flip to soonest-first, past stays most-recent-first.
   const {active, upcoming, past} = useMemo(() => {
@@ -115,12 +113,27 @@ function ContactsPage() {
           Scheduled communication sessions between satellites and contracted ground stations. Window durations are
           recomputed from the current TLE; a dash means the stored time no longer matches a pass.
         </p>
+        {satelliteFilter !== null ? (
+          <p className={styles.filterRow}>
+            <span className={styles.filterChip}>
+              Satellite: {filterLabel}
+              <button
+                type="button"
+                className={styles.filterClear}
+                aria-label="Clear satellite filter"
+                onClick={clearFilter}
+              >
+                ✕
+              </button>
+            </span>
+          </p>
+        ) : null}
       </header>
 
       <QueryState
         loading={loading && !data}
         error={error}
-        empty={contacts.length === 0}
+        empty={allContacts.length === 0}
         emptyMessage="No contacts have been scheduled."
         onRetry={() => void refetch()}
       >
