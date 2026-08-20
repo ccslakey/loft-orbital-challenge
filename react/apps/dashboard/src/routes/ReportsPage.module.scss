@@ -25,6 +25,92 @@
   color: var(--ink-2);
 }
 
+.form {
+  @include panel;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--rule);
+}
+
+.formTitle {
+  @include label;
+}
+
+.fieldRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 180px;
+}
+
+.fieldLabel {
+  @include label;
+}
+
+.select,
+.input,
+.textarea {
+  padding: var(--space-2);
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  background: var(--panel-sunk);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.textarea {
+  font-family: var(--font-mono);
+  resize: vertical;
+}
+
+.formFoot {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.formError {
+  font-size: var(--text-sm);
+  color: var(--state-critical);
+}
+
+.submit {
+  align-self: flex-end;
+  padding: var(--space-2) var(--space-4);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--panel);
+  cursor: pointer;
+  background: var(--ink);
+  border: 0;
+  border-radius: var(--radius-sm);
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
 .reports {
   display: flex;
   flex-direction: column;
