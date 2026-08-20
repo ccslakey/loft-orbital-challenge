@@ -50,6 +50,47 @@
   color: var(--ink-2);
 }
 
+.actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.actionPrimary,
+.actionSecondary,
+.actionDisabled {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.actionPrimary {
+  color: var(--panel);
+  background: var(--ink);
+}
+
+.actionSecondary {
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+
+  &:hover {
+    background: var(--panel-sunk);
+  }
+}
+
+.actionDisabled {
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  cursor: not-allowed;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -152,4 +193,136 @@
 
   flex: 1;
   text-align: right;
+}
+
+/* Tables /////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: var(--space-2) var(--space-3);
+    text-align: left;
+  }
+
+  thead th {
+    @include label;
+
+    white-space: nowrap;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--rule);
+
+    &[data-state="nominal"] {
+      box-shadow: inset 3px 0 0 var(--state-nominal);
+    }
+
+    &[data-state="planned"] {
+      box-shadow: inset 3px 0 0 var(--state-planned);
+    }
+
+    &[data-state="inert"] {
+      box-shadow: inset 3px 0 0 var(--state-inert);
+    }
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &:hover {
+      background: var(--panel-sunk);
+    }
+  }
+
+  tbody td {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+}
+
+.numeric {
+  @include tabular;
+
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.rowLink,
+.inlineLink {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px;
+
+  &:hover {
+    text-decoration-color: var(--ink);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.inlineLink {
+  align-self: flex-start;
+}
+
+.srOnly {
+  @include visually-hidden;
+}
+
+/* Orbit //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+.orbitReadout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3) var(--space-6);
+
+  dt,
+  dd {
+    white-space: nowrap;
+  }
+}
+
+// The epoch pairs a long datetime with the staleness chip; a shared column squeezes it into wrapping.
+.orbitEpoch {
+  grid-column: 1 / -1;
+}
+
+.epochCell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Reports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+.reportsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  @include display(var(--text-lg));
+}
+
+.reports {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  list-style: none;
 }

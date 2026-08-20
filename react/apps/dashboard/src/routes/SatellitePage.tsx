@@ -1,16 +1,66 @@
 /* Imports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 import {useQuery} from "@apollo/client/react";
+import {useMemo} from "react";
 import {Link, useParams} from "react-router-dom";
 
-import {SATELLITE_DETAIL_QUERY} from "@/api/operations.js";
+import {
+  EMPLOYEES_QUERY,
+  GROUND_STATIONS_QUERY,
+  SATELLITE_ACTIVITY_QUERY,
+  SATELLITE_DETAIL_QUERY,
+} from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
-import {formatAltitude, formatDate, formatLatitude, formatLongitude} from "@/lib/format.js";
-import {getLaunchState, getPayloadState, getSatelliteState} from "@/lib/status.js";
+import ReportCard from "@/components/ui/ReportCard.js";
+import {useNow} from "@/hooks/useNow.js";
+import {contactPhase, recoverContactWindow, type ContactPhase} from "@/lib/contacts.js";
+import {
+  activeFleetStations,
+  CONTACT_HORIZON_HOURS,
+  findContactWindows,
+  getCachedWindows,
+  type WindowsCache,
+} from "@/lib/fleet.js";
+import {
+  formatAltitude,
+  formatDate,
+  formatLatitude,
+  formatLongitude,
+  formatSpan,
+  formatUtcDateTime,
+} from "@/lib/format.js";
+import {deriveOrbit, tleAgeDays, TLE_STALE_DAYS} from "@/lib/orbit.js";
+import {createSatrec} from "@/lib/propagation.js";
+import {getLaunchState, getPayloadState, getSatelliteState, type State} from "@/lib/status.js";
 import {getCatalogNumber, parseTle} from "@/lib/tle.js";
+import type {SatelliteActivityQuery} from "@/gql/graphql.js";
 
 import styles from "./SatellitePage.module.scss";
+
+/* Types //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+type ActivityContact = NonNullable<NonNullable<NonNullable<SatelliteActivityQuery["Satellite"]>["Contacts"]>[number]>;
+
+interface ContactRow {
+  contact: ActivityContact;
+  dateMs: number;
+  phase: ContactPhase;
+  windowLabel: string | null;
+}
+
+/* Constants //////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+// Keyed by satellite + TLE + station set, shared with remounts; the window search is too heavy per render.
+const passCache: WindowsCache = new Map();
+
+const PHASE_PRESENTATION: Record<ContactPhase, {label: string; state: State; rank: number}> = {
+  active: {label: "In progress", state: "nominal", rank: 0},
+  upcoming: {label: "Upcoming", state: "planned", rank: 1},
+  past: {label: "Past", state: "inert", rank: 2},
+};
+
+const hhmm = (ms: number): string => new Date(ms).toISOString().slice(11, 16);
 
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -22,11 +72,105 @@ function SatellitePage() {
     skip: !satelliteId,
     pollInterval: 5000,
   });
+  // Contacts and reports are fetched apart from the 5 s position poll so they are not re-fetched every tick.
+  const activityQuery = useQuery(SATELLITE_ACTIVITY_QUERY, {
+    variables: {id: satelliteId ?? ""},
+    skip: !satelliteId,
+  });
+  const stationsQuery = useQuery(GROUND_STATIONS_QUERY, {variables: {perPage: 50, page: 0}});
+  const employeesQuery = useQuery(EMPLOYEES_QUERY);
+  const now = useNow(15_000);
 
   const satellite = data?.Satellite ?? null;
   const state = getSatelliteState(satellite?.status);
-  const tle = parseTle(satellite?.tle);
+  const inert = state === "inert";
   const [latitude, longitude] = satellite?.coordinates ?? [];
+
+  // Memoized off the raw tle field so the 5 s position poll does not rebuild the satrec chain.
+  const tleValue = satellite?.tle;
+  const tle = useMemo(() => parseTle(tleValue), [tleValue]);
+  const satrec = useMemo(() => (tle ? createSatrec(tle) : null), [tle]);
+  const orbit = useMemo(() => (satrec ? deriveOrbit(satrec) : null), [satrec]);
+  const tleAgeMs = orbit ? now.getTime() - orbit.epochMs : null;
+  const tleStale = orbit !== null && tleAgeDays(orbit.epochMs, now.getTime()) > TLE_STALE_DAYS;
+
+  const activeStations = useMemo(
+    () => activeFleetStations(stationsQuery.data?.allGroundStations),
+    [stationsQuery.data],
+  );
+
+  const upcomingPasses = useMemo(() => {
+    if (!satrec || !satelliteId || activeStations.length === 0) {
+      return [];
+    }
+
+    const stationsKey = activeStations.map((station) => station.id).join("|");
+    const windows = getCachedWindows(passCache, `${satelliteId}\n${tle?.line1}\n${stationsKey}`, now, () =>
+      findContactWindows(satrec, activeStations, now),
+    );
+
+    return windows.filter((window) => window.losMs > now.getTime());
+  }, [satrec, satelliteId, tle, activeStations, now]);
+
+  const contacts = useMemo(
+    () => (activityQuery.data?.Satellite?.Contacts ?? []).filter((contact) => contact !== null),
+    [activityQuery.data],
+  );
+
+  const contactRows = useMemo(() => {
+    const nowMs = now.getTime();
+
+    return contacts
+      .flatMap((contact): ContactRow[] => {
+        const dateMs = new Date(contact.date).getTime();
+
+        if (Number.isNaN(dateMs)) {
+          return [];
+        }
+
+        const [stationLat, stationLon] = contact.GroundStation?.coordinates ?? [null, null];
+        const window =
+          satrec && stationLat != null && stationLon != null
+            ? recoverContactWindow(satrec, stationLat, stationLon, dateMs)
+            : null;
+        const phase = contactPhase(dateMs, window?.losMs ?? null, nowMs);
+
+        return [
+          {
+            contact,
+            dateMs,
+            phase,
+            windowLabel:
+              phase === "active" && window
+                ? `ends in ${formatSpan(window.losMs - nowMs)}`
+                : window
+                  ? `${formatSpan(window.losMs - dateMs)} · ${Math.round(window.maxElevationDeg)}°`
+                  : null,
+          },
+        ];
+      })
+      .sort((a, b) => {
+        const rank = PHASE_PRESENTATION[a.phase].rank - PHASE_PRESENTATION[b.phase].rank;
+
+        // Past runs most-recent-first; everything else soonest-first.
+        return rank !== 0 ? rank : a.phase === "past" ? b.dateMs - a.dateMs : a.dateMs - b.dateMs;
+      });
+  }, [contacts, satrec, now]);
+
+  const reports = useMemo(
+    () =>
+      (activityQuery.data?.Satellite?.Reports ?? [])
+        .filter((report) => report !== null)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [activityQuery.data],
+  );
+
+  const employees = useMemo(
+    () => (employeesQuery.data?.allEmployees ?? []).filter((employee) => employee !== null),
+    [employeesQuery.data],
+  );
+
+  const scheduleHref = `/contacts/new?satellite=${satelliteId}`;
 
   return (
     <section className={styles.page}>
@@ -50,6 +194,20 @@ function SatellitePage() {
                 <h1 className={styles.title}>{satellite.name}</h1>
                 <StatusChip label={satellite.status} state={state} />
                 <p className={styles.description}>{satellite.description}</p>
+              </div>
+              <div className={styles.actions}>
+                {inert ? (
+                  <span className={styles.actionDisabled} title="Decommissioned satellites cannot be scheduled">
+                    Schedule contact
+                  </span>
+                ) : (
+                  <Link className={styles.actionPrimary} to={scheduleHref}>
+                    Schedule contact
+                  </Link>
+                )}
+                <Link className={styles.actionSecondary} to={`/contacts?satellite=${satelliteId}`}>
+                  View contacts
+                </Link>
               </div>
             </header>
 
@@ -126,13 +284,166 @@ function SatellitePage() {
               </article>
 
               <article className={`${styles.panel} ${styles.panelWide}`}>
-                <h2 className={styles.panelTitle}>Two-line element set</h2>
-                {tle ? (
-                  <pre className={styles.tle}>
-                    {tle.line1}
-                    {"\n"}
-                    {tle.line2}
-                  </pre>
+                <h2 className={styles.panelTitle}>Upcoming passes — {CONTACT_HORIZON_HOURS} h horizon</h2>
+                {!tle ? (
+                  <p className={styles.missing}>No valid two-line element set — passes cannot be predicted.</p>
+                ) : stationsQuery.loading && !stationsQuery.data ? (
+                  <p className={styles.missing}>Computing passes…</p>
+                ) : upcomingPasses.length === 0 ? (
+                  <p className={styles.missing}>
+                    No passes clear the mask over operational stations within the next {CONTACT_HORIZON_HOURS} hours.
+                  </p>
+                ) : (
+                  <div className={styles.tableWrap}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th scope="col">Station</th>
+                          <th scope="col" className={styles.numeric}>
+                            <abbr title="Acquisition of signal">AOS</abbr>
+                          </th>
+                          <th scope="col" className={styles.numeric}>
+                            <abbr title="Loss of signal">LOS</abbr>
+                          </th>
+                          <th scope="col" className={styles.numeric}>
+                            Duration
+                          </th>
+                          <th scope="col" className={styles.numeric}>
+                            Max elev
+                          </th>
+                          {inert ? null : (
+                            <th scope="col">
+                              <span className={styles.srOnly}>Schedule</span>
+                            </th>
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {upcomingPasses.map((window) => (
+                          <tr key={`${window.stationId}:${window.aosMs}`}>
+                            <td>{window.stationName}</td>
+                            <td className={styles.numeric}>{formatUtcDateTime(window.aosMs)}</td>
+                            <td className={styles.numeric}>{window.truncated ? "—" : `${hhmm(window.losMs)} UTC`}</td>
+                            <td className={styles.numeric}>{formatSpan(window.losMs - window.aosMs)}</td>
+                            <td className={styles.numeric}>{Math.round(window.maxElevationDeg)}°</td>
+                            {inert ? null : (
+                              <td className={styles.numeric}>
+                                <Link
+                                  className={styles.rowLink}
+                                  to={`${scheduleHref}&station=${window.stationId}&aos=${window.aosMs}`}
+                                >
+                                  Schedule
+                                </Link>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </article>
+
+              <article className={`${styles.panel} ${styles.panelWide}`}>
+                <h2 className={styles.panelTitle}>Contacts</h2>
+                {activityQuery.loading && !activityQuery.data ? (
+                  <p className={styles.missing}>Loading contacts…</p>
+                ) : contactRows.length === 0 ? (
+                  <p className={styles.missing}>
+                    No contacts scheduled.{" "}
+                    {inert ? null : (
+                      <Link className={styles.inlineLink} to={scheduleHref}>
+                        Schedule one →
+                      </Link>
+                    )}
+                  </p>
+                ) : (
+                  <>
+                    <div className={styles.tableWrap}>
+                      <table className={styles.table}>
+                        <thead>
+                          <tr>
+                            <th scope="col">Phase</th>
+                            <th scope="col" className={styles.numeric}>
+                              Date
+                            </th>
+                            <th scope="col">Station</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Payload</th>
+                            <th scope="col">Operator</th>
+                            <th scope="col" className={styles.numeric}>
+                              Window
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {contactRows.map(({contact, dateMs, phase, windowLabel}) => (
+                            <tr key={contact.id} data-state={PHASE_PRESENTATION[phase].state}>
+                              <td>
+                                <StatusChip
+                                  label={PHASE_PRESENTATION[phase].label}
+                                  state={PHASE_PRESENTATION[phase].state}
+                                />
+                              </td>
+                              <td className={styles.numeric}>{formatUtcDateTime(dateMs)}</td>
+                              <td>{contact.GroundStation?.name ?? "—"}</td>
+                              <td>{contact.type}</td>
+                              <td>{contact.Payload?.name ?? "—"}</td>
+                              <td>{contact.Employee?.name ?? "—"}</td>
+                              <td className={styles.numeric}>{windowLabel ?? "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <Link className={styles.inlineLink} to={`/contacts?satellite=${satelliteId}`}>
+                      All contacts →
+                    </Link>
+                  </>
+                )}
+              </article>
+
+              <article className={`${styles.panel} ${styles.panelWide}`}>
+                <h2 className={styles.panelTitle}>Orbit</h2>
+                {tle && orbit ? (
+                  <>
+                    <dl className={`${styles.readout} ${styles.orbitReadout}`}>
+                      <div>
+                        <dt>Inclination</dt>
+                        <dd>{orbit.inclinationDeg.toFixed(2)}°</dd>
+                      </div>
+                      <div>
+                        <dt>Period</dt>
+                        <dd>{orbit.periodMin.toFixed(1)} min</dd>
+                      </div>
+                      <div>
+                        <dt>Apogee</dt>
+                        <dd>{formatAltitude(orbit.apogeeKm)}</dd>
+                      </div>
+                      <div>
+                        <dt>Perigee</dt>
+                        <dd>{formatAltitude(orbit.perigeeKm)}</dd>
+                      </div>
+                      <div>
+                        <dt>Eccentricity</dt>
+                        <dd>{orbit.eccentricity.toFixed(5)}</dd>
+                      </div>
+                      <div className={styles.orbitEpoch}>
+                        <dt>TLE epoch</dt>
+                        <dd className={styles.epochCell}>
+                          {formatUtcDateTime(orbit.epochMs)}
+                          {tleStale && tleAgeMs !== null ? (
+                            <StatusChip label={`${formatSpan(tleAgeMs)} old`} state="caution" />
+                          ) : null}
+                        </dd>
+                      </div>
+                    </dl>
+                    <pre className={styles.tle}>
+                      {tle.line1}
+                      {"\n"}
+                      {tle.line2}
+                    </pre>
+                  </>
                 ) : (
                   <p className={styles.missing}>No valid two-line element set on record.</p>
                 )}
@@ -155,6 +466,21 @@ function SatellitePage() {
                 )}
               </article>
             </div>
+
+            <section className={styles.reportsSection}>
+              <h2 className={styles.sectionTitle}>Reports</h2>
+              {activityQuery.loading && !activityQuery.data ? (
+                <p className={styles.missing}>Loading reports…</p>
+              ) : reports.length === 0 ? (
+                <p className={styles.missing}>No reports reference this satellite.</p>
+              ) : (
+                <ul className={styles.reports}>
+                  {reports.map((report) => (
+                    <ReportCard key={report.id} report={report} employees={employees} hideTarget />
+                  ))}
+                </ul>
+              )}
+            </section>
           </>
         ) : null}
       </QueryState>

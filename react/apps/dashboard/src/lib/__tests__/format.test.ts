@@ -2,7 +2,14 @@
 
 import {describe, expect, it} from "vitest";
 
-import {formatAltitude, formatDate, formatLatitude, formatLongitude, formatSpan} from "@/lib/format.js";
+import {
+  formatAltitude,
+  formatDate,
+  formatLatitude,
+  formatLongitude,
+  formatSpan,
+  formatUtcDateTime,
+} from "@/lib/format.js";
 
 /* Tests //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -67,5 +74,16 @@ describe("formatDate", () => {
   it("renders an em dash for missing or unparseable values", () => {
     expect(formatDate(null)).toBe("\u2014");
     expect(formatDate("not a date")).toBe("\u2014");
+  });
+});
+
+describe("formatUtcDateTime", () => {
+  it("formats epoch ms as a UTC date and time", () => {
+    expect(formatUtcDateTime(Date.UTC(2021, 0, 9, 14, 32))).toBe("Jan 09, 2021 \u00b7 14:32 UTC");
+  });
+
+  it("renders an em dash for missing or non-finite values", () => {
+    expect(formatUtcDateTime(null)).toBe("\u2014");
+    expect(formatUtcDateTime(Number.NaN)).toBe("\u2014");
   });
 });

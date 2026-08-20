@@ -115,6 +115,24 @@ API has no current-user concept, so a `<select>` of `allEmployees` sets
 `employee_id` rather than hardcoding a stand-in user.
 **Why:** _TODO — honest about the missing auth instead of hiding it._
 
+### Satellite detail: activity split from the position poll
+Contacts and reports arrive via a second, non-polling query using the
+`Satellite.Contacts` / `Satellite.Reports` reverse relations; both queries
+normalize into the same `Satellite` cache entity. Plan in
+[`plans/satellite-detail.md`](./plans/satellite-detail.md).
+**Why:** _TODO — report threads shouldn't re-fetch on every 5 s position tick._
+
+### Satellite detail: flat contact list, not `/contacts`' three groups
+One table sorted in-progress → upcoming → past, phase as a chip per row.
+**Why:** _TODO — per-satellite counts are small; grouped sections would be
+mostly empty states._
+
+### Satellite detail: TLE staleness flagged at 14 days
+`lib/orbit.ts` derives elements + epoch from the satrec; an epoch older than
+14 d gets a caution chip beside the orbit readout.
+**Why:** _TODO — stale elements quietly corrupt the pass predictions shown
+above them._
+
 ### Comments: terse, business-logic only
 Design-rationale prose stripped from source; it lives in the README/PR instead.
 **Why:** Rationale in source goes stale and can be wrong. _(expand if needed)_

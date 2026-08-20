@@ -2,7 +2,7 @@
 
 import type {SatRec} from "satellite.js";
 
-import {getLaunchState} from "./status.js";
+import {getGroundStationState, getLaunchState} from "./status.js";
 import {findNextWindow} from "./windows.js";
 
 /* Row model //////////////////////////////////////////////////////////////////////////////////////////////////////// */
@@ -43,6 +43,25 @@ export interface FleetStation {
   latitude: number;
   longitude: number;
 }
+
+interface StationLike {
+  id: string;
+  name: string;
+  status: string;
+  coordinates: ReadonlyArray<number | null>;
+}
+
+// Window search only considers stations that could actually take a pass: operational and positioned.
+export const activeFleetStations = (stations: ReadonlyArray<StationLike | null> | null | undefined): FleetStation[] =>
+  (stations ?? [])
+    .filter((station): station is StationLike => station !== null)
+    .flatMap((station): FleetStation[] => {
+      const [latitude, longitude] = station.coordinates;
+
+      return getGroundStationState(station.status) === "inert" || latitude == null || longitude == null
+        ? []
+        : [{id: station.id, name: station.name, latitude, longitude}];
+    });
 
 export interface PassWindow {
   aosMs: number;
