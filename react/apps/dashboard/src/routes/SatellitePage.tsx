@@ -14,15 +14,9 @@ import {
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
 import ReportCard from "@/components/ui/ReportCard.js";
+import {useContactRows} from "@/hooks/useContactRows.js";
 import {useNow} from "@/hooks/useNow.js";
-import {
-  compareContactPhase,
-  contactPhase,
-  contactWindowLabel,
-  PHASE_PRESENTATION,
-  recoverContactWindow,
-  type ContactPhase,
-} from "@/lib/contacts.js";
+import {PHASE_PRESENTATION} from "@/lib/contacts.js";
 import {
   activeFleetStations,
   CONTACT_HORIZON_HOURS,
@@ -43,20 +37,10 @@ import {deriveOrbit, tleAgeDays, TLE_STALE_DAYS} from "@/lib/orbit.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getLaunchState, getPayloadState, getSatelliteState} from "@/lib/status.js";
 import {getCatalogNumber, parseTle} from "@/lib/tle.js";
-import type {SatelliteActivityQuery} from "@/gql/graphql.js";
 
 import styles from "./SatellitePage.module.scss";
 
 /* Types //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
-type ActivityContact = NonNullable<NonNullable<NonNullable<SatelliteActivityQuery["Satellite"]>["Contacts"]>[number]>;
-
-interface ContactRow {
-  contact: ActivityContact;
-  dateMs: number;
-  phase: ContactPhase;
-  windowLabel: string | null;
-}
 
 /* Constants //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
@@ -124,28 +108,7 @@ function SatellitePage() {
     [activityQuery.data],
   );
 
-  const contactRows = useMemo(() => {
-    const nowMs = now.getTime();
-
-    return contacts
-      .flatMap((contact): ContactRow[] => {
-        const dateMs = new Date(contact.date).getTime();
-
-        if (Number.isNaN(dateMs)) {
-          return [];
-        }
-
-        const [stationLat, stationLon] = contact.GroundStation?.coordinates ?? [null, null];
-        const window =
-          satrec && stationLat != null && stationLon != null
-            ? recoverContactWindow(satrec, stationLat, stationLon, dateMs)
-            : null;
-        const phase = contactPhase(dateMs, window?.losMs ?? null, nowMs);
-
-        return [{contact, dateMs, phase, windowLabel: contactWindowLabel(phase, window, dateMs, nowMs)}];
-      })
-      .sort(compareContactPhase);
-  }, [contacts, satrec, now]);
+  const contactRows = useContactRows(contacts, now, {satrec});
 
   const reports = useMemo(
     () =>

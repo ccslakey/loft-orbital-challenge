@@ -3,17 +3,15 @@
 import {useQuery} from "@apollo/client/react";
 import {useMemo} from "react";
 import {Link, useSearchParams} from "react-router-dom";
-import type {SatRec} from "satellite.js";
 
 import {CONTACTS_QUERY} from "@/api/operations.js";
 import QueryState from "@/components/ui/QueryState.js";
 import StatusChip from "@/components/ui/StatusChip.js";
+import {useContactRows} from "@/hooks/useContactRows.js";
 import {useNow} from "@/hooks/useNow.js";
-import {contactPhase, contactWindowLabel, recoverContactWindow, type ContactPhase} from "@/lib/contacts.js";
+import {type ContactPhase} from "@/lib/contacts.js";
 import {formatUtcDateTime} from "@/lib/format.js";
-import {createSatrec} from "@/lib/propagation.js";
 import {getSatelliteState, type State} from "@/lib/status.js";
-import {parseTle} from "@/lib/tle.js";
 import type {ContactsQuery} from "@/gql/graphql.js";
 
 import styles from "./ContactsPage.module.scss";
@@ -72,50 +70,20 @@ function ContactsPage() {
     setSearchParams(next, {replace: true});
   };
 
-  // Query order is date desc; in-progress and upcoming flip to soonest-first, past stays most-recent-first.
+  const recoveredRows = useContactRows(contacts, now);
+
+  // Rows arrive phase-sorted (in-progress and upcoming soonest-first, past most-recent-first).
   const {active, upcoming, past} = useMemo(() => {
-    const nowMs = now.getTime();
-    const satrecCache = new Map<string, SatRec | null>();
-    const rows = contacts.flatMap((contact): ContactRow[] => {
-      const dateMs = new Date(contact.date).getTime();
-
-      if (Number.isNaN(dateMs)) {
-        return [];
-      }
-
-      const satId = contact.Satellite?.id ?? "";
-
-      if (!satrecCache.has(satId)) {
-        const tle = parseTle(contact.Satellite?.tle);
-
-        satrecCache.set(satId, tle ? createSatrec(tle) : null);
-      }
-
-      const satrec = satrecCache.get(satId) ?? null;
-      const [stationLat, stationLon] = contact.GroundStation?.coordinates ?? [null, null];
-      const window =
-        satrec && stationLat != null && stationLon != null
-          ? recoverContactWindow(satrec, stationLat, stationLon, dateMs)
-          : null;
-      const phase = contactPhase(dateMs, window?.losMs ?? null, nowMs);
-
-      return [
-        {
-          contact,
-          dateMs,
-          phase,
-          state: getSatelliteState(contact.Satellite?.status),
-          windowLabel: contactWindowLabel(phase, window, dateMs, nowMs),
-        },
-      ];
-    });
+    const rows = recoveredRows.map(
+      (row): ContactRow => ({...row, state: getSatelliteState(row.contact.Satellite?.status)}),
+    );
 
     return {
-      active: rows.filter((row) => row.phase === "active").sort((a, b) => a.dateMs - b.dateMs),
-      upcoming: rows.filter((row) => row.phase === "upcoming").sort((a, b) => a.dateMs - b.dateMs),
+      active: rows.filter((row) => row.phase === "active"),
+      upcoming: rows.filter((row) => row.phase === "upcoming"),
       past: rows.filter((row) => row.phase === "past"),
     };
-  }, [contacts, now]);
+  }, [recoveredRows]);
 
   return (
     <section className={styles.page}>

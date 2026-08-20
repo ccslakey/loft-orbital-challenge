@@ -3,21 +3,14 @@
 import {useQuery} from "@apollo/client/react";
 import {useMemo} from "react";
 import {Link, useParams} from "react-router-dom";
-import type {SatRec} from "satellite.js";
 
 import {EMPLOYEES_QUERY, GROUND_STATION_DETAIL_QUERY, MAP_SATELLITES_QUERY} from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
 import ReportCard from "@/components/ui/ReportCard.js";
+import {useContactRows} from "@/hooks/useContactRows.js";
 import {useNow} from "@/hooks/useNow.js";
-import {
-  compareContactPhase,
-  contactPhase,
-  contactWindowLabel,
-  PHASE_PRESENTATION,
-  recoverContactWindow,
-  type ContactPhase,
-} from "@/lib/contacts.js";
+import {PHASE_PRESENTATION} from "@/lib/contacts.js";
 import {
   CONTACT_HORIZON_HOURS,
   findContactWindows,
@@ -30,22 +23,10 @@ import {formatLatitude, formatLongitude, formatSpan, formatUtcDateTime, formatUt
 import {createSatrec} from "@/lib/propagation.js";
 import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
-import type {GroundStationDetailQuery} from "@/gql/graphql.js";
 
 import styles from "./GroundStationPage.module.scss";
 
 /* Types //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
-type StationContact = NonNullable<
-  NonNullable<NonNullable<GroundStationDetailQuery["GroundStation"]>["Contacts"]>[number]
->;
-
-interface ContactRow {
-  contact: StationContact;
-  dateMs: number;
-  phase: ContactPhase;
-  windowLabel: string | null;
-}
 
 interface StationPass {
   satelliteId: string;
@@ -125,37 +106,7 @@ function GroundStationPage() {
 
   const contacts = useMemo(() => (data?.GroundStation?.Contacts ?? []).filter((contact) => contact !== null), [data]);
 
-  const contactRows = useMemo(() => {
-    const nowMs = now.getTime();
-    const satrecCache = new Map<string, SatRec | null>();
-
-    return contacts
-      .flatMap((contact): ContactRow[] => {
-        const dateMs = new Date(contact.date).getTime();
-
-        if (Number.isNaN(dateMs)) {
-          return [];
-        }
-
-        const satId = contact.Satellite?.id ?? "";
-
-        if (!satrecCache.has(satId)) {
-          const tle = parseTle(contact.Satellite?.tle);
-
-          satrecCache.set(satId, tle ? createSatrec(tle) : null);
-        }
-
-        const satrec = satrecCache.get(satId) ?? null;
-        const window =
-          satrec && latitude != null && longitude != null
-            ? recoverContactWindow(satrec, latitude, longitude, dateMs)
-            : null;
-        const phase = contactPhase(dateMs, window?.losMs ?? null, nowMs);
-
-        return [{contact, dateMs, phase, windowLabel: contactWindowLabel(phase, window, dateMs, nowMs)}];
-      })
-      .sort(compareContactPhase);
-  }, [contacts, latitude, longitude, now]);
+  const contactRows = useContactRows(contacts, now, {station: {latitude: latitude ?? null, longitude: longitude ?? null}});
 
   const reports = useMemo(
     () =>
