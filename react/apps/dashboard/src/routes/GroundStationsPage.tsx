@@ -1,6 +1,7 @@
 /* Imports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 import {useQuery} from "@apollo/client/react";
+import {Link} from "react-router-dom";
 
 import {GROUND_STATIONS_QUERY} from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
@@ -41,7 +42,11 @@ function GroundStationsPage() {
             return (
               <li className={styles.card} key={station.id} data-state={state}>
                 <div className={styles.cardHead}>
-                  <h2 className={styles.name}>{station.name}</h2>
+                  <h2 className={styles.name}>
+                    <Link className={styles.nameLink} to={`/ground-stations/${station.id}`}>
+                      {station.name}
+                    </Link>
+                  </h2>
                   <StatusChip label={station.status} state={state} />
                 </div>
                 <dl className={styles.readout}>

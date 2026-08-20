@@ -133,6 +133,14 @@ mostly empty states._
 **Why:** _TODO — stale elements quietly corrupt the pass predictions shown
 above them._
 
+### Station detail: the satellite page inverted, one unpolled query
+`/ground-stations/:id` shows passes of every serviceable satellite over the
+one station, the station's contacts and reports. No polling/static split —
+stations don't move. `/contacts` filter generalized to `?station=`. Plan in
+[`plans/station-detail.md`](./plans/station-detail.md).
+**Why:** _TODO — the ground segment deserved the same treatment; a station is
+half of every contact._
+
 ### Comments: terse, business-logic only
 Design-rationale prose stripped from source; it lives in the README/PR instead.
 **Why:** Rationale in source goes stale and can be wrong. _(expand if needed)_
