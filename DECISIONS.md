@@ -52,6 +52,14 @@ Same version rules out client/server skew; the route carries ~100 KB of world
 geometry, so it code-splits instead of joining the vendor bundle.
 **Why:** _TODO_
 
+### Map: ground tracks, one orbit ahead, minute-bucketed
+Each serviceable satellite draws its next full orbit as a dashed muted line
+(`groundTrack` in `lib/propagation.ts`, ~128 samples, d3-geo antimeridian
+clipping free). Track shape drifts only with Earth rotation, so it recomputes
+per minute, not on the 1 Hz clock. Inert satellites keep only their marker.
+**Why:** _TODO — the planning half of a contact map is where satellites are
+going, not just where they are._
+
 ### Fleet: client-side filter/sort, state in URL search params
 Filtering/sorting over the polled set (derived sort fields, join-through-payload
 customer filter); the URL is the store, so views are shareable links. Stale

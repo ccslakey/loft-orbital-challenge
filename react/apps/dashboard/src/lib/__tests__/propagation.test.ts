@@ -2,7 +2,7 @@
 
 import {describe, expect, it} from "vitest";
 
-import {createSatrec, propagateToGeodetic} from "@/lib/propagation.js";
+import {createSatrec, groundTrack, orbitalPeriodMinutes, propagateToGeodetic} from "@/lib/propagation.js";
 
 /* Fixtures ///////////////////////////////////////////////////////////////////////////////////////////////////////// */
 // Seed TLE from apps/server/src/db.ts (Starlink-1), epoch 2022-02-22.
@@ -45,5 +45,42 @@ describe("propagateToGeodetic", () => {
     const satrec = createSatrec(TLE);
 
     expect(propagateToGeodetic(satrec!, TIME)).toEqual(propagateToGeodetic(satrec!, TIME));
+  });
+});
+
+describe("orbitalPeriodMinutes", () => {
+  it("derives the period from the mean motion", () => {
+    const satrec = createSatrec(TLE);
+
+    // 11.86 rev/day is a ~121 min period; satrec.no is un-Kozai'd, so allow slack.
+    expect(orbitalPeriodMinutes(satrec!)).toBeGreaterThan(120);
+    expect(orbitalPeriodMinutes(satrec!)).toBeLessThan(123);
+  });
+});
+
+describe("groundTrack", () => {
+  it("samples one orbit of in-range coordinates starting at the current position", () => {
+    const satrec = createSatrec(TLE);
+    const period = orbitalPeriodMinutes(satrec!);
+    const track = groundTrack(satrec!, TIME, period!, 64);
+
+    expect(track).toHaveLength(65);
+
+    const start = propagateToGeodetic(satrec!, TIME);
+    expect(track[0][0]).toBeCloseTo(start!.longitude, 6);
+    expect(track[0][1]).toBeCloseTo(start!.latitude, 6);
+
+    for (const [longitude, latitude] of track) {
+      expect(longitude).toBeGreaterThanOrEqual(-180);
+      expect(longitude).toBeLessThanOrEqual(180);
+      // Geodetic latitude can exceed the 32.86° inclination by Earth-oblateness (~0.2°).
+      expect(Math.abs(latitude)).toBeLessThanOrEqual(33.1);
+    }
+  });
+
+  it("is deterministic for a fixed start", () => {
+    const satrec = createSatrec(TLE);
+
+    expect(groundTrack(satrec!, TIME, 120, 16)).toEqual(groundTrack(satrec!, TIME, 120, 16));
   });
 });
