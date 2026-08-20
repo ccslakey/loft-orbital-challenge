@@ -29,9 +29,9 @@ export const client = new ApolloClient({
     typePolicies: {
       Query: {
         fields: {
-          // Key by args so filtered/sorted result sets do not overwrite each other.
+          // Key by args so filtered/sorted/paged result sets do not overwrite each other.
           allSatellites: {
-            keyArgs: ["filter", "sortField", "sortOrder", "perPage"],
+            keyArgs: ["filter", "sortField", "sortOrder", "perPage", "page"],
           },
         },
       },
