@@ -1,7 +1,7 @@
 /* Imports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 import {useQuery} from "@apollo/client/react";
-import {useMemo} from "react";
+import {useMemo, useState} from "react";
 import {Link, useParams} from "react-router-dom";
 
 import {
@@ -51,6 +51,8 @@ const passCache: WindowsCache = new Map();
 
 function SatellitePage() {
   const {satelliteId} = useParams();
+  // Tracks the URL that failed rather than a boolean, so a corrected image URL renders again.
+  const [failedHeroUrl, setFailedHeroUrl] = useState<string | null>(null);
 
   const {data, loading, error, refetch} = useQuery(SATELLITE_DETAIL_QUERY, {
     variables: {id: satelliteId ?? ""},
@@ -153,14 +155,12 @@ function SatellitePage() {
         {satellite ? (
           <>
             <header className={styles.head}>
-              {satellite.image ? (
+              {satellite.image && satellite.image !== failedHeroUrl ? (
                 <img
                   className={styles.heroImage}
                   src={satellite.image}
                   alt={satellite.name}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
+                  onError={() => setFailedHeroUrl(satellite.image)}
                 />
               ) : null}
               <div className={styles.headText}>

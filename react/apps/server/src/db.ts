@@ -16,7 +16,7 @@ import {
 /* Constellations /////////////////////////////////////////////////////////////////////////////////////////////////// */
 // A collection of satellites working together to achieve a common goal.
 
-interface Constellation {
+export interface Constellation {
   id: string;
   name: string;
   description: string;
@@ -33,25 +33,25 @@ const constellations: Constellation[] = [
 /* Launches ///////////////////////////////////////////////////////////////////////////////////////////////////////// */
 // The launch of a rocket carrying one or more satellites into space.
 
-enum LaunchProvider {
+export enum LaunchProvider {
   SpaceX = "SpaceX",
   RocketLab = "Rocket Lab",
   BlueOrigin = "Blue Origin",
 }
 
-enum LaunchStatus {
+export enum LaunchStatus {
   Pending = "Pending",
   Active = "Active",
   Completed = "Completed",
   Terminated = "Terminated",
 }
 
-enum LaunchOutcome {
+export enum LaunchOutcome {
   Success = "Success",
   Failure = "Failure",
 }
 
-interface Launch {
+export interface Launch {
   id: string;
   date: Date;
   provider: LaunchProvider;
@@ -105,13 +105,13 @@ const launches: Launch[] = [
 // An object that contains many customer payloads and is launched into orbit around Earth. Satellite position is updated
 // periodically based off TLE and current time.
 
-enum SatelliteStatus {
+export enum SatelliteStatus {
   Planned = "Planned",
   InOrbit = "In Orbit",
   Decommissioned = "Decommissioned",
 }
 
-enum SatelliteManufacturer {
+export enum SatelliteManufacturer {
   AirBus = "AirBus",
   BallAerospace = "Ball Aerospace",
   Boeing = "Boeing",
@@ -119,7 +119,7 @@ enum SatelliteManufacturer {
   NorthropGrumman = "Northrop Grumman",
 }
 
-enum SatelliteBusType {
+export enum SatelliteBusType {
   BCP500 = "BCP 500",
   BCP2000 = "BCP 2000",
   ESPAStar = "ESPAStar",
@@ -129,7 +129,7 @@ enum SatelliteBusType {
   MP702 = "MP702",
 }
 
-interface Satellite {
+export interface Satellite {
   id: string;
   name: string;
   description: string;
@@ -303,7 +303,7 @@ const satellites: Satellite[] = [
 
 const convertRadiansToDegrees = (radians: Radians) => radians * (180 / Math.PI);
 
-const updateSatellitesPositions = () => {
+export const updateSatellitesPositions = () => {
   const time = new Date();
   const gmst = gstime(time);
 
@@ -335,14 +335,14 @@ setInterval(updateSatellitesPositions, 1000);
 /* Ground Stations ////////////////////////////////////////////////////////////////////////////////////////////////// */
 // A ground-based facility with a large antenna used to communicate with satellites.
 
-enum GroundStationNetwork {
+export enum GroundStationNetwork {
   KSAT = "KSAT",
   NASA = "NASA",
   AWS = "AWS",
   ATLAS = "ATLAS",
 }
 
-enum GroundStationStatus {
+export enum GroundStationStatus {
   Unknown = "Unknown",
   Online = "Online",
   Offline = "Offline",
@@ -350,7 +350,7 @@ enum GroundStationStatus {
   Maintenance = "Maintenance",
 }
 
-interface GroundStation {
+export interface GroundStation {
   id: string;
   name: string;
   image: string;

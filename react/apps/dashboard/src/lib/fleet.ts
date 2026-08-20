@@ -128,11 +128,12 @@ export interface WindowsCacheEntry {
 
 export type WindowsCache = Map<string, WindowsCacheEntry>;
 
-const WINDOWS_TTL_MS = 60_000;
+const WINDOWS_TTL_MS = 300_000;
 
-// The full-fleet enumeration costs ~200 ms, far too heavy for the 5 s position poll. Entries are keyed by
-// TLE + station set; rendering clamps against the current time, so a stale list only misses windows newly
-// entering the far end of the horizon until the TTL refreshes it.
+// The full-fleet enumeration costs ~100 ms per satellite over ten stations, far too heavy for the 5 s
+// position poll or even the 60 s clock at demo-fleet scale. Entries are keyed by TLE + station set;
+// rendering clamps against the current time, so a stale list only misses windows newly entering the far
+// end of the horizon until the TTL refreshes it.
 export const getCachedWindows = (
   cache: WindowsCache,
   key: string,
