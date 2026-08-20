@@ -93,7 +93,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.LockheedMartin,
     busType: SatelliteBusType.A2100,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Iridium_satellite.jpg/1280px-Iridium_satellite.jpg",
     tle: {
       line1: "1 41917U 17003A   26231.93368547  .00000042  00000+0  78783-5 0  9995",
       line2: "2 41917  86.3915  61.8861 0002409  83.7625 276.3846 14.34217576502342",
@@ -111,7 +112,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.LockheedMartin,
     busType: SatelliteBusType.A2100,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Iridium_satellite.jpg/1280px-Iridium_satellite.jpg",
     tle: {
       line1: "1 41918U 17003B   26231.50238616  .00000027  00000+0  24397-5 0  9997",
       line2: "2 41918  86.3915  61.9663 0002248  93.6283 266.5170 14.34217287502301",
@@ -129,7 +131,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.LockheedMartin,
     busType: SatelliteBusType.A2100,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Iridium_satellite.jpg/1280px-Iridium_satellite.jpg",
     tle: {
       line1: "1 41919U 17003C   26231.50873246  .00000037  00000+0  61353-5 0  9996",
       line2: "2 41919  86.3916  62.0241 0002192  90.3418 269.8029 14.34217416502278",
@@ -147,7 +150,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.LockheedMartin,
     busType: SatelliteBusType.A2100,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Iridium_satellite.jpg/1280px-Iridium_satellite.jpg",
     tle: {
       line1: "1 41920U 17003D   26231.47701605  .00000028  00000+0  28173-5 0  9996",
       line2: "2 41920  86.3914  61.9597 0002161  87.4843 272.6600 14.34217788502353",
@@ -165,7 +169,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.LockheedMartin,
     busType: SatelliteBusType.A2100,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Iridium_satellite.jpg/1280px-Iridium_satellite.jpg",
     tle: {
       line1: "1 41921U 17003E   26231.50538171  .00000100  00000+0  28491-4 0  9990",
       line2: "2 41921  86.3961  30.3822 0001952  97.4327 262.7091 14.34217519504215",
@@ -183,7 +188,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.LockheedMartin,
     busType: SatelliteBusType.A2100,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Iridium_satellite.jpg/1280px-Iridium_satellite.jpg",
     tle: {
       line1: "1 41922U 17003F   26231.97809493  .00000045  00000+0  89655-5 0  9998",
       line2: "2 41922  86.3916  61.7934 0002080  97.0563 263.0870 14.34218255502416",
@@ -201,7 +207,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.LockheedMartin,
     busType: SatelliteBusType.A2100,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Iridium_satellite.jpg/1280px-Iridium_satellite.jpg",
     tle: {
       line1: "1 41923U 17003G   26232.26349519  .00000042  00000+0  79939-5 0  9991",
       line2: "2 41923  86.3916  61.6569 0002200  92.2880 267.8567 14.34217682502433",
@@ -219,7 +226,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.LockheedMartin,
     busType: SatelliteBusType.A2100,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Iridium_satellite.jpg/1280px-Iridium_satellite.jpg",
     tle: {
       line1: "1 41924U 17003H   26231.52433335 -.00000041  00000+0 -21627-4 0  9991",
       line2: "2 41924  86.3953  30.2607 0001965  91.2030 268.9391 14.34216464504181",
@@ -237,7 +245,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.LockheedMartin,
     busType: SatelliteBusType.A2100,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Iridium_satellite.jpg/1280px-Iridium_satellite.jpg",
     tle: {
       line1: "1 41925U 17003J   26232.25081323  .00000047  00000+0  98194-5 0  9997",
       line2: "2 41925  86.3911  61.5012 0002120  90.6217 269.5222 14.34217830502453",
@@ -255,7 +264,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.LockheedMartin,
     busType: SatelliteBusType.A2100,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Iridium_satellite.jpg/1280px-Iridium_satellite.jpg",
     tle: {
       line1: "1 41926U 17003K   26231.47067499  .00000044  00000+0  85173-5 0  9999",
       line2: "2 41926  86.3914  61.8999 0002202  89.2645 270.8803 14.34217692502326",
@@ -273,7 +283,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.BallAerospace,
     busType: SatelliteBusType.BCP500,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Planet_Labs_satellite_launch_from_ISS.jpg/1280px-Planet_Labs_satellite_launch_from_ISS.jpg",
     tle: {
       line1: "1 39418U 13066C   26232.07286504  .00002555  00000+0  14632-3 0  9993",
       line2: "2 39418  97.3767 279.4294 0022987  93.2588 267.1274 15.13281172698144",
@@ -291,7 +302,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.BallAerospace,
     busType: SatelliteBusType.BCP500,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Planet_Labs_satellite_launch_from_ISS.jpg/1280px-Planet_Labs_satellite_launch_from_ISS.jpg",
     tle: {
       line1: "1 40072U 14037D   26232.13813505  .00001061  00000+0  12177-3 0  9997",
       line2: "2 40072  98.3897 194.7743 0006956  74.1994 285.9987 14.88162214655476",
@@ -309,7 +321,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.BallAerospace,
     busType: SatelliteBusType.BCP500,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Planet_Labs_satellite_launch_from_ISS.jpg/1280px-Planet_Labs_satellite_launch_from_ISS.jpg",
     tle: {
       line1: "1 41601U 16040C   26231.05068381  .00009133  00000+0  25248-3 0  9997",
       line2: "2 41601  96.9542 259.3930 0003871 126.3609 233.7994 15.37227150567521",
@@ -327,7 +340,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.BallAerospace,
     busType: SatelliteBusType.BCP500,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Planet_Labs_satellite_launch_from_ISS.jpg/1280px-Planet_Labs_satellite_launch_from_ISS.jpg",
     tle: {
       line1: "1 41771U 16058B   26232.32873116  .00016137  00000+0  28497-3 0  9996",
       line2: "2 41771  96.9164 251.4929 0003255  69.8244 290.3359 15.50426736555406",
@@ -345,7 +359,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.InOrbit,
     manufacturer: SatelliteManufacturer.BallAerospace,
     busType: SatelliteBusType.BCP500,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Planet_Labs_satellite_launch_from_ISS.jpg/1280px-Planet_Labs_satellite_launch_from_ISS.jpg",
     tle: {
       line1: "1 41772U 16058C   26231.04672570  .00007204  00000+0  22045-3 0  9994",
       line2: "2 41772  97.0431 268.8327 0004230  87.5448 272.6280 15.34108942553386",
@@ -363,7 +378,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Planned,
     manufacturer: SatelliteManufacturer.BallAerospace,
     busType: SatelliteBusType.BCP500,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Planet_Labs_satellite_launch_from_ISS.jpg/1280px-Planet_Labs_satellite_launch_from_ISS.jpg",
     tle: {
       line1: "1 41773U 16058D   26232.01867800  .00011860  00000+0  26757-3 0  9992",
       line2: "2 41773  97.0166 251.7644 0003913 142.0913 218.0612 15.43360249554896",
@@ -381,7 +397,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Planned,
     manufacturer: SatelliteManufacturer.BallAerospace,
     busType: SatelliteBusType.BCP500,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Planet_Labs_satellite_launch_from_ISS.jpg/1280px-Planet_Labs_satellite_launch_from_ISS.jpg",
     tle: {
       line1: "1 41774U 16058E   26231.06189116  .00026229  00000+0  39113-3 0  9999",
       line2: "2 41774  96.8980 259.5892 0003275  94.0758 266.0872 15.55052100555870",
@@ -399,7 +416,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Planned,
     manufacturer: SatelliteManufacturer.BallAerospace,
     busType: SatelliteBusType.BCP500,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Planet_Labs_satellite_launch_from_ISS.jpg/1280px-Planet_Labs_satellite_launch_from_ISS.jpg",
     tle: {
       line1: "1 42987U 17068A   26231.38846912  .00033564  00000+0  39938-3 0  9992",
       line2: "2 42987  97.4422  23.1551 0001799 109.9008 250.2443 15.61062529493092",
@@ -417,7 +435,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Planned,
     manufacturer: SatelliteManufacturer.BallAerospace,
     busType: SatelliteBusType.BCP500,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Planet_Labs_satellite_launch_from_ISS.jpg/1280px-Planet_Labs_satellite_launch_from_ISS.jpg",
     tle: {
       line1: "1 42988U 17068B   26232.17011528  .00008636  00000+0  25143-3 0  9993",
       line2: "2 42988  97.4585   9.7207 0001681  95.7601 264.3834 15.35655857492173",
@@ -435,7 +454,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Planned,
     manufacturer: SatelliteManufacturer.BallAerospace,
     busType: SatelliteBusType.BCP500,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Planet_Labs_satellite_launch_from_ISS.jpg/1280px-Planet_Labs_satellite_launch_from_ISS.jpg",
     tle: {
       line1: "1 42989U 17068C   26232.14663993  .00012221  00000+0  27960-3 0  9994",
       line2: "2 42989  97.4504  11.2618 0006497 262.5440  97.5069 15.42940289492613",
@@ -453,7 +473,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.LongBow,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/ISS-47_CubeSat_deployment_-_Lemur-2.jpg/1280px-ISS-47_CubeSat_deployment_-_Lemur-2.jpg",
     tle: {
       line1: "1 40044U 14033AL  26231.88702769  .00001705  00000+0  20035-3 0  9999",
       line2: "2 40044  97.7961  20.3166 0047060 227.9125 131.8084 14.85431318654925",
@@ -471,7 +492,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.LongBow,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/ISS-47_CubeSat_deployment_-_Lemur-2.jpg/1280px-ISS-47_CubeSat_deployment_-_Lemur-2.jpg",
     tle: {
       line1: "1 42837U 17042N   26231.95569300  .00017269  00000+0  54067-3 0  9998",
       line2: "2 42837  97.3858  52.3890 0009712 131.2950 228.9130 15.33127535498150",
@@ -489,7 +511,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.LongBow,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/ISS-47_CubeSat_deployment_-_Lemur-2.jpg/1280px-ISS-47_CubeSat_deployment_-_Lemur-2.jpg",
     tle: {
       line1: "1 42838U 17042P   26231.95735823  .00023144  00000+0  63535-3 0  9993",
       line2: "2 42838  97.3705  52.8166 0009099 130.6997 229.5040 15.37213411498245",
@@ -507,7 +530,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.LongBow,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/ISS-47_CubeSat_deployment_-_Lemur-2.jpg/1280px-ISS-47_CubeSat_deployment_-_Lemur-2.jpg",
     tle: {
       line1: "1 42839U 17042Q   26232.23716294  .00015958  00000+0  55756-3 0  9997",
       line2: "2 42839  97.4123  52.5370 0007768 121.4908 238.7093 15.29620157497953",
@@ -525,7 +549,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.LongBow,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/ISS-47_CubeSat_deployment_-_Lemur-2.jpg/1280px-ISS-47_CubeSat_deployment_-_Lemur-2.jpg",
     tle: {
       line1: "1 42840U 17042R   26231.46950866  .00017783  00000+0  57478-3 0  9999",
       line2: "2 42840  97.3802  49.7167 0006944 185.4221 174.6947 15.32123062497899",
@@ -543,7 +568,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.LongBow,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/ISS-47_CubeSat_deployment_-_Lemur-2.jpg/1280px-ISS-47_CubeSat_deployment_-_Lemur-2.jpg",
     tle: {
       line1: "1 42841U 17042S   26232.23889985  .00020627  00000+0  58283-3 0  9995",
       line2: "2 42841  97.4014  57.5033 0005109 108.4078 251.7722 15.36366328498260",
@@ -561,7 +587,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.LongBow,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/ISS-47_CubeSat_deployment_-_Lemur-2.jpg/1280px-ISS-47_CubeSat_deployment_-_Lemur-2.jpg",
     tle: {
       line1: "1 42842U 17042T   26231.49042495  .00016892  00000+0  54745-3 0  9998",
       line2: "2 42842  97.3851  52.8022 0007332 142.7521 217.4231 15.32044680498038",
@@ -579,7 +606,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.LongBow,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/ISS-47_CubeSat_deployment_-_Lemur-2.jpg/1280px-ISS-47_CubeSat_deployment_-_Lemur-2.jpg",
     tle: {
       line1: "1 42845U 17042W   26231.97569957  .00059120  00000+0  84823-3 0  9992",
       line2: "2 42845  97.3568  65.2277 0004087 134.0124 226.1468 15.55940929499107",
@@ -597,7 +625,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.LongBow,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/ISS-47_CubeSat_deployment_-_Lemur-2.jpg/1280px-ISS-47_CubeSat_deployment_-_Lemur-2.jpg",
     tle: {
       line1: "1 48269U 21034B   26231.86745960  .00034739  00000+0  92954-3 0  9995",
       line2: "2 48269  97.5715 311.9962 0002910  67.0610 293.0941 15.37962604290831",
@@ -615,7 +644,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.LongBow,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/ISS-47_CubeSat_deployment_-_Lemur-2.jpg/1280px-ISS-47_CubeSat_deployment_-_Lemur-2.jpg",
     tle: {
       line1: "1 48273U 21034F   26231.80024369  .02747306  25107-5  18282-2 0  9992",
       line2: "2 48273  97.5535 324.8090 0014393 262.4839  97.4813 16.16748205291734",
@@ -633,7 +663,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 44057U 19010A   26231.93862901  .00000068  00000+0  14453-3 0  9996",
       line2: "2 44057  87.9086 216.1192 0002073 102.2425 257.8939 13.16596055359955",
@@ -651,7 +682,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 44058U 19010B   26232.19196165  .00000057  00000+0  11678-3 0  9992",
       line2: "2 44058  87.9101 216.0667 0002331  80.5148 279.6247 13.16589722360035",
@@ -669,7 +701,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 44059U 19010C   26231.45731250  .00000012  00000+0 -28158-5 0  9996",
       line2: "2 44059  87.9095 216.2070 0001660  86.5053 273.6268 13.16594122360052",
@@ -687,7 +720,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 44060U 19010D   26232.30324607 -.00000116  00000+0 -34114-3 0  9990",
       line2: "2 44060  87.8953 246.4379 0002321  93.7868 266.3528 13.15550263359808",
@@ -705,7 +739,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 44061U 19010E   26231.47058762 -.00000051  00000+0 -16931-3 0  9999",
       line2: "2 44061  87.8963 246.5748 0002026  86.5356 273.6006 13.15548374359740",
@@ -723,7 +758,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 44062U 19010F   26232.04735916  .00000077  00000+0  17063-3 0  9990",
       line2: "2 44062  87.8970 246.4702 0001989  86.4467 273.6891 13.15548574359819",
@@ -741,7 +777,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45131U 20008A   26231.89658882 -.00000219  00000+0 -67129-3 0  9993",
       line2: "2 45131  87.8516  39.9573 0001855 123.1664 236.9641 13.09465190314400",
@@ -759,7 +796,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45132U 20008B   26231.45284334 -.00000664  00000+0 -19371-2 0  9992",
       line2: "2 45132  87.8855  23.6614 0001703  88.8201 271.3121 13.10374145316239",
@@ -777,7 +815,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45133U 20008C   26231.42230231  .00000584  00000+0  16373-2 0  9995",
       line2: "2 45133  87.8854  23.6687 0001730  95.0831 265.0494 13.10371658316620",
@@ -795,7 +834,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45134U 20008D   26232.12478408 -.00000055  00000+0 -19260-3 0  9998",
       line2: "2 45134  87.8846  23.5410 0001856  97.1458 262.9880 13.10369040317024",
@@ -813,7 +853,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45136U 20008F   26232.13581575 -.00000514  00000+0 -15096-2 0  9993",
       line2: "2 45136  87.8854  23.5248 0001579  97.5833 262.5474 13.10371198316455",
@@ -831,7 +872,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45137U 20008G   26231.42075013  .00000629  00000+0  17644-2 0  9996",
       line2: "2 45137  87.8861  23.6631 0001811  94.0640 266.0695 13.10370786316522",
@@ -849,7 +891,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45138U 20008H   26232.18404319  .00000680  00000+0  19111-2 0  9994",
       line2: "2 45138  87.8862  23.5011 0001420  82.5495 277.5793 13.10372216316954",
@@ -867,7 +910,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45139U 20008J   26232.32427805 -.00000391  00000+0 -11382-2 0  9999",
       line2: "2 45139  87.8932   8.3047 0001809  93.1469 266.9866 13.11415881319518",
@@ -885,7 +929,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45140U 20008K   26232.06969097  .00000423  00000+0  11590-2 0  9991",
       line2: "2 45140  87.8926   8.3603 0001866 114.9519 245.1804 13.11415499316997",
@@ -903,7 +948,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45141U 20008L   26231.45466407 -.00000624  00000+0 -18252-2 0  9998",
       line2: "2 45141  87.8855  23.6637 0001599 110.8225 249.3074 13.10373388316587",
@@ -921,7 +967,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45142U 20008M   26231.88723349  .00000359  00000+0  99290-3 0  9992",
       line2: "2 45142  87.8846  23.5816 0002058  81.1507 278.9853 13.10370305316556",
@@ -939,7 +986,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45143U 20008N   26232.13679465 -.00000607  00000+0 -17744-2 0  9992",
       line2: "2 45143  87.8850  23.5267 0001843  94.2572 265.8766 13.10369749316312",
@@ -957,7 +1005,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45144U 20008P   26232.11446941  .00000398  00000+0  11049-2 0  9999",
       line2: "2 45144  87.8865  23.5538 0001662  98.7423 261.3892 13.10369926316737",
@@ -975,7 +1024,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45145U 20008Q   26231.80037015 -.00000430  00000+0 -12500-2 0  9995",
       line2: "2 45145  87.8944   8.4268 0003465 101.9867 258.1650 13.11416491318661",
@@ -993,7 +1043,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45146U 20008R   26231.50883620  .00000126  00000+0  32589-3 0  9994",
       line2: "2 45146  87.8851  23.6498 0001827 110.6274 249.5049 13.10369180316454",
@@ -1011,7 +1062,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45147U 20008S   26231.50205827  .00000448  00000+0  12462-2 0  9996",
       line2: "2 45147  87.8845  23.6599 0001488  95.9039 264.2258 13.10370459316151",
@@ -1029,7 +1081,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://i0.wp.com/spacenews.com/wp-content/uploads/2023/04/arrow-bus.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45149U 20008U   26232.11475722  .00000495  00000+0  13822-2 0  9992",
       line2: "2 45149  87.8855  23.5306 0001760 111.9009 248.2306 13.10368762316552",
@@ -1047,7 +1100,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://space.skyrocket.de/img_sat/nss-6__1.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45150U 20008V   26232.14343753 -.00000615  00000+0 -17984-2 0  9994",
       line2: "2 45150  87.8854  23.5268 0001669  99.1807 260.9510 13.10372523316852",
@@ -1065,7 +1119,8 @@ const extraSatellites: Satellite[] = [
     status: SatelliteStatus.Decommissioned,
     manufacturer: SatelliteManufacturer.AirBus,
     busType: SatelliteBusType.MP702,
-    image: "https://cdn.geekwire.com/wp-content/uploads/2019/06/190628-starlink-630x361.jpg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg/1280px-SpaceX%2C_Falcon_9%2C_OneWeb_17%2C_03-09-2023_%2852737534925%29.jpg",
     tle: {
       line1: "1 45151U 20008W   26232.32921791 -.00000505  00000+0 -14603-2 0  9992",
       line2: "2 45151  87.8941   8.3000 0001881 100.9668 259.1672 13.11415331318810",
