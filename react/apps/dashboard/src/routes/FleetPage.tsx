@@ -454,7 +454,7 @@ function FleetPage() {
                       <td>
                         <div
                           className={styles.timeline}
-                          role="img"
+                          role="group"
                           aria-label={`${row.timeline.length} passes in the next ${CONTACT_HORIZON_HOURS} hours`}
                         >
                           <span className={styles.timelineMid} aria-hidden="true" />
