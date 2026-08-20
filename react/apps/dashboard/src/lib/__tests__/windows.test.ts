@@ -47,6 +47,20 @@ describe("findNextWindow", () => {
     expect(elevationAt(window!.aos, GUAM)).toBeCloseTo(10, 1);
   });
 
+  it("refines max elevation at culmination for a near-zenith pass", () => {
+    // Station placed at the sub-satellite point mid-pass: the true peak is 90° by construction,
+    // which the 30 s coarse samples alone under-report.
+    const overhead = new Date("2022-02-23T01:00:00Z");
+    const point = propagateToGeodetic(satrec, overhead)!;
+    const from = new Date(overhead.getTime() - 20 * 60_000);
+    const window = findNextWindow(satrec, point.latitude, point.longitude, from)!;
+
+    expect(window.aos.getTime()).toBeLessThan(overhead.getTime());
+    expect(window.los.getTime()).toBeGreaterThan(overhead.getTime());
+    expect(window.maxElevationDeg).toBeGreaterThan(89);
+    expect(window.maxElevationDeg).toBeLessThanOrEqual(90);
+  });
+
   it("reports a pass already in progress from the given start time", () => {
     const first = findNextWindow(satrec, GUAM.lat, GUAM.lon, FROM)!;
     const during = new Date((first.aos.getTime() + first.los.getTime()) / 2);

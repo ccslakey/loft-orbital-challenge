@@ -31,6 +31,8 @@ export interface WindowOptions {
 /* Search /////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 const BISECT_ITERATIONS = 24;
+const PEAK_ITERATIONS = 20;
+const GOLDEN_RATIO = (Math.sqrt(5) - 1) / 2;
 const REACHABILITY_MARGIN_DEG = 1;
 
 // Fast bound that spares a full 24 h scan: a satellite never clears the mask for stations poleward
@@ -91,6 +93,35 @@ const bisectCrossing = (f: (ms: number) => number | null, loMs: number, hiMs: nu
   return rising ? hi : lo;
 };
 
+// Golden-section maximization around the best coarse sample: elevation is unimodal within one coarse
+// step of culmination, so this recovers the true peak the 30 s grid can miss by 10°+ on near-zenith passes.
+const refinePeakMargin = (f: (ms: number) => number | null, loMs: number, hiMs: number, seed: number): number => {
+  let lo = loMs;
+  let hi = hiMs;
+  let best = seed;
+
+  for (let i = 0; i < PEAK_ITERATIONS; i++) {
+    const a = hi - (hi - lo) * GOLDEN_RATIO;
+    const b = lo + (hi - lo) * GOLDEN_RATIO;
+    const valueA = f(a);
+    const valueB = f(b);
+
+    if (valueA === null || valueB === null) {
+      break;
+    }
+
+    best = Math.max(best, valueA, valueB);
+
+    if (valueA < valueB) {
+      lo = a;
+    } else {
+      hi = b;
+    }
+  }
+
+  return best;
+};
+
 // Coarse scan for the next pass, refined by bisection. A pass already in progress reports aos = from.
 // Returns null when no pass starts within the horizon or the TLE cannot be propagated.
 export const findNextWindow = (
@@ -119,6 +150,11 @@ export const findNextWindow = (
 
   let aosMs: number | null = prev >= 0 ? startMs : null;
   let maxMargin = Math.max(0, prev);
+  let peakMs = startMs;
+
+  const peakElevationDeg = (losMs: number): number =>
+    maskDeg +
+    refinePeakMargin(f, Math.max(aosMs ?? startMs, peakMs - stepMs), Math.min(losMs, peakMs + stepMs), maxMargin);
 
   for (let t = startMs + stepMs; t <= endMs; t += stepMs) {
     const value = f(t);
@@ -131,18 +167,24 @@ export const findNextWindow = (
       if (prev < 0 && value >= 0) {
         aosMs = bisectCrossing(f, prevMs, t, true);
         maxMargin = value;
+        peakMs = t;
       }
     } else {
       if (value < 0) {
+        const losMs = bisectCrossing(f, prevMs, t, false);
+
         return {
           aos: new Date(aosMs),
-          los: new Date(bisectCrossing(f, prevMs, t, false)),
-          maxElevationDeg: maskDeg + maxMargin,
+          los: new Date(losMs),
+          maxElevationDeg: peakElevationDeg(losMs),
           truncated: false,
         };
       }
 
-      maxMargin = Math.max(maxMargin, value);
+      if (value > maxMargin) {
+        maxMargin = value;
+        peakMs = t;
+      }
     }
 
     prev = value;
@@ -151,5 +193,5 @@ export const findNextWindow = (
 
   return aosMs === null
     ? null
-    : {aos: new Date(aosMs), los: new Date(endMs), maxElevationDeg: maskDeg + maxMargin, truncated: true};
+    : {aos: new Date(aosMs), los: new Date(endMs), maxElevationDeg: peakElevationDeg(endMs), truncated: true};
 };
