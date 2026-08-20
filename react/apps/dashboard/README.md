@@ -1,8 +1,11 @@
 # Dashboard
 
-A boilerplate web app that you can modify to complete the project tasks assigned to you.
+The Fleet Operations console: live satellite positions propagated client-side from TLEs, a contact map
+with ground tracks and visibility footprints, pass prediction and contact scheduling with double-booking
+detection, and incident reports with threaded comments.
 
-You can access the dashboard client by visiting `localhost:8080` in your browser.
+You can access the dashboard client by visiting `localhost:8080` in your browser (started via `pnpm dev`
+at the workspace root — see [`../../README.md`](../../README.md)).
 
 ## Tech Stack
 
@@ -18,11 +21,13 @@ You can access the dashboard client by visiting `localhost:8080` in your browser
 
 ## Scripts
 
-- `pnpm build` --> Compiles the web app using [Vite](https://vitejs.dev/guide/)
-- `pnpm dev` --> Runs the build in watch mode and monitors the output for changes via [nodemon](https://nodemon.io/) to automatically refresh the server process.
-- `pnpm start` --> Runs the build output directly.
+- `pnpm build` --> Type-checks `src/` and compiles the web app using [Vite](https://vitejs.dev/guide/), in parallel
+- `pnpm dev` --> Vite dev server with HMR on `localhost:8080`
+- `pnpm start` --> Serves the production build (`vite preview`)
+- `pnpm type-check` --> `tsc` over the app **including tests** plus `vite.config.ts`; part of the CI matrix
 - `pnpm codegen` --> Regenerates typed documents in `src/gql/` from the committed `schema.graphql`. Run after adding or editing a GraphQL operation.
 - `pnpm codegen:schema` --> Re-introspects the running API and rewrites `schema.graphql`. Requires the server to be up; only needed when the API schema itself changes.
+- `pnpm codegen:refresh` --> Both of the above in sequence; CI runs this against a live server and fails on drift.
 
 ## Data layer
 
@@ -48,14 +53,18 @@ reason — a fresh clone type-checks before anything is started.
 `src/router.tsx` defines a single layout route that owns the shell, so the header and navigation persist across
 navigations and only the outlet re-renders.
 
-| Route                 | View                                                          |
-| --------------------- | ------------------------------------------------------------- |
-| `/`                   | Redirects to `/fleet`                                         |
-| `/fleet`              | Satellite list with live sub-satellite positions              |
-| `/fleet/:satelliteId` | Satellite detail: position, spacecraft, launch, TLE, payloads |
-| `/ground-stations`    | Contracted antenna sites                                      |
-| `/reports`            | Routed but not implemented                                    |
-| `*`                   | Not found                                                     |
+| Route                         | View                                                                        |
+| ----------------------------- | --------------------------------------------------------------------------- |
+| `/`                           | Redirects to `/fleet`                                                       |
+| `/fleet`                      | Satellite list: live positions, filters/sort/search in the URL, pass strips |
+| `/fleet/:satelliteId`         | Satellite detail: position poll, orbit, upcoming passes, contacts, reports  |
+| `/ground-stations`            | Contracted antenna sites                                                    |
+| `/ground-stations/:stationId` | Station detail: upcoming passes across the fleet, contact history           |
+| `/map`                        | Contact map (lazy chunk): 1 Hz markers, ground tracks, footprints, links    |
+| `/contacts`                   | Scheduled contacts grouped by phase, windows recovered from current TLEs    |
+| `/contacts/new`               | Schedule a contact: computed pass windows with conflict flagging            |
+| `/reports`                    | Raise and read reports, with optimistic threaded comments                   |
+| `*`                           | Not found                                                                   |
 
 ## Styling
 
