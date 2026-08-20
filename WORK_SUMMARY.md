@@ -18,6 +18,13 @@ pnpm dev          # dashboard on :8080, API on :3000/graphql
 
 Everything runs inside Docker because the workspace pins Node `>=20.10.0 <21`.
 
+Optional: `SEED_PROFILE=large pnpm dev` starts the API with ~60 satellites (real CelesTrak TLEs for Iridium
+NEXT, Planet, Spire, and OneWeb) and 17 ground stations instead of the default seven and nine. It exercises
+the fleet filters, the map at density, and the list-truncation notices ("first 50 of 62 tracked"). The
+status mix is deliberately weighted toward decommissioned satellites: pass searches cost ~100 ms per
+in-orbit satellite over ten stations, and the in-orbit share is sized to keep the fleet page responsive —
+the same accuracy/CPU trade-off documented under Testing.
+
 | Command | Result |
 | --- | --- |
 | `pnpm build` | Type-check and production build, both exit 0 |
