@@ -186,3 +186,11 @@ already caught a real bug (deprecated `clip` → `clip-path`)._
 
 ### Open / not decided
 - Component tests?
+
+
+
+SCALING CONCERNS
+
+1. The pass-window scans — the first hard cliff. findContactWindows walks a 24-hour horizon in 30-second steps, so ~2,880 SGP4 propagations per satellite–station pair, on the main thread. FleetPage runs it for every satellite × every active station on first render; GroundStationPage runs all satellites against one station; and MapPage's "next contacts" recomputes every pair on each 30 s poll with no TTL cache (the other pages at least have getCachedWindows). The killer detail: pairs with no pass in the horizon cost the most, because the scan runs to the end — and maxReachableLatitudeDeg only prunes polar-station pairs. At today's 7×9 it's milliseconds; at 100 satellites × 30 stations you're at ~8–9 million propagations, which is seconds of frozen UI on fleet-page load and a visible hitch on the map every 30 s. Fixes, in order of payoff: a web worker for the scans, a TTL cache on MapPage's upcoming, and computing per-row timelines lazily.
+
+2. The perPage caps turn into invisible data loss. Everything reads the first 50 satellites / 50 stations / 100 contacts with no pagination UI. The sweep made some truncation visible (contacts count, fleet counter), but stations have no meta anywhere — station #51 silently vanishes from the map, the schedule form, and every pass computation. Conflict detection past 100 contacts is now flagged but still blind. Real growth needs pagination or fetch-all-pages loops; the keyArgs fix means the cache is at least ready for it.
