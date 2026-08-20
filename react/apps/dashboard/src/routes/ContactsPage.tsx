@@ -74,9 +74,10 @@ function ContactsPage() {
 
   // Rows arrive phase-sorted (in-progress and upcoming soonest-first, past most-recent-first).
   const {active, upcoming, past} = useMemo(() => {
-    const rows = recoveredRows.map(
-      (row): ContactRow => ({...row, state: getSatelliteState(row.contact.Satellite?.status)}),
-    );
+    const rows = recoveredRows.map((row): ContactRow => ({
+      ...row,
+      state: getSatelliteState(row.contact.Satellite?.status),
+    }));
 
     return {
       active: rows.filter((row) => row.phase === "active"),

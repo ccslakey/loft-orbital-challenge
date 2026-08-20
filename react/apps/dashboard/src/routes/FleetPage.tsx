@@ -358,7 +358,9 @@ function FleetPage() {
 
           <span className={styles.count} role="status">
             {visible.length} of {rows.length}
-            {totalCount !== null && totalCount > rows.length ? ` · first ${rows.length} of ${totalCount} tracked` : null}
+            {totalCount !== null && totalCount > rows.length
+              ? ` · first ${rows.length} of ${totalCount} tracked`
+              : null}
           </span>
         </div>
 

@@ -107,7 +107,9 @@ function GroundStationPage() {
 
   const contacts = useMemo(() => (data?.GroundStation?.Contacts ?? []).filter((contact) => contact !== null), [data]);
 
-  const contactRows = useContactRows(contacts, now, {station: {latitude: latitude ?? null, longitude: longitude ?? null}});
+  const contactRows = useContactRows(contacts, now, {
+    station: {latitude: latitude ?? null, longitude: longitude ?? null},
+  });
 
   const reports = useMemo(
     () =>
