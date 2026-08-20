@@ -15,6 +15,7 @@ import {
   SATELLITE_OVERVIEW_QUERY,
 } from "@/api/operations.js";
 import QueryState from "@/components/ui/QueryState.js";
+import {useNow} from "@/hooks/useNow.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import {busyInterval, conflictsFor, PASS_PAD_MS, recoverContactWindow, type ScheduledUse} from "@/lib/contacts.js";
 import {activeFleetStations, CONTACT_HORIZON_HOURS, findContactWindows, type PassWindow} from "@/lib/fleet.js";
@@ -90,9 +91,9 @@ function ScheduleContactPage() {
   const payloads = (satellite?.Payloads ?? []).filter((payload) => payload !== null);
   const payload = payloads.find((candidate) => candidate.id === payloadId) ?? null;
 
-  // Candidate windows for the chosen satellite; passes must start at least one pad ahead to be schedulable.
+  // Candidate windows for the chosen satellite, scanned once per selection so window identity stays stable.
   const satelliteTle = satellite?.tle;
-  const windows = useMemo(() => {
+  const scannedWindows = useMemo(() => {
     const tle = parseTle(satelliteTle);
     const satrec = tle ? createSatrec(tle) : null;
 
@@ -100,12 +101,16 @@ function ScheduleContactPage() {
       return null;
     }
 
-    const now = new Date();
-
-    return findContactWindows(satrec, activeStations, now).filter(
-      (window) => window.aosMs > now.getTime() + PASS_PAD_MS,
-    );
+    return findContactWindows(satrec, activeStations, new Date());
   }, [satelliteTle, activeStations]);
+
+  // Passes must start at least one pad ahead to be schedulable; re-filtering against a ticking clock
+  // drops elapsed passes while the form sits open, without re-scanning (which would shift AOS keys).
+  const now = useNow(60_000);
+  const windows = useMemo(
+    () => scannedWindows?.filter((window) => window.aosMs > now.getTime() + PASS_PAD_MS) ?? null,
+    [scannedWindows, now],
+  );
 
   // Busy intervals from every scheduled contact, for double-booking warnings.
   const scheduledUses = useMemo(() => {

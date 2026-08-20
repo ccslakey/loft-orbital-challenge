@@ -116,6 +116,9 @@ function MapPage() {
     return rows.sort((a, b) => a.window.aos.getTime() - b.window.aos.getTime());
   }, [tracked, stations]);
 
+  // The scan refreshes on poll boundaries, so between polls a pass can end; hide it once LOS is behind us.
+  const currentUpcoming = upcoming.filter(({window}) => window.truncated || window.los.getTime() > now.getTime());
+
   // The track's shape drifts only with Earth rotation (~0.25°/min), so it recomputes on a minute bucket,
   // not the 1 Hz clock. Inert satellites keep only their marker, same as footprints and links.
   const trackEpochMs = Math.floor(now.getTime() / 60_000) * 60_000;
@@ -331,7 +334,7 @@ function MapPage() {
         <section className={styles.contacts}>
           <h2 className={styles.contactsTitle}>Next contacts — 24 h horizon, times UTC</h2>
 
-          {upcoming.length === 0 ? (
+          {currentUpcoming.length === 0 ? (
             <p className={styles.contactsNote}>No contacts clear the mask within the next 24 hours.</p>
           ) : (
             <>
@@ -356,7 +359,7 @@ function MapPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {upcoming.slice(0, 10).map(({satellite, station, window}) => (
+                    {currentUpcoming.slice(0, 10).map(({satellite, station, window}) => (
                       <tr key={`${station.id}-${satellite.id}`}>
                         <td>{station.name}</td>
                         <td>
@@ -374,9 +377,9 @@ function MapPage() {
                 </table>
               </div>
 
-              {upcoming.length > 10 ? (
+              {currentUpcoming.length > 10 ? (
                 <p className={styles.contactsNote}>
-                  {upcoming.length - 10} more pairs have a window inside the horizon.
+                  {currentUpcoming.length - 10} more pairs have a window inside the horizon.
                 </p>
               ) : null}
             </>
