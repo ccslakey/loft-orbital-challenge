@@ -66,6 +66,14 @@ $states: nominal, planned, caution, critical, inert;
   fill: var(--rule);
 }
 
+.track {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 0.75;
+  stroke-opacity: 0.55;
+  stroke-dasharray: 4 3;
+}
+
 .footprint {
   fill: var(--state, var(--state-inert));
   fill-opacity: 0.05;
@@ -143,6 +151,11 @@ $states: nominal, planned, caution, critical, inert;
   height: 7px;
   background: var(--ink-2);
   transform: rotate(45deg);
+}
+
+.legendTrack {
+  width: 14px;
+  border-top: 1px dashed var(--ink-3);
 }
 
 .legendFootprint {

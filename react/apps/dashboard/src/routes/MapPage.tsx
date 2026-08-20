@@ -11,7 +11,7 @@ import landTopology from "world-atlas/land-110m.json";
 import {GROUND_STATIONS_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.js";
 import QueryState from "@/components/ui/QueryState.js";
 import {formatAltitude, formatLatitude, formatLongitude} from "@/lib/format.js";
-import {createSatrec, propagateToGeodetic} from "@/lib/propagation.js";
+import {createSatrec, groundTrack, orbitalPeriodMinutes, propagateToGeodetic} from "@/lib/propagation.js";
 import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
 import {centralAngleDeg, DEFAULT_ELEVATION_MASK_DEG, elevationDeg, footprintRadiusDeg} from "@/lib/visibility.js";
@@ -129,6 +129,33 @@ function MapPage() {
     return rows.sort((a, b) => a.window.aos.getTime() - b.window.aos.getTime());
   }, [tracked, stations]);
 
+  // The track's shape drifts only with Earth rotation (~0.25°/min), so it recomputes on a minute bucket,
+  // not the 1 Hz clock. Inert satellites keep only their marker, same as footprints and links.
+  const trackEpochMs = Math.floor(now.getTime() / 60_000) * 60_000;
+  const tracks = useMemo(() => {
+    const start = new Date(trackEpochMs);
+    const rows = [];
+
+    for (const {satellite, satrec} of tracked) {
+      if (!satrec || getSatelliteState(satellite.status) === "inert") {
+        continue;
+      }
+
+      const period = orbitalPeriodMinutes(satrec);
+      const coordinates = period === null ? [] : groundTrack(satrec, start, period);
+
+      if (coordinates.length === 0) {
+        continue;
+      }
+
+      const d = toPath({type: "LineString", coordinates}) ?? "";
+
+      rows.push({id: satellite.id, name: satellite.name, d});
+    }
+
+    return rows;
+  }, [tracked, trackEpochMs]);
+
   const fleet = tracked.map(({satellite, satrec}) => ({
     satellite,
     state: getSatelliteState(satellite.status),
@@ -207,6 +234,12 @@ function MapPage() {
             <path className={styles.sphere} d={SPHERE_PATH} />
             <path className={styles.graticule} d={GRATICULE_PATH} />
             <path className={styles.land} d={LAND_PATH} />
+
+            {tracks.map((track) => (
+              <path key={track.id} className={styles.track} d={track.d}>
+                <title>{`${track.name} — ground track, one orbit ahead`}</title>
+              </path>
+            ))}
 
             {fleet.map(({satellite, state, live}) => {
               if (state === "inert" || !live) {
@@ -287,6 +320,9 @@ function MapPage() {
             </span>
             <span className={styles.legendItem}>
               <span className={styles.legendStation} aria-hidden="true" /> Ground station
+            </span>
+            <span className={styles.legendItem}>
+              <span className={styles.legendTrack} aria-hidden="true" /> Ground track, one orbit
             </span>
             <span className={styles.legendItem}>
               <span className={styles.legendFootprint} aria-hidden="true" /> Visibility footprint
