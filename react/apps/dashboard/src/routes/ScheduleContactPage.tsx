@@ -215,7 +215,10 @@ function ScheduleContactPage() {
     }).catch(() => {});
   };
 
-  const loading = (satellitesQuery.loading && !satellitesQuery.data) || (stationsQuery.loading && !stationsQuery.data);
+  const loading =
+    (satellitesQuery.loading && !satellitesQuery.data) ||
+    (stationsQuery.loading && !stationsQuery.data) ||
+    (employeesQuery.loading && !employeesQuery.data);
 
   return (
     <section className={styles.page}>
@@ -232,12 +235,14 @@ function ScheduleContactPage() {
 
       <QueryState
         loading={loading}
-        error={satellitesQuery.error ?? stationsQuery.error}
+        error={satellitesQuery.error ?? stationsQuery.error ?? employeesQuery.error}
+        hasData={Boolean(satellitesQuery.data && stationsQuery.data && employeesQuery.data)}
         empty={satellites.length === 0}
         emptyMessage="No serviceable satellites are registered against this operator."
         onRetry={() => {
           void satellitesQuery.refetch();
           void stationsQuery.refetch();
+          void employeesQuery.refetch();
         }}
       >
         <form className={styles.form} onSubmit={submit}>
@@ -395,6 +400,15 @@ function ScheduleContactPage() {
                 </table>
               </div>
             )}
+
+            {contactsQuery.error ? (
+              <p className={styles.warning} role="alert">
+                Scheduled contacts failed to load, so double-booking conflicts cannot be flagged.{" "}
+                <button className={styles.retryInline} type="button" onClick={() => void contactsQuery.refetch()}>
+                  Retry
+                </button>
+              </p>
+            ) : null}
 
             {staleWindow ? (
               <p className={styles.warning} role="alert">
