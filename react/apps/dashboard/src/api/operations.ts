@@ -155,6 +155,61 @@ export const GROUND_STATIONS_QUERY = graphql(`
   }
 `);
 
+// Stations don't move and their status changes rarely, so one unpolled query carries the site plus its
+// contacts and reports (reverse relations), unlike the satellite page's polling/static split.
+export const GROUND_STATION_DETAIL_QUERY = graphql(`
+  query GroundStationDetail($id: ID!) {
+    GroundStation(id: $id) {
+      id
+      name
+      status
+      network
+      coordinates
+      Contacts {
+        id
+        date
+        type
+        Satellite {
+          id
+          name
+          status
+          tle
+        }
+        Payload {
+          id
+          name
+        }
+        Employee {
+          id
+          name
+        }
+      }
+      Reports {
+        id
+        title
+        type
+        date
+        content
+        Employee {
+          id
+          name
+          role
+        }
+        Comments {
+          id
+          date
+          content
+          Employee {
+            id
+            name
+            role
+          }
+        }
+      }
+    }
+  }
+`);
+
 /* Contacts ///////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 export const CONTACTS_QUERY = graphql(`

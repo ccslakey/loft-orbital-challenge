@@ -38,23 +38,35 @@ function ContactsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const satelliteFilter = searchParams.get("satellite");
+  const stationFilter = searchParams.get("station");
 
   const allContacts = useMemo(() => (data?.allContacts ?? []).filter((contact) => contact !== null), [data]);
   const contacts = useMemo(
     () =>
-      satelliteFilter === null
-        ? allContacts
-        : allContacts.filter((contact) => contact.Satellite?.id === satelliteFilter),
-    [allContacts, satelliteFilter],
+      allContacts.filter(
+        (contact) =>
+          (satelliteFilter === null || contact.Satellite?.id === satelliteFilter) &&
+          (stationFilter === null || contact.GroundStation?.id === stationFilter),
+      ),
+    [allContacts, satelliteFilter, stationFilter],
   );
 
-  // Chip label from any matching contact; an id with no contacts (or an unknown id) falls back to the raw value.
-  const filterLabel = contacts[0]?.Satellite?.name ?? satelliteFilter;
+  // Chip labels from any matching contact; an id with no contacts (or an unknown id) falls back to the raw value.
+  const filterChips = [
+    satelliteFilter !== null && {
+      param: "satellite",
+      label: `Satellite: ${contacts[0]?.Satellite?.name ?? satelliteFilter}`,
+    },
+    stationFilter !== null && {
+      param: "station",
+      label: `Station: ${contacts[0]?.GroundStation?.name ?? stationFilter}`,
+    },
+  ].filter((chip) => chip !== false);
 
-  const clearFilter = () => {
+  const clearFilter = (param: string) => {
     const next = new URLSearchParams(searchParams);
 
-    next.delete("satellite");
+    next.delete(param);
     setSearchParams(next, {replace: true});
   };
 
@@ -113,19 +125,21 @@ function ContactsPage() {
           Scheduled communication sessions between satellites and contracted ground stations. Window durations are
           recomputed from the current TLE; a dash means the stored time no longer matches a pass.
         </p>
-        {satelliteFilter !== null ? (
+        {filterChips.length > 0 ? (
           <p className={styles.filterRow}>
-            <span className={styles.filterChip}>
-              Satellite: {filterLabel}
-              <button
-                type="button"
-                className={styles.filterClear}
-                aria-label="Clear satellite filter"
-                onClick={clearFilter}
-              >
-                ✕
-              </button>
-            </span>
+            {filterChips.map(({param, label}) => (
+              <span className={styles.filterChip} key={param}>
+                {label}
+                <button
+                  type="button"
+                  className={styles.filterClear}
+                  aria-label={`Clear ${param} filter`}
+                  onClick={() => clearFilter(param)}
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
           </p>
         ) : null}
       </header>

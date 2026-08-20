@@ -74,6 +74,21 @@
   @include display(var(--text-lg));
 }
 
+.nameLink {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px;
+
+  &:hover {
+    text-decoration-color: var(--ink);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
 .readout {
   display: flex;
   flex-direction: column;
