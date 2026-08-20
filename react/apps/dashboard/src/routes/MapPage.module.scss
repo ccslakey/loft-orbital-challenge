@@ -72,6 +72,18 @@ $states: nominal, planned, caution, critical, inert;
   stroke-width: 0.75;
   stroke-opacity: 0.55;
   stroke-dasharray: 4 3;
+  transition: stroke-opacity 120ms ease;
+}
+
+.map[data-highlighting] .track {
+  stroke-opacity: 0.12;
+}
+
+.map[data-highlighting] .track[data-active] {
+  stroke: var(--ink);
+  stroke-width: 1.4;
+  stroke-opacity: 0.95;
+  stroke-dasharray: none;
 }
 
 .footprint {
@@ -110,6 +122,12 @@ $states: nominal, planned, caution, critical, inert;
     fill: var(--panel);
     stroke: var(--state, var(--state-inert));
     stroke-dasharray: 2 1.5;
+  }
+
+  .hitArea {
+    pointer-events: all;
+    fill: none;
+    stroke: none;
   }
 }
 

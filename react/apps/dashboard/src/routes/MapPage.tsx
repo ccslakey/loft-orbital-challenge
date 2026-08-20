@@ -2,7 +2,7 @@
 
 import {useQuery} from "@apollo/client/react";
 import {geoCircle, geoEquirectangular, geoGraticule10, geoPath} from "d3-geo";
-import {useMemo} from "react";
+import {useMemo, useState} from "react";
 import {Link} from "react-router-dom";
 import {feature} from "topojson-client";
 import type {Topology} from "topojson-specification";
@@ -137,6 +137,12 @@ function MapPage() {
     return rows;
   }, [tracked, trackEpochMs]);
 
+  // Hover (marker or next-contacts row) highlights that satellite's ground track; dimming only engages
+  // when the hovered satellite actually has one, so trackless markers don't grey out the whole map.
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const trackIds = useMemo(() => new Set(tracks.map((track) => track.id)), [tracks]);
+  const highlightId = hoveredId !== null && trackIds.has(hoveredId) ? hoveredId : null;
+
   const fleet = tracked.map(({satellite, satrec}) => ({
     satellite,
     state: getSatelliteState(satellite.status),
@@ -208,13 +214,19 @@ function MapPage() {
             viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
             role="img"
             aria-label="World map of live satellite positions and contracted ground stations"
+            data-highlighting={highlightId !== null || undefined}
           >
             <path className={styles.sphere} d={SPHERE_PATH} />
             <path className={styles.graticule} d={GRATICULE_PATH} />
             <path className={styles.land} d={LAND_PATH} />
 
             {tracks.map((track) => (
-              <path key={track.id} className={styles.track} d={track.d}>
+              <path
+                key={track.id}
+                className={styles.track}
+                data-active={track.id === highlightId || undefined}
+                d={track.d}
+              >
                 <title>{`${track.name} — ground track, one orbit ahead`}</title>
               </path>
             ))}
@@ -281,8 +293,11 @@ function MapPage() {
                   data-state={state}
                   data-degraded={live ? undefined : true}
                   transform={`translate(${point[0]} ${point[1]})`}
+                  onMouseEnter={() => setHoveredId(satellite.id)}
+                  onMouseLeave={() => setHoveredId(null)}
                 >
                   <title>{`${satellite.name} — ${satellite.status ?? "Unknown"} · ${formatLatitude(latitude)}, ${formatLongitude(longitude)} · ${formatAltitude(altitude)}${detail}`}</title>
+                  <circle className={styles.hitArea} r={10} />
                   <circle r={3.5} />
                   <text className={styles.markerLabel} x={7} y={-6}>
                     {satellite.name}
@@ -334,6 +349,7 @@ function MapPage() {
                 rowKey={({satellite, station}) => `${station.id}-${satellite.id}`}
                 compact
                 now={now}
+                onHoverRow={(row) => setHoveredId(row ? row.satellite.id : null)}
                 lead={[
                   {header: "Station", render: ({station}) => station.name},
                   {

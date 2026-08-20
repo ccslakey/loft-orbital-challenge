@@ -16,6 +16,10 @@ See [`WORK_SUMMARY.md`](../WORK_SUMMARY.md) for what was built and why, and
 The workspace requires Node `>=20.10.0 <21`, which is why the Docker environment exists; do not expect a host with a
 newer Node to work.
 
+Optional: `SEED_PROFILE=large pnpm dev` starts the API with a bigger demo dataset — 62 satellites with
+real CelesTrak TLEs and 17 ground stations — to exercise the fleet filters, the map at density, and the
+list-truncation notices. See [`apps/server/README.md`](./apps/server/README.md).
+
 ## Tech Stack
 
 - [pnpm](https://pnpm.io/)
@@ -39,5 +43,10 @@ newer Node to work.
 - `pnpm test` --> Runs tests
 - `pnpm test:watch` --> Runs tests in watch mode
 - `pnpm test:coverage` --> Runs tests and collects coverage
-- `pnpm lint` --> Lints every workspace with ESLint
+- `pnpm type-check` --> `tsc` over every workspace, including dashboard tests and the server
+- `pnpm lint` --> Lints every workspace with ESLint (`--max-warnings 0`)
 - `pnpm lint:fix` --> Lints and applies fixes
+- `pnpm lint:styles` --> Stylelint over the SCSS (`lint:styles:fix` to write)
+- `pnpm format:check` --> Prettier check (`pnpm format` to write)
+
+Every one of these (plus a codegen-drift check against a live server) runs as a separate job in CI.

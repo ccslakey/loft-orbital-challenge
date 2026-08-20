@@ -34,6 +34,8 @@ interface PassTableProps<Row> {
   compact?: boolean;
   now?: Date;
   isSelected?: (row: Row) => boolean;
+  /** Called with the hovered row, and null on leave — for cross-highlighting (e.g. the map's tracks). */
+  onHoverRow?: (row: Row | null) => void;
   /** Extra class for the scrolling wrapper, for page-specific panel treatments. */
   wrapClassName?: string;
 }
@@ -57,6 +59,7 @@ function PassTable<Row>({
   compact,
   now,
   isSelected,
+  onHoverRow,
   wrapClassName,
 }: PassTableProps<Row>) {
   const columnClass = (column: PassTableColumn<Row>) =>
@@ -96,7 +99,12 @@ function PassTable<Row>({
             const window = getWindow(row);
 
             return (
-              <tr key={rowKey(row)} data-selected={isSelected?.(row) || undefined}>
+              <tr
+                key={rowKey(row)}
+                data-selected={isSelected?.(row) || undefined}
+                onMouseEnter={onHoverRow ? () => onHoverRow(row) : undefined}
+                onMouseLeave={onHoverRow ? () => onHoverRow(null) : undefined}
+              >
                 {lead.map((column, index) => (
                   <td className={columnClass(column)} key={index}>
                     {column.render(row)}
