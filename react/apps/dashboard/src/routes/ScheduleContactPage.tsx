@@ -145,6 +145,9 @@ function ScheduleContactPage() {
     return uses;
   }, [contactsQuery.data]);
 
+  const loadedContacts = contactsQuery.data?.allContacts?.length ?? 0;
+  const contactsTotal = contactsQuery.data?._allContactsMeta?.count ?? null;
+
   const prefillWindow =
     prefill === null
       ? null
@@ -415,6 +418,12 @@ function ScheduleContactPage() {
                 <button className={styles.retryInline} type="button" onClick={() => void contactsQuery.refetch()}>
                   Retry
                 </button>
+              </p>
+            ) : null}
+
+            {contactsTotal !== null && contactsTotal > loadedContacts ? (
+              <p className={styles.warning}>
+                Conflict checks cover only the {loadedContacts} most recent of {contactsTotal} scheduled contacts.
               </p>
             ) : null}
 

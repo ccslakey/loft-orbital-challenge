@@ -44,6 +44,9 @@ export const SATELLITE_OVERVIEW_QUERY = graphql(`
         }
       }
     }
+    _allSatellitesMeta {
+      count
+    }
   }
 `);
 
@@ -267,6 +270,9 @@ export const CONTACTS_QUERY = graphql(`
         name
         role
       }
+    }
+    _allContactsMeta {
+      count
     }
   }
 `);

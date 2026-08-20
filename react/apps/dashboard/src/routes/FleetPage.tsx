@@ -110,6 +110,7 @@ function FleetPage() {
   }, [filters.search]);
 
   const satellites = useMemo(() => (data?.allSatellites ?? []).filter((satellite) => satellite !== null), [data]);
+  const totalCount = data?._allSatellitesMeta?.count ?? null;
 
   const activeStations = useMemo(
     () => activeFleetStations(stationsQuery.data?.allGroundStations),
@@ -357,6 +358,7 @@ function FleetPage() {
 
           <span className={styles.count} role="status">
             {visible.length} of {rows.length}
+            {totalCount !== null && totalCount > rows.length ? ` · first ${rows.length} of ${totalCount} tracked` : null}
           </span>
         </div>
 
