@@ -7,6 +7,7 @@ import {Link, useSearchParams} from "react-router-dom";
 import {GROUND_STATIONS_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
+import {useNow} from "@/hooks/useNow.js";
 import {
   activeFleetStations,
   CONTACT_HORIZON_HOURS,
@@ -26,7 +27,7 @@ import {
   type TimelineSegment,
   type WindowsCache,
 } from "@/lib/fleet.js";
-import {formatAltitude, formatDate, formatLatitude, formatLongitude, formatSpan} from "@/lib/format.js";
+import {formatAltitude, formatDate, formatLatitude, formatLongitude, formatSpan, formatUtcHhmm} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getSatelliteState, type State} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
@@ -64,11 +65,10 @@ const contactCache: WindowsCache = new Map();
 // "STATION · 12:34–12:46 UTC"; a pass on the next UTC day gets one trailing "+1d", one that straddles
 // midnight marks only the end time, and a truncated LOS (still open at the horizon) gets a "+".
 const formatWindowTip = ({stationName, aosMs, losMs, truncated}: PassWindow, reference: Date): string => {
-  const hhmm = (ms: number) => new Date(ms).toISOString().slice(11, 16);
   const straddles = new Date(losMs).getUTCDate() !== new Date(aosMs).getUTCDate();
   const nextDay = new Date(aosMs).getUTCDate() !== reference.getUTCDate();
 
-  return `${stationName} · ${hhmm(aosMs)}–${hhmm(losMs)}${straddles ? " +1d" : ""}${truncated ? "+" : ""} UTC${
+  return `${stationName} · ${formatUtcHhmm(aosMs)}–${formatUtcHhmm(losMs)}${straddles ? " +1d" : ""}${truncated ? "+" : ""} UTC${
     nextDay ? " +1d" : ""
   }`;
 };
@@ -87,6 +87,7 @@ function FleetPage() {
   });
   const stationsQuery = useQuery(GROUND_STATIONS_QUERY, {variables: {perPage: 50, page: 0}});
 
+  const clock = useNow(60_000);
   const [searchParams, setSearchParams] = useSearchParams();
   const {filters, sort, direction} = readFleetParams(searchParams);
 
@@ -111,8 +112,9 @@ function FleetPage() {
   );
 
   // Rebuilt every poll; the expensive window search inside is served from the TTL cache between refreshes.
+  // `clock` (60 s) ensures contactEta labels stay fresh even when the poll returns unchanged data.
   const rows = useMemo((): FleetRow[] => {
-    const now = new Date();
+    const now = new Date(clock.getTime());
     const stationsKey = activeStations.map((station) => station.id).join("|");
 
     return satellites.map((satellite) => {
@@ -170,7 +172,7 @@ function FleetPage() {
         })),
       };
     });
-  }, [satellites, activeStations]);
+  }, [satellites, activeStations, clock]);
 
   // Customer names live on the payloads, not the rows; both option lists derive from the unfiltered data.
   const options = useMemo(() => {
@@ -245,11 +247,24 @@ function FleetPage() {
 
     const id = window.setTimeout(() => {
       writtenSearch.current = searchInput;
-      setFilter("q", searchInput, true);
+      setSearchParams(
+        (previous) => {
+          const next = new URLSearchParams(previous);
+
+          if (searchInput === "") {
+            next.delete("q");
+          } else {
+            next.set("q", searchInput);
+          }
+
+          return next;
+        },
+        {replace: true},
+      );
     }, 250);
 
     return () => window.clearTimeout(id);
-  });
+  }, [searchInput, filters.search, setSearchParams]);
 
   const clearFilters = () =>
     updateParams((next) => {

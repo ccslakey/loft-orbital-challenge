@@ -3,13 +3,14 @@
 import {useQuery} from "@apollo/client/react";
 import {useMemo} from "react";
 import {Link, useSearchParams} from "react-router-dom";
+import type {SatRec} from "satellite.js";
 
 import {CONTACTS_QUERY} from "@/api/operations.js";
 import QueryState from "@/components/ui/QueryState.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import {useNow} from "@/hooks/useNow.js";
-import {contactPhase, recoverContactWindow, type ContactPhase} from "@/lib/contacts.js";
-import {formatSpan, formatUtcDateTime} from "@/lib/format.js";
+import {contactPhase, contactWindowLabel, recoverContactWindow, type ContactPhase} from "@/lib/contacts.js";
+import {formatUtcDateTime} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
 import {getSatelliteState, type State} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
@@ -73,6 +74,7 @@ function ContactsPage() {
   // Query order is date desc; in-progress and upcoming flip to soonest-first, past stays most-recent-first.
   const {active, upcoming, past} = useMemo(() => {
     const nowMs = now.getTime();
+    const satrecCache = new Map<string, SatRec | null>();
     const rows = contacts.flatMap((contact): ContactRow[] => {
       const dateMs = new Date(contact.date).getTime();
 
@@ -80,8 +82,15 @@ function ContactsPage() {
         return [];
       }
 
-      const tle = parseTle(contact.Satellite?.tle);
-      const satrec = tle ? createSatrec(tle) : null;
+      const satId = contact.Satellite?.id ?? "";
+
+      if (!satrecCache.has(satId)) {
+        const tle = parseTle(contact.Satellite?.tle);
+
+        satrecCache.set(satId, tle ? createSatrec(tle) : null);
+      }
+
+      const satrec = satrecCache.get(satId) ?? null;
       const [stationLat, stationLon] = contact.GroundStation?.coordinates ?? [null, null];
       const window =
         satrec && stationLat != null && stationLon != null
@@ -95,12 +104,7 @@ function ContactsPage() {
           dateMs,
           phase,
           state: getSatelliteState(contact.Satellite?.status),
-          windowLabel:
-            phase === "active" && window
-              ? `ends in ${formatSpan(window.losMs - nowMs)}`
-              : window
-                ? `${formatSpan(window.losMs - dateMs)} · ${Math.round(window.maxElevationDeg)}°`
-                : null,
+          windowLabel: contactWindowLabel(phase, window, dateMs, nowMs),
         },
       ];
     });
