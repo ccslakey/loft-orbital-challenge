@@ -2,14 +2,15 @@
 
 import {useQuery} from "@apollo/client/react";
 import {geoCircle, geoEquirectangular, geoGraticule10, geoPath} from "d3-geo";
-import {useEffect, useMemo, useState} from "react";
+import {useMemo} from "react";
 import {Link} from "react-router-dom";
 import {feature} from "topojson-client";
 import type {Topology} from "topojson-specification";
 import landTopology from "world-atlas/land-110m.json";
 
-import {GROUND_STATIONS_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.js";
+import {GROUND_STATIONS_QUERY, MAP_SATELLITES_QUERY} from "@/api/operations.js";
 import QueryState from "@/components/ui/QueryState.js";
+import {useNow} from "@/hooks/useNow.js";
 import {formatAltitude, formatLatitude, formatLongitude} from "@/lib/format.js";
 import {createSatrec, groundTrack, orbitalPeriodMinutes, propagateToGeodetic} from "@/lib/propagation.js";
 import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
@@ -58,25 +59,11 @@ const formatUtcTime = (date: Date, reference: Date): string => {
 const formatWindowDuration = ({aos, los, truncated}: ContactWindow): string =>
   `${Math.max(1, Math.round((los.getTime() - aos.getTime()) / 60000))}${truncated ? "+" : ""} min`;
 
-/* Hooks //////////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
-const useNow = (intervalMs: number): Date => {
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), intervalMs);
-
-    return () => window.clearInterval(id);
-  }, [intervalMs]);
-
-  return now;
-};
-
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 function MapPage() {
   // Motion comes from local propagation; the slow poll refreshes TLEs and corrects drift.
-  const satellitesQuery = useQuery(SATELLITE_OVERVIEW_QUERY, {
+  const satellitesQuery = useQuery(MAP_SATELLITES_QUERY, {
     variables: {perPage: 50, page: 0},
     pollInterval: 30000,
   });
@@ -162,7 +149,10 @@ function MapPage() {
     live: satrec ? propagateToGeodetic(satrec, now) : null,
   }));
 
-  const stationEntries = stations.map((station) => ({station, state: getGroundStationState(station.status)}));
+  const stationEntries = useMemo(
+    () => stations.map((station) => ({station, state: getGroundStationState(station.status)})),
+    [stations],
+  );
 
   // Footprints and links are planning aids: decommissioned satellites and offline stations keep only their marker.
   const links = [];

@@ -3,13 +3,21 @@
 import {useQuery} from "@apollo/client/react";
 import {useMemo} from "react";
 import {Link, useParams} from "react-router-dom";
+import type {SatRec} from "satellite.js";
 
-import {EMPLOYEES_QUERY, GROUND_STATION_DETAIL_QUERY, SATELLITE_OVERVIEW_QUERY} from "@/api/operations.js";
+import {EMPLOYEES_QUERY, GROUND_STATION_DETAIL_QUERY, MAP_SATELLITES_QUERY} from "@/api/operations.js";
 import StatusChip from "@/components/ui/StatusChip.js";
 import QueryState from "@/components/ui/QueryState.js";
 import ReportCard from "@/components/ui/ReportCard.js";
 import {useNow} from "@/hooks/useNow.js";
-import {contactPhase, recoverContactWindow, type ContactPhase} from "@/lib/contacts.js";
+import {
+  compareContactPhase,
+  contactPhase,
+  contactWindowLabel,
+  PHASE_PRESENTATION,
+  recoverContactWindow,
+  type ContactPhase,
+} from "@/lib/contacts.js";
 import {
   CONTACT_HORIZON_HOURS,
   findContactWindows,
@@ -18,9 +26,9 @@ import {
   type PassWindow,
   type WindowsCache,
 } from "@/lib/fleet.js";
-import {formatLatitude, formatLongitude, formatSpan, formatUtcDateTime} from "@/lib/format.js";
+import {formatLatitude, formatLongitude, formatSpan, formatUtcDateTime, formatUtcHhmm} from "@/lib/format.js";
 import {createSatrec} from "@/lib/propagation.js";
-import {getGroundStationState, getSatelliteState, type State} from "@/lib/status.js";
+import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
 import type {GroundStationDetailQuery} from "@/gql/graphql.js";
 
@@ -50,14 +58,6 @@ interface StationPass {
 // Keyed by satellite + TLE + station, shared with remounts; the window search is too heavy per render.
 const passCache: WindowsCache = new Map();
 
-const PHASE_PRESENTATION: Record<ContactPhase, {label: string; state: State; rank: number}> = {
-  active: {label: "In progress", state: "nominal", rank: 0},
-  upcoming: {label: "Upcoming", state: "planned", rank: 1},
-  past: {label: "Past", state: "inert", rank: 2},
-};
-
-const hhmm = (ms: number): string => new Date(ms).toISOString().slice(11, 16);
-
 /* Component //////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 function GroundStationPage() {
@@ -67,7 +67,7 @@ function GroundStationPage() {
     variables: {id: stationId ?? ""},
     skip: !stationId,
   });
-  const satellitesQuery = useQuery(SATELLITE_OVERVIEW_QUERY, {variables: {perPage: 50, page: 0}});
+  const satellitesQuery = useQuery(MAP_SATELLITES_QUERY, {variables: {perPage: 50, page: 0}});
   const employeesQuery = useQuery(EMPLOYEES_QUERY);
   const now = useNow(15_000);
 
@@ -127,6 +127,7 @@ function GroundStationPage() {
 
   const contactRows = useMemo(() => {
     const nowMs = now.getTime();
+    const satrecCache = new Map<string, SatRec | null>();
 
     return contacts
       .flatMap((contact): ContactRow[] => {
@@ -136,34 +137,24 @@ function GroundStationPage() {
           return [];
         }
 
-        const tle = parseTle(contact.Satellite?.tle);
-        const satrec = tle ? createSatrec(tle) : null;
+        const satId = contact.Satellite?.id ?? "";
+
+        if (!satrecCache.has(satId)) {
+          const tle = parseTle(contact.Satellite?.tle);
+
+          satrecCache.set(satId, tle ? createSatrec(tle) : null);
+        }
+
+        const satrec = satrecCache.get(satId) ?? null;
         const window =
           satrec && latitude != null && longitude != null
             ? recoverContactWindow(satrec, latitude, longitude, dateMs)
             : null;
         const phase = contactPhase(dateMs, window?.losMs ?? null, nowMs);
 
-        return [
-          {
-            contact,
-            dateMs,
-            phase,
-            windowLabel:
-              phase === "active" && window
-                ? `ends in ${formatSpan(window.losMs - nowMs)}`
-                : window
-                  ? `${formatSpan(window.losMs - dateMs)} · ${Math.round(window.maxElevationDeg)}°`
-                  : null,
-          },
-        ];
+        return [{contact, dateMs, phase, windowLabel: contactWindowLabel(phase, window, dateMs, nowMs)}];
       })
-      .sort((a, b) => {
-        const rank = PHASE_PRESENTATION[a.phase].rank - PHASE_PRESENTATION[b.phase].rank;
-
-        // Past runs most-recent-first; everything else soonest-first.
-        return rank !== 0 ? rank : a.phase === "past" ? b.dateMs - a.dateMs : a.dateMs - b.dateMs;
-      });
+      .sort(compareContactPhase);
   }, [contacts, latitude, longitude, now]);
 
   const reports = useMemo(
@@ -274,7 +265,9 @@ function GroundStationPage() {
                               </Link>
                             </td>
                             <td className={styles.numeric}>{formatUtcDateTime(window.aosMs)}</td>
-                            <td className={styles.numeric}>{window.truncated ? "—" : `${hhmm(window.losMs)} UTC`}</td>
+                            <td className={styles.numeric}>
+                              {window.truncated ? "—" : `${formatUtcHhmm(window.losMs)} UTC`}
+                            </td>
                             <td className={styles.numeric}>{formatSpan(window.losMs - window.aosMs)}</td>
                             <td className={styles.numeric}>{Math.round(window.maxElevationDeg)}°</td>
                             <td className={styles.numeric}>

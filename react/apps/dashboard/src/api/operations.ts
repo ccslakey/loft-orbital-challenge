@@ -141,6 +141,21 @@ export const SATELLITE_ACTIVITY_QUERY = graphql(`
   }
 `);
 
+// Lean variant for pages that only propagate positions (MapPage, GroundStationPage); omits Constellation,
+// Launch, and Payloads to reduce payload size against a real API with per-field resolver costs.
+export const MAP_SATELLITES_QUERY = graphql(`
+  query MapSatellites($perPage: Int!, $page: Int!) {
+    allSatellites(perPage: $perPage, page: $page, sortField: "name", sortOrder: "asc") {
+      id
+      name
+      status
+      altitude
+      coordinates
+      tle
+    }
+  }
+`);
+
 /* Ground segment /////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 export const GROUND_STATIONS_QUERY = graphql(`
