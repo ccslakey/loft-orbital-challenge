@@ -1,15 +1,9 @@
 /* Imports ////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
-import {useEffect, useState} from "react";
+import {useNow} from "@/hooks/useNow.js";
 
 function MissionClock() {
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
-
-    return () => window.clearInterval(timer);
-  }, []);
+  const now = useNow(1000);
 
   const stamp = now.toISOString().slice(11, 19);
 

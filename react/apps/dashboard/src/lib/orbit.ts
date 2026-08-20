@@ -16,6 +16,13 @@ const MS_PER_DAY = 86_400_000;
 // predictions are suspect.
 export const TLE_STALE_DAYS = 14;
 
+// Kepler's third law: semi-major axis from the satrec's mean motion (rad/min).
+export const keplerSemiMajorKm = (meanMotionRadPerMin: number): number => {
+  const meanMotionRadS = meanMotionRadPerMin / 60;
+
+  return Math.cbrt(MU_KM3_S2 / (meanMotionRadS * meanMotionRadS));
+};
+
 /* Derived elements ///////////////////////////////////////////////////////////////////////////////////////////////// */
 
 export interface OrbitElements {
@@ -35,8 +42,7 @@ export const deriveOrbit = (satrec: SatRec): OrbitElements | null => {
     return null;
   }
 
-  const meanMotionRadS = no / 60;
-  const semiMajorKm = Math.cbrt(MU_KM3_S2 / (meanMotionRadS * meanMotionRadS));
+  const semiMajorKm = keplerSemiMajorKm(no);
 
   return {
     inclinationDeg: inclo * (180 / Math.PI),

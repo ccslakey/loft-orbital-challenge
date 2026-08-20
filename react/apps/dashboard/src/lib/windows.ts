@@ -2,6 +2,7 @@
 
 import type {SatRec} from "satellite.js";
 
+import {keplerSemiMajorKm} from "./orbit.js";
 import {propagateToGeodetic} from "./propagation.js";
 import {
   centralAngleDeg,
@@ -30,7 +31,6 @@ export interface WindowOptions {
 /* Search /////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 const BISECT_ITERATIONS = 24;
-const MU_KM3_S2 = 398600.4418;
 const REACHABILITY_MARGIN_DEG = 1;
 
 // Fast bound that spares a full 24 h scan: a satellite never clears the mask for stations poleward
@@ -40,8 +40,7 @@ const maxReachableLatitudeDeg = (satrec: SatRec, maskDeg: number): number => {
   const maxGroundLat = Math.min(inclinationDeg, 180 - inclinationDeg);
 
   // satrec.no is mean motion in rad/min; Kepler gives the semi-major axis, hence apogee altitude.
-  const meanMotionRadS = satrec.no / 60;
-  const semiMajorKm = Math.cbrt(MU_KM3_S2 / (meanMotionRadS * meanMotionRadS));
+  const semiMajorKm = keplerSemiMajorKm(satrec.no);
   const radius = footprintRadiusDeg(semiMajorKm * (1 + satrec.ecco) - EARTH_RADIUS_KM, maskDeg);
 
   return maxGroundLat + (radius ?? 0) + REACHABILITY_MARGIN_DEG;

@@ -11,6 +11,7 @@ import landTopology from "world-atlas/land-110m.json";
 import {GROUND_STATIONS_QUERY, MAP_SATELLITES_QUERY} from "@/api/operations.js";
 import QueryState from "@/components/ui/QueryState.js";
 import {useNow} from "@/hooks/useNow.js";
+import {activeFleetStations} from "@/lib/fleet.js";
 import {formatAltitude, formatLatitude, formatLongitude} from "@/lib/format.js";
 import {createSatrec, groundTrack, orbitalPeriodMinutes, propagateToGeodetic} from "@/lib/propagation.js";
 import {getGroundStationState, getSatelliteState} from "@/lib/status.js";
@@ -87,6 +88,12 @@ function MapPage() {
     [stationsQuery.data],
   );
 
+  // Footprints and links are planning aids: decommissioned satellites and offline stations keep only their marker.
+  const operationalStations = useMemo(
+    () => activeFleetStations(stationsQuery.data?.allGroundStations),
+    [stationsQuery.data],
+  );
+
   // Recomputed per poll, not per animation tick: the search costs milliseconds thanks to the
   // reachability bound, but is far too heavy for the 1 Hz clock.
   const upcoming = useMemo(() => {
@@ -98,14 +105,8 @@ function MapPage() {
         continue;
       }
 
-      for (const station of stations) {
-        const [stationLat, stationLon] = station.coordinates;
-
-        if (getGroundStationState(station.status) === "inert" || stationLat == null || stationLon == null) {
-          continue;
-        }
-
-        const window = findNextWindow(satrec, stationLat, stationLon, from);
+      for (const station of operationalStations) {
+        const window = findNextWindow(satrec, station.latitude, station.longitude, from);
 
         if (window) {
           rows.push({satellite, station, window});
@@ -114,7 +115,7 @@ function MapPage() {
     }
 
     return rows.sort((a, b) => a.window.aos.getTime() - b.window.aos.getTime());
-  }, [tracked, stations]);
+  }, [tracked, operationalStations]);
 
   // The scan refreshes on poll boundaries, so between polls a pass can end; hide it once LOS is behind us.
   const currentUpcoming = upcoming.filter(({window}) => window.truncated || window.los.getTime() > now.getTime());
@@ -157,7 +158,6 @@ function MapPage() {
     [stations],
   );
 
-  // Footprints and links are planning aids: decommissioned satellites and offline stations keep only their marker.
   const links = [];
 
   for (const {satellite, state, live} of fleet) {
@@ -165,15 +165,9 @@ function MapPage() {
       continue;
     }
 
-    for (const {station, state: stationState} of stationEntries) {
-      const [stationLat, stationLon] = station.coordinates;
-
-      if (stationState === "inert" || stationLat == null || stationLon == null) {
-        continue;
-      }
-
+    for (const station of operationalStations) {
       const elevation = elevationDeg(
-        centralAngleDeg(stationLat, stationLon, live.latitude, live.longitude),
+        centralAngleDeg(station.latitude, station.longitude, live.latitude, live.longitude),
         live.altitude,
       );
 
@@ -189,7 +183,7 @@ function MapPage() {
           toPath({
             type: "LineString",
             coordinates: [
-              [stationLon, stationLat],
+              [station.longitude, station.latitude],
               [live.longitude, live.latitude],
             ],
           }) ?? "",
