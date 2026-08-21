@@ -24,7 +24,6 @@ function GroundStationsPage() {
     <section className={styles.page}>
       <header className={styles.head}>
         <h1 className={styles.title}>Ground stations</h1>
-        <p className={styles.subtitle}>Contracted antenna sites available for scheduling contacts.</p>
       </header>
 
       <QueryState

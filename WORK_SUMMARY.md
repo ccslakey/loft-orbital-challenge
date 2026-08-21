@@ -122,14 +122,8 @@ Being explicit about the edges:
   `SEED_PROFILE=large` exists for scale.
 
 ## AI usage
-Claude Code was used substantially throughout. Specifically:
 
-- **Environment and verification** — bringing up the Docker environment, and running the build, type-check, tests and
-  browser checks after each change. (side by side testing)
-- **Scaffolding** — the Apollo client and codegen configuration, the router, the SCSS token system, and the route
-  components were largely AI-written under direction.
-- **Investigation** — API quirks, SGP4 math and satellite.js interface
-- **Review and correction** — several defects were caught this way, including various clipped displays, and a TypeScript directive being deleted during a comment cleanup.
+See [AI usage](./README.md#ai-usage) in the root README.
 
 ## Decisions
 

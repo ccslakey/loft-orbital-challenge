@@ -241,10 +241,7 @@ function ScheduleContactPage() {
     <section className={styles.page}>
       <header className={styles.head}>
         <h1 className={styles.title}>Schedule contact</h1>
-        <p className={styles.subtitle}>
-          Book a ground-station pass to communicate with a satellite. Windows cover the next {CONTACT_HORIZON_HOURS}{" "}
-          hours over operational stations; conflicts with already-scheduled contacts are flagged, not blocked.
-        </p>
+
         <Link className={styles.backLink} to="/contacts">
           ← Scheduled contacts
         </Link>

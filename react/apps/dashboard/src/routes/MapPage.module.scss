@@ -30,11 +30,6 @@ $states: nominal, planned, caution, critical, inert;
   letter-spacing: 0.02em;
 }
 
-.subtitle {
-  font-size: var(--text-sm);
-  color: var(--ink-2);
-}
-
 .panel {
   @include panel;
 

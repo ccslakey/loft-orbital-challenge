@@ -95,10 +95,7 @@ function ContactsPage() {
             Schedule contact
           </Link>
         </div>
-        <p className={styles.subtitle}>
-          Scheduled communication sessions between satellites and contracted ground stations. Window durations are
-          recomputed from the current TLE; a dash means the stored time no longer matches a pass.
-        </p>
+
         {totalCount !== null && totalCount > allContacts.length ? (
           <p className={styles.capNote} role="status">
             Showing the {allContacts.length} most recent of {totalCount} contacts.

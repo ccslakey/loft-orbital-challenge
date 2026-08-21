@@ -31,7 +31,6 @@ import {formatAltitude, formatDate, formatLatitude, formatLongitude, formatSpan,
 import {createSatrec} from "@/lib/propagation.js";
 import {getSatelliteState, type State} from "@/lib/status.js";
 import {parseTle} from "@/lib/tle.js";
-import {DEFAULT_ELEVATION_MASK_DEG} from "@/lib/visibility.js";
 
 import styles from "./FleetPage.module.scss";
 
@@ -300,11 +299,6 @@ function FleetPage() {
     <section className={styles.page}>
       <header className={styles.head}>
         <h1 className={styles.title}>Satellites</h1>
-        <p className={styles.subtitle}>
-          Sub-satellite point and altitude refreshed every five seconds; next contact and the passes strip cover every
-          window over an operational ground station within {CONTACT_HORIZON_HOURS} hours, above a{" "}
-          {DEFAULT_ELEVATION_MASK_DEG}° elevation mask. Click a pass to schedule a contact in it.
-        </p>
       </header>
 
       <QueryState
