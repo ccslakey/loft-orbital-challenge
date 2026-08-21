@@ -57,7 +57,7 @@ function SatellitePage() {
     skip: !satelliteId,
   });
   // The 5 s cadence polls only the position fields; they merge into the same Satellite cache entity,
-  // so description/image/specs and relations are fetched once by the detail query above.
+  // so description/specs and relations are fetched once by the detail query above.
   useQuery(SATELLITE_POSITION_QUERY, {
     variables: {id: satelliteId ?? ""},
     skip: !satelliteId,

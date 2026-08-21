@@ -191,10 +191,6 @@ function MapPage() {
     <section className={styles.page}>
       <header className={styles.head}>
         <h1 className={styles.title}>Contact map</h1>
-        <p className={styles.subtitle}>
-          Sub-satellite points propagated in the browser from each TLE once a second, with visibility footprints and
-          active line-of-sight links above a {DEFAULT_ELEVATION_MASK_DEG}° elevation mask.
-        </p>
       </header>
 
       <QueryState
