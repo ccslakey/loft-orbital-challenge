@@ -59,7 +59,6 @@ export const SATELLITE_DETAIL_QUERY = graphql(`
       status
       manufacturer
       busType
-      image
       altitude
       coordinates
       tle
