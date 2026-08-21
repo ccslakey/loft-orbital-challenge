@@ -53,6 +53,6 @@ Core assumptions baked into the code, grouped by area. Each one names where it l
 - **Desktop first.** Hover interactions (map track highlight) are enhancements; nothing depends on them.
 - **Dev-scale performance envelope.** Pass searches cost ~100 ms per in-orbit satellite over ten stations
   and run on the main thread, so the design assumes tens of active satellites, not hundreds. The
-  `SEED_PROFILE=large` status mix is sized to this. (measured; see DECISIONS.md scaling notes)
+  `SEED_PROFILE=large` status mix is sized to this. (measured)
 - **One environment owns `node_modules` at a time.** The Docker bind mount shares it between host and
   container, so switching sides means reinstalling. (`docker-compose.yml`)
