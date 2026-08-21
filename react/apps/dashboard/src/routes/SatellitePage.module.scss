@@ -31,15 +31,6 @@
   flex-wrap: wrap;
 }
 
-.heroImage {
-  width: 100%;
-  aspect-ratio: 12 / 5;
-  object-fit: cover;
-  object-position: center;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--rule);
-}
-
 .headText {
   display: flex;
   flex-direction: column;
