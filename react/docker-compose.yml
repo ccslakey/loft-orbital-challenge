@@ -1,9 +1,9 @@
 # version: "3.8"
 
 services:
-  challenge:
-    image: loft-orbital/challenge/dev
-    container_name: loft-challenge-dev
+  fleet-ops:
+    image: fleet-ops/dev
+    container_name: fleet-ops-dev
     ports:
       - 3000:3000 # Server access port
       - 8080:8080 # Dashboard access port
@@ -15,5 +15,5 @@ services:
 
 networks:
   default:
-    name: loft
+    name: fleet-ops
     external: true

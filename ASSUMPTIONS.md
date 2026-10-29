@@ -26,7 +26,7 @@ Core assumptions baked into the code, grouped by area. Each one names where it l
 - **A station antenna and a satellite link each serve one contact at a time**, with a 2-minute pad between
   contacts. That is the whole conflict model — no link budgets, no multi-antenna sites. (`PASS_PAD_MS`)
 - **Conflicts are flagged, not blocked.** The operator is trusted to override a warning. (`/contacts/new`)
-- **Planned satellites can be scheduled and shown on the map** if they have a TLE. The seed data's YAM-5
+- **Planned satellites can be scheduled and shown on the map** if they have a TLE. The seed data's Kestrel-5
   works this way, so it is treated as intended. (schedule form filters out only decommissioned)
 
 ## Data and API

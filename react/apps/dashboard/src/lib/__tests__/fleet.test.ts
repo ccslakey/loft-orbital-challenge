@@ -80,7 +80,7 @@ describe("filterRows", () => {
       payloadCategories: ["Communication"],
     }),
     row({
-      name: "YAM-2",
+      name: "Kestrel-2",
       status: "In Orbit",
       customerIds: ["google", "amazon"],
       payloadCategories: ["Navigation", "Earth Observation"],
@@ -92,14 +92,17 @@ describe("filterRows", () => {
   });
 
   it("filters each dimension", () => {
-    expect(filterRows(rows, {...NO_FILTERS, status: "In Orbit"}).map((r) => r.name)).toEqual(["Starlink-1", "YAM-2"]);
+    expect(filterRows(rows, {...NO_FILTERS, status: "In Orbit"}).map((r) => r.name)).toEqual([
+      "Starlink-1",
+      "Kestrel-2",
+    ]);
     expect(filterRows(rows, {...NO_FILTERS, constellation: "c1"})).toHaveLength(2);
-    expect(filterRows(rows, {...NO_FILTERS, customer: "google"}).map((r) => r.name)).toEqual(["YAM-2"]);
-    expect(filterRows(rows, {...NO_FILTERS, payloadCategory: "Navigation"}).map((r) => r.name)).toEqual(["YAM-2"]);
+    expect(filterRows(rows, {...NO_FILTERS, customer: "google"}).map((r) => r.name)).toEqual(["Kestrel-2"]);
+    expect(filterRows(rows, {...NO_FILTERS, payloadCategory: "Navigation"}).map((r) => r.name)).toEqual(["Kestrel-2"]);
   });
 
   it("matches names by case-insensitive substring", () => {
-    expect(filterRows(rows, {...NO_FILTERS, search: "  yam "}).map((r) => r.name)).toEqual(["YAM-2"]);
+    expect(filterRows(rows, {...NO_FILTERS, search: "  kestrel "}).map((r) => r.name)).toEqual(["Kestrel-2"]);
   });
 
   it("combines filters conjunctively", () => {
@@ -153,7 +156,7 @@ describe("readFleetParams", () => {
 
   it("reads every recognised param", () => {
     const params = new URLSearchParams(
-      "status=In+Orbit&constellation=c1&customer=x&payload=Navigation&q=yam&sort=launched&dir=desc",
+      "status=In+Orbit&constellation=c1&customer=x&payload=Navigation&q=kestrel&sort=launched&dir=desc",
     );
     const {filters, sort, direction} = readFleetParams(params);
 
@@ -162,7 +165,7 @@ describe("readFleetParams", () => {
       constellation: "c1",
       customer: "x",
       payloadCategory: "Navigation",
-      search: "yam",
+      search: "kestrel",
     });
     expect(sort).toBe("launched");
     expect(direction).toBe("desc");

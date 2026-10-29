@@ -1,6 +1,6 @@
 # Server
 
-The template-provided GraphQL API, kept intentionally close to stock: an in-memory
+The mock GraphQL API, kept intentionally close to its starter template: an in-memory
 [JSON GraphQL Server](https://github.com/marmelab/json-graphql-server) whose schema is inferred from the
 seed data in `db.ts`, with satellite positions recomputed from their TLEs once per second.
 
