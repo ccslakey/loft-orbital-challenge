@@ -70,7 +70,7 @@ jobs:
 
       - name: Build and start the server
         run: |
-          pnpm --filter @loft/server build
+          pnpm --filter @fleet-ops/server build
           node apps/server/dist/index.js &
           for i in $(seq 1 30); do
             curl -sf -X POST http://localhost:3000/graphql -H 'content-type: application/json' -d '{"query":"{__typename}"}' && break
@@ -78,7 +78,7 @@ jobs:
           done
 
       - name: Regenerate schema and types
-        run: pnpm --filter @loft/dashboard codegen:refresh
+        run: pnpm --filter @fleet-ops/dashboard codegen:refresh
 
       - name: Fail on drift
         run: git diff --exit-code -- apps/dashboard/schema.graphql apps/dashboard/src/gql

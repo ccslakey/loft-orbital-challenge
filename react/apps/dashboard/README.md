@@ -94,6 +94,6 @@ whose marker is positioned from live coordinates, so the column drifts each time
 
 ## Accessibility and motion
 
-The floor is deliberately modest, per the challenge brief: visible keyboard focus, semantic table and list markup,
+The floor is deliberately modest: visible keyboard focus, semantic table and list markup,
 `prefers-reduced-motion` respected, and no page-level horizontal scrolling — wide tables scroll inside their own
 container.

@@ -1,7 +1,7 @@
 {
   "private": true,
-  "name": "@loft/project",
-  "description": "The Loft Orbital front end coding challenge.",
+  "name": "@fleet-ops/project",
+  "description": "Fleet operations console for a ride-share satellite operator.",
   "version": "0.0.0",
   "workspaces": [
     "apps/*"

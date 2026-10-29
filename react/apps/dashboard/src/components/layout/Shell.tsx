@@ -44,8 +44,7 @@ function Shell() {
       <header className={styles.header}>
         <div className={styles.brand}>
           <span className={styles.mark} aria-hidden="true" />
-          <span className={styles.wordmark}>Loft Orbital</span>
-          <span className={styles.product}>Fleet Operations</span>
+          <span className={styles.wordmark}>Fleet Operations</span>
         </div>
 
         <div className={styles.readout}>

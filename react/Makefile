@@ -1,6 +1,6 @@
-project_name := challenge
+project_name := fleet-ops
 
-image_base := loft-orbital/$(project_name)
+image_base := $(project_name)
 dev_image_url := $(image_base)/dev
 prod_image_url := $(image_base)/prod
 
@@ -19,7 +19,7 @@ dev-image: ## Build development image
 .PHONY: dev-image
 
 up: ## Start development environment
-	docker network create loft || true
+	docker network create fleet-ops || true
 	docker compose \
 		--project-name=$(project_name) \
 		--file="$(CURDIR)/docker-compose.yml" \

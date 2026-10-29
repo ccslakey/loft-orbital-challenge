@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@loft/dashboard",
+  "name": "@fleet-ops/dashboard",
   "version": "0.0.0",
   "type": "module",
   "dependencies": {

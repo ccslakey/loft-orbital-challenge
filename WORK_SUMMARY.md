@@ -1,8 +1,6 @@
 # Work summary
 
-## Submission
-
-The submission is the **React** variant, in [`react/`](./react).
+The app is in [`react/`](./react): a React dashboard and a mock GraphQL API in one pnpm workspace.
 
 ## Running it
 
@@ -78,9 +76,9 @@ Quirks of `json-graphql-server` that shaped the client, found by probing the run
 - The bundled GraphiQL page was broken out of the box: 3.1.1 loads its browser assets from an unpinned
   CDN link that rotted. Upgrading to 3.3.1 fixed it with no server code changes.
 
-## Changes made to the project template
+## Changes made to the starter template
 
-The challenge asks for these to be called out.
+The mock API server, its seed data and the Docker dev environment came from a starter template. Every change made to them:
 
 | Change | Reason |
 | --- | --- |
@@ -88,7 +86,7 @@ The challenge asks for these to be called out.
 | `apps/server/src/db.ts`: `Object` → `object` (3 fields) | `Object` is the wrapper type; `object` is correct. Type-level only, no behaviour change |
 | `vite.config.ts`: added Sass `includePaths` | Lets modules `@use "mixins"`. Vite 5.3 drives Sass through its legacy API, which reads `includePaths`, not `loadPaths` |
 | `docker-compose.yml`: commented out `version: "3.8"` | Obsolete key; Compose warns on every command |
-| Added ESLint, Prettier and Stylelint | The template README references lint configs that don't exist |
+| Added ESLint, Prettier and Stylelint | The starter's README referenced lint configs that didn't exist |
 | Upgraded `json-graphql-server` 3.1.1 → 3.3.1 | The bundled GraphiQL page never loads on 3.1.1. No server code changed |
 | `db.ts`: seed ids are stable literals instead of boot-time `uuid()` | URLs that reference ids (fleet filters, scheduler deep-links) survive server restarts |
 | Added a `type-check` task and fixed the tsconfigs behind it | Nothing type-checked tests, `vite.config.ts`, or the server before; the server also gained `@types/node` |
@@ -116,7 +114,7 @@ Being explicit about the edges:
 
 - **No production Docker image.** CI runs unit tests, lint, stylelint, format and build on every PR, but there is no
   built prod image or deploy step.
-- **Accessibility** is at the "reasonably accessible" floor the brief asks for: visible focus, semantic tables and
+- **Accessibility** is at a deliberate "reasonably accessible" floor: visible focus, semantic tables and
   lists, `prefers-reduced-motion` respected. Not screen-reader audited.
 - **Default seed data is small** (7 satellites, 9 ground stations), so views are designed for sparse data;
   `SEED_PROFILE=large` exists for scale.

@@ -39,14 +39,6 @@
   letter-spacing: 0.08em;
 }
 
-.product {
-  @include label;
-
-  @include below-sm {
-    display: none;
-  }
-}
-
 .readout {
   display: flex;
   gap: var(--space-3);
